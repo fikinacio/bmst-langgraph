@@ -1,0 +1,44 @@
+# Secrets — NUNCA commitar
+.env
+.env.*
+!.env.example
+secrets/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Pytest / ruff cache
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Conteúdo sensível de negócio (prompts proprietários, base de conhecimento, PRDs)
+agents/*/AGENT_*_SystemPrompt.md
+docs/knowledge-base/
+docs/PRD_Angola_BMST_v2.pdf
+docs/PRD_Suisse_Consultant_v2.pdf
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude / Superpowers internals
+.claude/
+.remember/
+.qodo/
