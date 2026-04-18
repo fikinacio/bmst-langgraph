@@ -23,6 +23,12 @@ env/
 .coverage
 htmlcov/
 
+# Conteúdo sensível de negócio (prompts proprietários, base de conhecimento, PRDs)
+agents/*/AGENT_*_SystemPrompt.md
+docs/knowledge-base/
+docs/PRD_Angola_BMST_v2.pdf
+docs/PRD_Suisse_Consultant_v2.pdf
+
 # IDE
 .vscode/
 .idea/
