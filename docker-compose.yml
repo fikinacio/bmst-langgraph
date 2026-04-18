@@ -51,4 +51,4 @@ volumes:
 
 networks:
   bmst-net:
-    external: true   # partilha rede com n8n e Evolution API no EasyPanel
+    driver: bridge
