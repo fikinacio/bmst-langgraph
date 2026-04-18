@@ -1,0 +1,54 @@
+services:
+  bmst-agents:
+    build: .
+    container_name: bmst-agents
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - GOTENBERG_URL=http://gotenberg:3000
+    volumes:
+      - ./secrets:/app/secrets:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      gotenberg:
+        condition: service_started
+    networks:
+      - bmst-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: bmst-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - bmst-net
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: bmst-gotenberg
+    restart: unless-stopped
+    # Desabilita os módulos não usados para reduzir superfície de ataque
+    command:
+      - gotenberg
+      - --chromium-disable-javascript=true
+      - --chromium-allow-list=file:///tmp/.*
+    networks:
+      - bmst-net
+
+volumes:
+  redis-data:
+
+networks:
+  bmst-net:
+    external: true   # partilha rede com n8n e Evolution API no EasyPanel
