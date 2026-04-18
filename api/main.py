@@ -22,6 +22,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 import time
 from contextlib import asynccontextmanager
 from datetime import date
@@ -159,7 +165,7 @@ async def health():
         asyncio.wait_for(_check_redis(),    timeout=5),
         asyncio.wait_for(_check_supabase(), timeout=5),
         asyncio.wait_for(_check_evolution(), timeout=5),
-        asyncio.wait_for(_check_sheets(),   timeout=5),
+        asyncio.wait_for(_check_sheets(),   timeout=20),
         return_exceptions=True,
     )
 
