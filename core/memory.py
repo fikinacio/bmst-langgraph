@@ -11,6 +11,15 @@ from supabase import Client, create_client
 
 logger = logging.getLogger(__name__)
 
+# ── Nomes de tabelas / colunas (ajustar se o schema Supabase mudar) ───────────
+_TABLE_LEADS     = "deals"       # tabela de leads/prospects
+_TABLE_MENSAGENS = "mensagens"   # tabela de histórico de mensagens
+_TABLE_REVISOES  = "revisoes"    # tabela de revisões do REVISOR
+_COL_MSG_CONTENT = "conteudo"    # texto da mensagem
+_COL_MSG_ROLE    = "direcao"     # "user" | "assistant" | "system"
+_COL_MSG_TS      = "timestamp"   # data/hora da mensagem
+_COL_MSG_CANAL   = "canal"       # canal de comunicação (ex: "whatsapp")
+
 # ── Cliente ───────────────────────────────────────────────────────────────────
 
 @lru_cache(maxsize=1)
@@ -37,7 +46,7 @@ def get_lead(phone: str) -> dict | None:
     try:
         result = (
             _get_client()
-            .table("leads")
+            .table(_TABLE_LEADS)
             .select("*")
             .eq("phone", phone)
             .limit(1)
@@ -63,7 +72,7 @@ def upsert_lead(lead_data: dict) -> dict:
     try:
         result = (
             _get_client()
-            .table("leads")
+            .table(_TABLE_LEADS)
             .upsert(lead_data, on_conflict="phone")
             .execute()
         )
@@ -86,7 +95,7 @@ def update_lead_state(phone: str, estado: str, agente: str) -> bool:
         now = datetime.now(timezone.utc).isoformat()
         result = (
             _get_client()
-            .table("leads")
+            .table(_TABLE_LEADS)
             .update({"estado": estado, "agente": agente, "updated_at": now})
             .eq("phone", phone)
             .execute()
@@ -124,12 +133,13 @@ def save_message(phone: str, role: str, content: str, agente: str) -> bool:
     """
     try:
         now = datetime.now(timezone.utc).isoformat()
-        _get_client().table("mensagens").insert({
-            "phone":      phone,
-            "role":       role,
-            "content":    content,
-            "agente":     agente,
-            "created_at": now,
+        _get_client().table(_TABLE_MENSAGENS).insert({
+            "phone":          phone,
+            _COL_MSG_ROLE:    role,
+            _COL_MSG_CONTENT: content,
+            _COL_MSG_CANAL:   "whatsapp",
+            "agente":         agente,
+            _COL_MSG_TS:      now,
         }).execute()
         logger.debug("save_message: ok phone=%s role=%s agente=%s", phone, role, agente)
         return True
@@ -150,10 +160,10 @@ def get_conversation_history(phone: str, limit: int = 10) -> list[dict]:
     try:
         result = (
             _get_client()
-            .table("mensagens")
-            .select("role, content, agente, created_at")
+            .table(_TABLE_MENSAGENS)
+            .select(f"{_COL_MSG_ROLE}, {_COL_MSG_CONTENT}, agente, {_COL_MSG_TS}")
             .eq("phone", phone)
-            .order("created_at", desc=True)
+            .order(_COL_MSG_TS, desc=True)
             .limit(limit)
             .execute()
         )
@@ -193,7 +203,7 @@ def save_revisao(
     """
     try:
         now = datetime.now(timezone.utc).isoformat()
-        _get_client().table("revisoes").insert({
+        _get_client().table(_TABLE_REVISOES).insert({
             "lead_id":        lead_id,
             "texto_original": texto_original,
             "texto_final":    texto_final,

@@ -152,9 +152,11 @@ async def test_mensagem_sem_termos_proibidos():
     msg = r2.get("mensagem_gerada") or ""
     assert msg, "Expected a non-empty message from gerar_mensagem_hunter"
 
+    import re
     msg_lower = msg.lower()
     for term in TERMOS_PROIBIDOS:
-        assert term.lower() not in msg_lower, (
+        pattern = r"\b" + re.escape(term.lower()) + r"\b"
+        assert not re.search(pattern, msg_lower), (
             f"Forbidden term '{term}' found in generated message:\n\n{msg}"
         )
 

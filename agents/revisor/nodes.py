@@ -34,7 +34,8 @@ async def avaliar_texto(state: RevisorState) -> dict:
     RevisorAvaliacaoSchema. Populates problemas_encontrados, qualidade_estimada,
     and sets an initial status.
     """
-    logger.info("revisor.avaliar_texto: evaluating text (%d chars)", len(state["texto_original"]))
+    texto = state.get("texto_original") or ""
+    logger.info("revisor.avaliar_texto: evaluating text (%d chars)", len(texto))
 
     avaliacao = await create_json_message(
         system=CHECKLIST_AVALIACAO_PROMPT,
