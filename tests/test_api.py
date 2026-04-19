@@ -1,9 +1,7 @@
 """
 Testes da API FastAPI
 """
-import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch
 import os
 
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")

@@ -207,7 +207,7 @@ async def test_auto_corrige_chatbot(mocker):
 #   import os; if "test" in os.environ.get("ANTHROPIC_API_KEY", "").lower(): pytest.skip(...)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-import os as _os
+import os as _os  # noqa: E402
 
 
 def _require_real_key():

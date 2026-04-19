@@ -182,3 +182,23 @@ class MetricsResponse(BaseModel):
     leads_hoje: int
     mensagens_hoje: int
     mensagens_enviadas_hoje: int
+
+
+# ── PROSPECTOR ────────────────────────────────────────────────────────────────
+
+class ProspectorRunRequest(BaseModel):
+    """Trigger a PROSPECTOR session (normally called by the n8n cron at 07:00 UTC)."""
+    sector: str = Field(
+        default="",
+        description="Override the sector for this session. Leave blank to use the day-of-week calendar.",
+    )
+    max_companies: int = Field(
+        default=30,
+        ge=1,
+        le=50,
+        description="Maximum number of companies to search (caps the Google Places API cost).",
+    )
+    city: str = Field(
+        default="Luanda",
+        description="Target city for Google Places search.",
+    )

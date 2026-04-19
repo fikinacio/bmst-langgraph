@@ -8,9 +8,6 @@ from agents.revisor.prompts import (
     SYSTEM_PROMPT,
     TERMOS_PROIBIDOS,
     ABERTURAS_BANIDAS,
-    OUTPUT_APROVADO,
-    OUTPUT_CORRIGIDO,
-    OUTPUT_ESCALADO,
     TELEGRAM_APROVACAO_TEMPLATE,
 )
 
@@ -52,7 +49,7 @@ def revisor_avaliar(
         f"  texto_sugerido (se escalado)"
     )
 
-    response = llm.invoke(prompt)
+    llm.invoke(prompt)
     # TODO: parsear JSON do response
 
     # Placeholder — substituir por parse real do JSON do LLM

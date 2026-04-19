@@ -15,7 +15,6 @@ import asyncio
 import json
 import logging
 import time
-from typing import Any
 
 import httpx
 from langchain_core.runnables import RunnableConfig
@@ -36,7 +35,6 @@ from agents.closer.prompts import (
     RespostaPropostaSchema,
     ObjecaoResponseSchema,
 )
-from agents.revisor.prompts import RevisorAvaliacaoSchema
 from core.llm import create_json_message, create_message
 from core.memory import save_message, update_lead_state, save_revisao
 from core import evolution_client, telegram_client

@@ -281,3 +281,74 @@ async def check_duplicate(sheet_id: str, empresa: str, phone: str) -> bool:
     except Exception as exc:
         logger.error("check_duplicate failed (empresa=%s phone=%s): %s", empresa, phone, exc)
         return False  # safe default: do not block lead on error
+
+
+# ── PROSPECTOR write ──────────────────────────────────────────────────────────
+
+# Column order for the leads_angola sheet (must match the header row exactly)
+_LEAD_COLUMNS = [
+    "id", "data_registo", "empresa", "sector", "segmento", "responsavel",
+    "cargo", "whatsapp", "email", "website", "instagram", "localizacao",
+    "nr_funcionarios", "servico_bmst", "pain_point", "valor_est_aoa",
+    "notas_abordagem", "notas", "oportunidade", "fonte", "estado_hunter",
+    "data_hunter", "resposta",
+]
+
+
+def _sync_get_next_lead_id(sheet_id: str) -> str:
+    """Read column A to determine the next sequential lead ID (ld_XXX)."""
+    service = _get_service()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=sheet_id, range=f"{_TAB_NAME}!A:A")
+        .execute()
+    )
+    values = result.get("values", [])
+    # values[0] is the header row; subsequent rows are IDs
+    existing_ids = [row[0] for row in values[1:] if row and str(row[0]).startswith("ld_")]
+    if not existing_ids:
+        return "ld_001"
+    # Extract the highest number and increment
+    numbers = []
+    for lead_id in existing_ids:
+        try:
+            numbers.append(int(lead_id.split("_")[1]))
+        except (IndexError, ValueError):
+            pass
+    next_n = (max(numbers) + 1) if numbers else 1
+    return f"ld_{next_n:03d}"
+
+
+def _sync_append_row(sheet_id: str, row_values: list) -> None:
+    """Append a single row to the leads_angola tab."""
+    service = _get_service()
+    service.spreadsheets().values().append(
+        spreadsheetId=sheet_id,
+        range=f"{_TAB_NAME}!A:A",
+        valueInputOption="RAW",
+        insertDataOption="INSERT_ROWS",
+        body={"values": [row_values]},
+    ).execute()
+
+
+async def append_lead(sheet_id: str, lead: dict) -> None:
+    """
+    Append a new lead row to the leads_angola sheet.
+
+    The lead dict keys should match the column names in _LEAD_COLUMNS.
+    Missing keys are written as empty strings.
+    The 'id' and 'data_registo' fields are auto-generated if not provided.
+
+    Raises on failure — callers are responsible for error handling.
+    """
+    from datetime import date
+
+    lead_id    = lead.get("id") or await asyncio.to_thread(_sync_get_next_lead_id, sheet_id)
+    today      = lead.get("data_registo") or date.today().isoformat()
+
+    full_lead  = {"id": lead_id, "data_registo": today, **lead}
+    row_values = [str(full_lead.get(col, "")) for col in _LEAD_COLUMNS]
+
+    await asyncio.to_thread(_sync_append_row, sheet_id, row_values)
+    logger.info("append_lead: wrote id=%s empresa=%s", lead_id, lead.get("empresa", "?"))

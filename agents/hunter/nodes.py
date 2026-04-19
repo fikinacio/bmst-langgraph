@@ -16,7 +16,7 @@ from agents.hunter.prompts import (
     SelecaoTemplateSchema,
 )
 from core.llm import create_json_message, create_message
-from core.memory import update_lead_state, save_message, get_lead
+from core.memory import update_lead_state, save_message
 from core.redis_client import is_duplicate, mark_sent, hash_message
 from core import sheets_client, evolution_client, telegram_client
 
@@ -89,7 +89,7 @@ def _validar_mensagem(mensagem: str) -> str | None:
 
     Returns None if valid, or a description of the first problem found.
     """
-    lines = [l for l in mensagem.strip().splitlines() if l.strip()]
+    lines = [ln for ln in mensagem.strip().splitlines() if ln.strip()]
     if len(lines) > 6:
         return f"Message too long: {len(lines)} lines (max 5)"
 
@@ -558,8 +558,8 @@ async def gerar_relatorio_diario(state: HunterState) -> dict:
         "processados":        state.get("leads_processados") or 0,
         "enviadas":           enviadas,
         "aguardam":           0,    # populated when real-time tracking is added
-        "arquivados":         sum(1 for l in leads if l.get("segmento") == "A"),
-        "seg_c_pendentes":    sum(1 for l in leads if l.get("segmento") == "C"),
+        "arquivados":         sum(1 for ld in leads if ld.get("segmento") == "A"),
+        "seg_c_pendentes":    sum(1 for ld in leads if ld.get("segmento") == "C"),
         "respostas":          0,
         "interessados":       0,
         "nomes_interessados": "",

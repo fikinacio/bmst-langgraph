@@ -161,9 +161,9 @@ def test_valor_acima_minimo_valido():
 # Skip automático se ANTHROPIC_API_KEY contiver "test".
 # ═══════════════════════════════════════════════════════════════════════════════
 
-import os as _os
+import os as _os  # noqa: E402
 
-from agents.closer.nodes import seleccionar_solucao
+from agents.closer.nodes import seleccionar_solucao  # noqa: E402
 
 
 def _require_real_key_closer():

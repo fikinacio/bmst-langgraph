@@ -35,7 +35,7 @@ from agents.ledger.prompts import (
     RelatorioSchema,
 )
 from core.llm import create_json_message
-from core.memory import save_message, update_lead_state, save_revisao
+from core.memory import save_message, save_revisao
 from core import evolution_client, telegram_client
 from core.settings import settings
 

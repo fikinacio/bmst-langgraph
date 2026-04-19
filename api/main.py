@@ -42,9 +42,9 @@ from agents.hunter.graph import get_hunter_graph
 from agents.closer.graph import get_closer_graph
 from agents.delivery.graph import get_delivery_graph
 from agents.ledger.graph import get_ledger_graph
+from agents.prospector.graph import get_prospector_graph
 from api.dependencies import verify_api_key
 from api.models import (
-    BatchResponse,
     CloserDiagnoseRequest,
     CloserProposeRequest,
     DeliveryStartRequest,
@@ -56,6 +56,7 @@ from api.models import (
     LedgerCheckPaymentsRequest,
     LedgerInvoiceRequest,
     MetricsResponse,
+    ProspectorRunRequest,
     TelegramCallbackRequest,
     WebhookResponse,
 )
@@ -848,4 +849,78 @@ async def ledger_check_payments(
     background_tasks.add_task(_run_ledger_verificar, request, _checkpointer)
     return {
         "message": f"LEDGER payment check queued for project {request.projecto_id}."
+    }
+
+
+# ── PROSPECTOR ────────────────────────────────────────────────────────────────
+
+async def _run_prospector(request: ProspectorRunRequest, checkpointer: Any) -> None:
+    """
+    Background task: run a PROSPECTOR session.
+
+    The PROSPECTOR runs autonomously — no interrupts — and writes qualified leads
+    directly to the Google Sheet, then sends a Telegram report.
+    """
+    thread_id = f"prospector-{int(time.time())}"
+    initial_state = {
+        "sector":        request.sector,
+        "city":          request.city,
+        "max_companies": request.max_companies,
+        # All other fields are initialised by initialize_session
+        "run_date":          "",
+        "raw_companies":     [],
+        "current_company":   None,
+        "current_index":     0,
+        "whatsapp_found":    None,
+        "instagram_url":     None,
+        "facebook_url":      None,
+        "website_url":       None,
+        "scraped_content":   None,
+        "approach_notes":    None,
+        "opportunity":       None,
+        "recommended_service": None,
+        "segment":             None,
+        "estimated_value_aoa": None,
+        "qualified":           None,
+        "leads_written":       0,
+        "leads_skipped":       0,
+        "errors":              [],
+        "next_action":         None,
+        "error":               None,
+    }
+
+    start = time.monotonic()
+    try:
+        graph  = get_prospector_graph(checkpointer=checkpointer)
+        config = {"configurable": {"thread_id": thread_id}}
+        await graph.ainvoke(initial_state, config)
+        elapsed = time.monotonic() - start
+        logger.info("PROSPECTOR session completed in %.1fs — thread_id=%s", elapsed, thread_id)
+    except Exception as exc:
+        logger.error("PROSPECTOR session failed: %s", exc)
+
+
+@app.post(
+    "/prospector/run",
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["prospector"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def prospector_run(request: ProspectorRunRequest, background_tasks: BackgroundTasks):
+    """
+    Trigger a PROSPECTOR session to discover and enrich leads from Google Places.
+
+    Normally called by the n8n cron at 07:00 UTC (08:00 Luanda) — one hour before
+    the HUNTER processes the leads.  The sector is determined from the day-of-week
+    calendar unless overridden in the request body.
+
+    Returns 202 immediately — the session runs in the background.
+    """
+    background_tasks.add_task(_run_prospector, request, _checkpointer)
+    return {
+        "message": (
+            f"PROSPECTOR session started "
+            f"(sector={request.sector or 'auto'}, city={request.city}, "
+            f"max={request.max_companies})."
+        )
     }

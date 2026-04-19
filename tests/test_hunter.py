@@ -245,10 +245,10 @@ async def test_notas_abordagem_vazio_nao_envia(mocker):
 # O LLM continua mockado (determinismo + custo). Testamos routing e wiring.
 # ═══════════════════════════════════════════════════════════════════════════════
 
-from langgraph.types import Command
-from agents.hunter import get_hunter_graph
-from agents.revisor.prompts import RevisorAvaliacaoSchema as _RevisorSchema
-from tests.conftest import make_sheet_lead
+from langgraph.types import Command  # noqa: E402
+from agents.hunter import get_hunter_graph  # noqa: E402
+from agents.revisor.prompts import RevisorAvaliacaoSchema as _RevisorSchema  # noqa: E402
+from tests.conftest import make_sheet_lead  # noqa: E402
 
 
 def _mock_hunter_io(mocker):
@@ -502,7 +502,7 @@ async def test_notas_abordagem_vazio_nao_envia_integration(mocker):
         return_value=[make_sheet_lead(segmento="B", notas_abordagem="")],
     )
     # confirmar_segmento qualifies the lead — gerar_mensagem_hunter should then archive
-    triagem_mock = mocker.patch(
+    mocker.patch(
         "agents.hunter.nodes.create_json_message",
         new_callable=AsyncMock,
         return_value=TriagemSchema(

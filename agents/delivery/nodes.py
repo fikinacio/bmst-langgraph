@@ -12,7 +12,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 
@@ -116,8 +115,6 @@ def _notion_callout(text: str) -> dict:
 def _format_update_message(responsavel: str, empresa: str, update: ActualizacaoSchema) -> str:
     """Format the progress update data into a natural WhatsApp message."""
     nome_curto = responsavel.split()[0] if responsavel else "bom dia"
-    periodo = "tarde" if True else "manhã"   # could be time-based in production
-
     concluido_str = "\n".join(f"  ✅ {item}" for item in update.concluido_semana)
     em_curso_str  = "\n".join(f"  🔄 {item}" for item in update.em_curso)
     a_seguir_str  = "\n".join(f"  📅 {item}" for item in update.a_seguir)

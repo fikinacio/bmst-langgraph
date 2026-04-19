@@ -64,6 +64,13 @@ class Settings(BaseSettings):
     HUNTER_MAX_MESSAGES_PER_DAY: int = 20
     HUNTER_DELAY_BETWEEN_MESSAGES: int = 90   # seconds between WA sends
 
+    # ── PROSPECTOR ────────────────────────────────────────────────────────────
+    GOOGLE_PLACES_API_KEY: str = ""
+    PROSPECTOR_MAX_EMPRESAS: int = 30         # companies searched per session
+    PROSPECTOR_CIDADE: str = "Luanda"
+    PROSPECTOR_DELAY_MIN: float = 2.0         # min seconds between scraping requests
+    PROSPECTOR_DELAY_MAX: float = 5.0         # max seconds between scraping requests
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
