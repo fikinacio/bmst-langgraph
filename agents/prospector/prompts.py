@@ -56,9 +56,6 @@ class ApproachNotesSchema(BaseModel):
     recommended_service: str = Field(
         description="Most relevant BMST service slug for this company."
     )
-    pain_point: str = Field(
-        description="One-sentence description of the main operational pain point."
-    )
 
 
 # ── Lead qualification ────────────────────────────────────────────────────────
