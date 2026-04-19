@@ -151,27 +151,34 @@ async def create_message(
     model_id = _MODEL_MAP[model]
     t0 = time.perf_counter()
 
-    # Langfuse trace (se configurado)
+    # Langfuse trace — best-effort, never blocks the LLM call
     lf = _get_langfuse()
     trace = generation = None
     if lf:
-        trace = lf.trace(name=f"{agent_name}.{node_name}", tags=[agent_name, model])
-        generation = trace.generation(
-            name=node_name,
-            model=model_id,
-            input={"system": system, "user": user},
-        )
+        try:
+            trace = lf.trace(name=f"{agent_name}.{node_name}", tags=[agent_name, model])
+            generation = trace.generation(
+                name=node_name,
+                model=model_id,
+                input={"system": system, "user": user},
+            )
+        except Exception as exc:
+            logger.warning("Langfuse setup failed (non-blocking): %s", exc)
+            lf = trace = generation = None
 
     try:
         response = await _call_with_retry(system, user, model_id, max_tokens)
     except Exception:
         if generation:
-            generation.end(level="ERROR")
+            try:
+                generation.end(level="ERROR")
+            except Exception:
+                pass
         raise
 
     latency_ms = int((time.perf_counter() - t0) * 1000)
     text       = response.content[0].text
-    usage      = response.usage  # input_tokens, output_tokens
+    usage      = response.usage
 
     logger.info(
         "LLM | agente=%-10s nó=%-20s modelo=%-30s "
@@ -181,15 +188,18 @@ async def create_message(
     )
 
     if generation:
-        generation.end(
-            output=text,
-            usage={
-                "input":  usage.input_tokens,
-                "output": usage.output_tokens,
-                "unit":   "TOKENS",
-            },
-            metadata={"latency_ms": latency_ms},
-        )
+        try:
+            generation.end(
+                output=text,
+                usage={
+                    "input":  usage.input_tokens,
+                    "output": usage.output_tokens,
+                    "unit":   "TOKENS",
+                },
+                metadata={"latency_ms": latency_ms},
+            )
+        except Exception as exc:
+            logger.warning("Langfuse end failed (non-blocking): %s", exc)
 
     return text
 
@@ -197,14 +207,14 @@ async def create_message(
 # ── JSON structured output ────────────────────────────────────────────────────
 
 _JSON_SUFFIX = (
-    "\n\nResponde APENAS com JSON válido. "
-    "Sem texto antes ou depois. Sem backticks. Sem markdown. Apenas o JSON."
+    "\n\nResponde APENAS com JSON válido que respeite o schema abaixo. "
+    "Sem texto antes ou depois. Sem backticks. Sem markdown. Apenas o JSON.\n\nSchema esperado:\n{schema_json}"
 )
 
 _JSON_RETRY_SUFFIX = (
-    "\n\nATENÇÃO: a resposta anterior não era JSON válido. "
-    "Devolve EXCLUSIVAMENTE um objecto JSON. "
-    "Nenhuma palavra antes ou depois. Nenhum caracter extra. Apenas { ... }."
+    "\n\nATENÇÃO: a resposta anterior não era JSON válido ou não respeitava o schema. "
+    "Devolve EXCLUSIVAMENTE um objecto JSON com exactamente os campos do schema abaixo. "
+    "Nenhuma palavra antes ou depois. Nenhum caracter extra. Apenas {{ ... }}.\n\nSchema esperado:\n{schema_json}"
 )
 
 
@@ -234,15 +244,17 @@ async def create_json_message(
     Raises:
         ValueError: Se o LLM não produzir JSON válido após 2 tentativas.
     """
+    schema_json = json.dumps(schema.model_json_schema(), ensure_ascii=False, indent=2)
+
     # 1ª tentativa
     raw = await create_message(
-        system=system + _JSON_SUFFIX,
+        system=system + _JSON_SUFFIX.format(schema_json=schema_json),
         user=user,
         model=model,
         **kwargs,
     )
     try:
-        return schema.model_validate(json.loads(raw))
+        return schema.model_validate(json.loads(_extract_json(raw)))
     except (json.JSONDecodeError, ValueError):
         logger.warning(
             "create_json_message: parse falhou na 1ª tentativa. Raw=%r", raw[:200]
@@ -250,13 +262,13 @@ async def create_json_message(
 
     # 2ª tentativa — instrução mais explícita
     raw2 = await create_message(
-        system=system + _JSON_RETRY_SUFFIX,
+        system=system + _JSON_RETRY_SUFFIX.format(schema_json=schema_json),
         user=f"Input original:\n{user}\n\nResposta anterior (inválida):\n{raw}",
         model=model,
         **kwargs,
     )
     try:
-        return schema.model_validate(json.loads(raw2))
+        return schema.model_validate(json.loads(_extract_json(raw2)))
     except (json.JSONDecodeError, ValueError) as exc:
         raise ValueError(
             f"create_json_message: o LLM não produziu JSON válido após 2 tentativas.\n"

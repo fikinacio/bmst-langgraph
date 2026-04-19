@@ -119,7 +119,7 @@ def _sync_update_cell(sheet_id: str, cell: str, value: str) -> None:
 
 # ── Public async API ──────────────────────────────────────────────────────────
 
-async def get_pending_leads(sheet_id: str) -> list[dict]:
+async def get_pending_leads(sheet_id: str, max_leads: int = _MAX_LEADS) -> list[dict]:
     """
     Read the 'leads_angola' tab and return leads where:
       - estado_hunter == "pendente"
@@ -148,7 +148,7 @@ async def get_pending_leads(sheet_id: str) -> list[dict]:
                 continue
             lead["_row_index"] = i + 2  # +1 for header row, +1 for 1-based index
             pending.append(lead)
-            if len(pending) >= _MAX_LEADS:
+            if len(pending) >= max_leads:
                 break
 
         logger.info("get_pending_leads: found %d pending leads (sheet=%s)", len(pending), sheet_id)

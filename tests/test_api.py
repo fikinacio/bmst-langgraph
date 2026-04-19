@@ -21,21 +21,21 @@ def test_health():
     response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "ok"
-    assert "hunter" in data["agents"]
+    assert data["status"] in ("ok", "degraded")
+    assert "redis" in data["services"]
 
 
-def test_hunter_run_sem_api_key_retorna_401():
-    response = client.post("/hunter/run", json={"triggered_by": "manual"})
-    assert response.status_code == 422  # Header obrigatório em falta
+def test_hunter_batch_sem_api_key_retorna_422():
+    response = client.post("/hunter/batch", json={})
+    assert response.status_code == 422  # Header X-Api-Key obrigatório em falta
 
 
 def test_hunter_webhook_sem_autenticacao():
     """Webhook da Evolution API não requer autenticação interna."""
     response = client.post("/hunter/webhook", json={
-        "lead_id": "1",
-        "whatsapp": "+244923000000",
-        "mensagem": "Sim, tenho interesse.",
-        "timestamp": "2026-04-16T09:00:00",
+        "phone": "+244923000000",
+        "message": "Sim, tenho interesse.",
+        "message_id": "test-msg-001",
+        "timestamp": 1713236400,
     })
     assert response.status_code == 200

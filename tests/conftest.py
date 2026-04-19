@@ -50,6 +50,9 @@ def mock_external_calls(mocker):
     mocker.patch("core.memory.save_revisao",      return_value=True)
     mocker.patch("core.memory.upsert_lead",       return_value={})
     mocker.patch("core.memory.get_lead",          return_value=None)
+    mocker.patch("core.redis_client.is_duplicate", return_value=False)
+    mocker.patch("core.redis_client.mark_sent",    return_value=None)
+    mocker.patch("core.redis_client.hash_message", return_value="test-hash")
 
 
 # ── State factory helpers ─────────────────────────────────────────────────────

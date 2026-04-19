@@ -32,12 +32,12 @@ def get_checkpointer() -> RedisSaver:
     """
     Return a LangGraph RedisSaver for interrupt() state persistence.
 
-    Uses get_redis() (cached) so the underlying connection is shared.
+    RedisSaver.from_conn_string() expects a URL string, not a Redis object.
     In production this is called once in the FastAPI lifespan — interrupted
     graphs can be resumed across restarts because the state lives in Redis.
     In tests, pass MemorySaver() directly to the graph factory instead.
     """
-    return RedisSaver(get_redis())
+    return RedisSaver.from_conn_string(settings.REDIS_URL)
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────

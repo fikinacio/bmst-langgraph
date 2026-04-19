@@ -22,6 +22,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 import time
 from contextlib import asynccontextmanager
 from datetime import date
@@ -134,9 +140,17 @@ async def health():
 
     async def _check_evolution() -> str:
         try:
-            from core.evolution_client import get_message_status
-            # A non-existent message ID will return a status dict, not raise
-            await get_message_status("health-check")
+            import os
+            import httpx
+            base_url = os.environ.get("EVOLUTION_API_URL", "http://localhost:8080")
+            api_key  = os.environ.get("EVOLUTION_API_KEY", "")
+            instance = os.environ.get("EVOLUTION_INSTANCE", "bmst")
+            async with httpx.AsyncClient(timeout=httpx.Timeout(5.0), follow_redirects=True) as client:
+                resp = await client.get(
+                    f"{base_url}/instance/connectionState/{instance}",
+                    headers={"apikey": api_key},
+                )
+                resp.raise_for_status()
             return "ok"
         except Exception as exc:
             logger.warning("Health check Evolution failed: %s", exc)
@@ -144,8 +158,12 @@ async def health():
 
     async def _check_sheets() -> str:
         try:
+            import os
             from core.sheets_client import get_pending_leads
-            await get_pending_leads(max_leads=1)
+            sheet_id = os.environ.get("GOOGLE_SHEETS_ID", "")
+            if not sheet_id:
+                return "error"
+            await get_pending_leads(sheet_id)
             return "ok"
         except Exception as exc:
             logger.warning("Health check Sheets failed: %s", exc)
@@ -155,7 +173,7 @@ async def health():
         asyncio.wait_for(_check_redis(),    timeout=5),
         asyncio.wait_for(_check_supabase(), timeout=5),
         asyncio.wait_for(_check_evolution(), timeout=5),
-        asyncio.wait_for(_check_sheets(),   timeout=5),
+        asyncio.wait_for(_check_sheets(),   timeout=20),
         return_exceptions=True,
     )
 
@@ -181,7 +199,7 @@ async def metrics():
 
         # Total leads
         total_result = await asyncio.to_thread(
-            lambda: client.table("leads").select("id", count="exact").execute()
+            lambda: client.table("deals").select("id", count="exact").execute()
         )
         leads_total = total_result.count or 0
 
@@ -189,7 +207,7 @@ async def metrics():
         from datetime import date
         today = date.today().isoformat()
         hoje_result = await asyncio.to_thread(
-            lambda: client.table("leads")
+            lambda: client.table("deals")
             .select("id", count="exact")
             .gte("updated_at", today)
             .execute()
@@ -200,17 +218,17 @@ async def metrics():
         msgs_result = await asyncio.to_thread(
             lambda: client.table("mensagens")
             .select("id", count="exact")
-            .gte("created_at", today)
+            .gte("timestamp", today)
             .execute()
         )
         mensagens_hoje = msgs_result.count or 0
 
-        # Sent messages (role=assistant) today
+        # Sent messages (direcao=assistant) today
         sent_result = await asyncio.to_thread(
             lambda: client.table("mensagens")
             .select("id", count="exact")
-            .eq("role", "assistant")
-            .gte("created_at", today)
+            .eq("direcao", "assistant")
+            .gte("timestamp", today)
             .execute()
         )
         mensagens_enviadas_hoje = sent_result.count or 0
@@ -243,7 +261,8 @@ async def _run_hunter_batch(request: HunterBatchRequest, checkpointer: Any) -> N
     try:
         from core.sheets_client import get_pending_leads
 
-        leads = await get_pending_leads(max_leads=request.max_leads)
+        sheet_id = request.sheet_id or settings.GOOGLE_SHEETS_ID
+        leads = await get_pending_leads(sheet_id=sheet_id, max_leads=request.max_leads)
         if not leads:
             logger.info("HUNTER batch: no pending leads found.")
             return
