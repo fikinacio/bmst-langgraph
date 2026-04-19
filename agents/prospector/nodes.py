@@ -473,7 +473,6 @@ async def write_lead_to_sheet(state: ProspectorState) -> dict:
         "localizacao":     company.get("address", ""),
         "nr_funcionarios": 0,
         "servico_bmst":    state.get("recommended_service", ""),
-        "pain_point":      state.get("approach_notes", ""),
         "valor_est_aoa":   state.get("estimated_value_aoa", 0),
         "notas_abordagem": state.get("approach_notes", ""),
         "notas":           notes,
