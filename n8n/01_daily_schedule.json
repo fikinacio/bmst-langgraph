@@ -1,0 +1,156 @@
+{
+  "name": "BMST — Daily Agents Schedule",
+  "nodes": [
+    {
+      "id": "sched-prospector",
+      "name": "PROSPECTOR 07:00 UTC (Mon-Fri)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [260, 200],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 7 * * 1-5" }]
+        }
+      }
+    },
+    {
+      "id": "http-prospector",
+      "name": "POST /prospector/run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 200],
+      "credentials": { "httpHeaderAuth": { "id": "bmst-api-key", "name": "BMST API Key" } },
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/prospector/run",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "rawBody": "{\n  \"sector\": \"\",\n  \"max_companies\": 30,\n  \"city\": \"Luanda\"\n}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+
+    {
+      "id": "sched-hunter",
+      "name": "HUNTER 08:00 UTC (Mon-Fri)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [260, 420],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 8 * * 1-5" }]
+        }
+      }
+    },
+    {
+      "id": "http-hunter",
+      "name": "POST /hunter/batch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 420],
+      "credentials": { "httpHeaderAuth": { "id": "bmst-api-key", "name": "BMST API Key" } },
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/hunter/batch",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "rawBody": "{\n  \"max_leads\": 20\n}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+
+    {
+      "id": "sched-ledger",
+      "name": "LEDGER Check 08:30 UTC (Daily)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [260, 640],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "30 8 * * *" }]
+        }
+      }
+    },
+    {
+      "id": "http-supabase-invoices",
+      "name": "GET Pending Invoices (Supabase)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 640],
+      "credentials": { "httpHeaderAuth": { "id": "supabase-key", "name": "Supabase Service Key" } },
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/revisoes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "status", "value": "eq.pendente" },
+            { "name": "select", "value": "lead_id" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Prefer", "value": "return=representation" }
+          ]
+        },
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+    {
+      "id": "split-invoices",
+      "name": "Split Invoices",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [740, 640],
+      "parameters": { "batchSize": 1, "options": {} }
+    },
+    {
+      "id": "http-ledger-check",
+      "name": "POST /ledger/check-payments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [980, 640],
+      "credentials": { "httpHeaderAuth": { "id": "bmst-api-key", "name": "BMST API Key" } },
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/ledger/check-payments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "rawBody": "={\n  \"projecto_id\": \"{{ $json.lead_id }}\",\n  \"invoice_ninja_id\": \"\"\n}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    }
+  ],
+  "connections": {
+    "PROSPECTOR 07:00 UTC (Mon-Fri)": {
+      "main": [[{ "node": "POST /prospector/run", "type": "main", "index": 0 }]]
+    },
+    "HUNTER 08:00 UTC (Mon-Fri)": {
+      "main": [[{ "node": "POST /hunter/batch", "type": "main", "index": 0 }]]
+    },
+    "LEDGER Check 08:30 UTC (Daily)": {
+      "main": [[{ "node": "GET Pending Invoices (Supabase)", "type": "main", "index": 0 }]]
+    },
+    "GET Pending Invoices (Supabase)": {
+      "main": [[{ "node": "Split Invoices", "type": "main", "index": 0 }]]
+    },
+    "Split Invoices": {
+      "main": [
+        [{ "node": "POST /ledger/check-payments", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": false }
+}

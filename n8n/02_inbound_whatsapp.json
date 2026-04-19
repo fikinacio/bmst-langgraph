@@ -1,0 +1,200 @@
+{
+  "name": "BMST — Inbound WhatsApp Router",
+  "nodes": [
+    {
+      "id": "wh-evolution",
+      "name": "Evolution Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 400],
+      "webhookId": "bmst-evolution-inbound",
+      "parameters": {
+        "path": "evolution",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "respond-200",
+      "name": "Respond 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [500, 280],
+      "parameters": {
+        "options": {
+          "responseCode": 200,
+          "responseBody": "{\"status\":\"received\"}"
+        }
+      }
+    },
+    {
+      "id": "parse-evolution",
+      "name": "Parse Evolution Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 520],
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\n\n// Ignore messages sent by the bot itself\nconst fromMe = body?.data?.key?.fromMe;\nif (fromMe) return [];\n\nconst remoteJid = body?.data?.key?.remoteJid || '';\n\n// Ignore group chats\nif (remoteJid.endsWith('@g.us')) return [];\n\n// Extract phone: remove @s.whatsapp.net, normalise to +244...\nconst rawPhone = remoteJid.replace('@s.whatsapp.net', '');\nlet phone;\nif (rawPhone.startsWith('+244')) {\n  phone = rawPhone;\n} else if (rawPhone.startsWith('244')) {\n  phone = '+' + rawPhone;\n} else if (rawPhone.startsWith('9') && rawPhone.length === 9) {\n  phone = '+244' + rawPhone;\n} else {\n  phone = '+' + rawPhone;\n}\n\n// Extract message text (try all known message types)\nconst msg = body?.data?.message;\nconst message =\n  msg?.conversation ||\n  msg?.extendedTextMessage?.text ||\n  msg?.imageMessage?.caption ||\n  msg?.videoMessage?.caption ||\n  msg?.documentMessage?.caption ||\n  '';\n\n// Ignore empty messages (stickers, audio, etc.)\nif (!message.trim()) return [];\n\nconst message_id = body?.data?.key?.id || '';\nconst timestamp  = body?.data?.messageTimestamp || Math.floor(Date.now() / 1000);\n\nreturn [{ json: { phone, message, message_id, timestamp } }];"
+      }
+    },
+    {
+      "id": "get-lead-agent",
+      "name": "GET Lead Agent (Supabase)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [740, 520],
+      "credentials": { "httpHeaderAuth": { "id": "supabase-key", "name": "Supabase Service Key" } },
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/deals",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "phone", "value": "=eq.{{ $json.phone }}" },
+            { "name": "select", "value": "agente,estado,phone" },
+            { "name": "limit",  "value": "1" }
+          ]
+        },
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+    {
+      "id": "merge-phone",
+      "name": "Merge Phone into Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [980, 520],
+      "parameters": {
+        "jsCode": "// Merge parsed message data with lead's current agent from Supabase\nconst msg   = $('Parse Evolution Message').first().json;\nconst leads = $input.all();\n\n// Supabase returns an array — pick first match or empty\nconst lead  = Array.isArray(leads[0]?.json) ? leads[0].json[0] : null;\nconst agente = lead?.agente || 'hunter';\n\nreturn [{\n  json: {\n    phone:      msg.phone,\n    message:    msg.message,\n    message_id: msg.message_id,\n    timestamp:  msg.timestamp,\n    agente\n  }\n}];"
+      }
+    },
+    {
+      "id": "route-agent",
+      "name": "Route by Agent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1220, 520],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+                "combinator": "and",
+                "conditions": [{
+                  "id": "cond-closer",
+                  "leftValue": "={{ $json.agente }}",
+                  "rightValue": "closer",
+                  "operator": { "type": "string", "operation": "equals" }
+                }]
+              },
+              "renameOutput": true,
+              "outputKey": "closer"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+                "combinator": "and",
+                "conditions": [{
+                  "id": "cond-delivery",
+                  "leftValue": "={{ $json.agente }}",
+                  "rightValue": "delivery",
+                  "operator": { "type": "string", "operation": "equals" }
+                }]
+              },
+              "renameOutput": true,
+              "outputKey": "delivery"
+            }
+          ]
+        },
+        "fallbackOutput": "extra",
+        "options": {}
+      }
+    },
+    {
+      "id": "http-closer-wh",
+      "name": "POST /closer/webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1460, 400],
+      "credentials": { "httpHeaderAuth": { "id": "bmst-api-key", "name": "BMST API Key" } },
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/closer/webhook",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "rawBody": "={\n  \"phone\": \"{{ $json.phone }}\",\n  \"message\": {{ JSON.stringify($json.message) }},\n  \"message_id\": \"{{ $json.message_id }}\",\n  \"timestamp\": {{ $json.timestamp }}\n}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+    {
+      "id": "http-delivery-wh",
+      "name": "POST /delivery/webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1460, 560],
+      "credentials": { "httpHeaderAuth": { "id": "bmst-api-key", "name": "BMST API Key" } },
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/delivery/webhook",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "rawBody": "={\n  \"thread_id\": \"delivery-{{ $json.phone }}\",\n  \"phone\": \"{{ $json.phone }}\",\n  \"aprovado\": {{ $json.message.trim().toUpperCase() === 'SIM' ? 'true' : 'false' }}\n}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+    {
+      "id": "http-hunter-wh",
+      "name": "POST /hunter/webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1460, 720],
+      "credentials": { "httpHeaderAuth": { "id": "bmst-api-key", "name": "BMST API Key" } },
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/hunter/webhook",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "rawBody": "={\n  \"phone\": \"{{ $json.phone }}\",\n  \"message\": {{ JSON.stringify($json.message) }},\n  \"message_id\": \"{{ $json.message_id }}\",\n  \"timestamp\": {{ $json.timestamp }}\n}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    }
+  ],
+  "connections": {
+    "Evolution Webhook": {
+      "main": [[
+        { "node": "Respond 200 OK",           "type": "main", "index": 0 },
+        { "node": "Parse Evolution Message",  "type": "main", "index": 0 }
+      ]]
+    },
+    "Parse Evolution Message": {
+      "main": [[{ "node": "GET Lead Agent (Supabase)", "type": "main", "index": 0 }]]
+    },
+    "GET Lead Agent (Supabase)": {
+      "main": [[{ "node": "Merge Phone into Lead", "type": "main", "index": 0 }]]
+    },
+    "Merge Phone into Lead": {
+      "main": [[{ "node": "Route by Agent", "type": "main", "index": 0 }]]
+    },
+    "Route by Agent": {
+      "main": [
+        [{ "node": "POST /closer/webhook",   "type": "main", "index": 0 }],
+        [{ "node": "POST /delivery/webhook", "type": "main", "index": 0 }],
+        [{ "node": "POST /hunter/webhook",   "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": false }
+}

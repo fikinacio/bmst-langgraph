@@ -1,0 +1,108 @@
+{
+  "name": "BMST — Telegram Callback Handler",
+  "nodes": [
+    {
+      "id": "wh-telegram",
+      "name": "Telegram Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 400],
+      "webhookId": "bmst-telegram-callback",
+      "parameters": {
+        "path": "telegram",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "respond-telegram",
+      "name": "Respond 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [500, 280],
+      "parameters": {
+        "options": {
+          "responseCode": 200,
+          "responseBody": "{\"ok\":true}"
+        }
+      }
+    },
+    {
+      "id": "check-callback",
+      "name": "Is Callback Query?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [500, 520],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "combinator": "and",
+          "conditions": [{
+            "id": "cond-has-callback",
+            "leftValue": "={{ $json.body.callback_query !== undefined }}",
+            "rightValue": "true",
+            "operator": { "type": "string", "operation": "equals" }
+          }]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "parse-callback",
+      "name": "Parse Callback Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [740, 460],
+      "parameters": {
+        "jsCode": "const cq = $input.first().json.body.callback_query;\n\n// callback_data format: \"action:thread_id\"\n// e.g. \"aprovar:hunter-batch-1734567890\"\nconst raw_data = cq.data || '';\nconst colonIdx = raw_data.indexOf(':');\n\nlet action, thread_id;\nif (colonIdx === -1) {\n  // Fallback: only action, no thread_id\n  action    = raw_data;\n  thread_id = '';\n} else {\n  action    = raw_data.slice(0, colonIdx);\n  thread_id = raw_data.slice(colonIdx + 1);\n}\n\n// Validate action is one of the expected values\nconst validActions = ['aprovar', 'editar', 'rejeitar'];\nif (!validActions.includes(action)) {\n  // Unknown action — skip\n  return [];\n}\n\nreturn [{\n  json: {\n    callback_query_id: cq.id,\n    message_id:        cq.message?.message_id || 0,\n    data:              action,\n    thread_id:         thread_id,\n    edited_text:       null\n  }\n}];"
+      }
+    },
+    {
+      "id": "http-tg-callback",
+      "name": "POST /telegram/callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [980, 460],
+      "credentials": { "httpHeaderAuth": { "id": "bmst-api-key", "name": "BMST API Key" } },
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/telegram/callback",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "rawBody": "={\n  \"callback_query_id\": \"{{ $json.callback_query_id }}\",\n  \"message_id\": {{ $json.message_id }},\n  \"data\": \"{{ $json.data }}\",\n  \"thread_id\": \"{{ $json.thread_id }}\",\n  \"edited_text\": null\n}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+    {
+      "id": "noop-ignore",
+      "name": "Ignore (not a callback)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [740, 620],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Telegram Webhook": {
+      "main": [[
+        { "node": "Respond 200 OK",      "type": "main", "index": 0 },
+        { "node": "Is Callback Query?",  "type": "main", "index": 0 }
+      ]]
+    },
+    "Is Callback Query?": {
+      "main": [
+        [{ "node": "Parse Callback Data",      "type": "main", "index": 0 }],
+        [{ "node": "Ignore (not a callback)",  "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse Callback Data": {
+      "main": [[{ "node": "POST /telegram/callback", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": false }
+}
