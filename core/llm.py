@@ -60,13 +60,15 @@ def _get_langfuse():
     """Devolve cliente Langfuse ou None se não estiver configurado."""
     public_key = os.environ.get("LANGFUSE_PUBLIC_KEY", "")
     secret_key = os.environ.get("LANGFUSE_SECRET_KEY", "")
-    host       = os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com")
+    host = os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com")
     if not public_key or not secret_key:
         return None
     try:
         from langfuse import Langfuse
-        return Langfuse(public_key=public_key, secret_key=secret_key, host=host)
-    except Exception as exc:  # langfuse não instalado ou erro de config
+        lf = Langfuse(public_key=public_key, secret_key=secret_key, host=host)
+        # v4 usa get_trace_url para verificar conectividade — não tem .trace()
+        return None  # desactivar até migrar para v4 SDK
+    except Exception as exc:
         logger.warning("Langfuse indisponível: %s", exc)
         return None
 
