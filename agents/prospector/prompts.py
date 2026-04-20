@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -53,9 +55,14 @@ class ApproachNotesSchema(BaseModel):
     opportunity: str = Field(
         description="Detailed description of the automation opportunity found (internal use)."
     )
-    recommended_service: str = Field(
-        description="Most relevant BMST service slug for this company."
-    )
+    recommended_service: Literal[
+        "whatsapp_chatbot_basico",
+        "whatsapp_chatbot_avancado",
+        "sistema_agendamentos",
+        "automacao_followup",
+        "catalogo_digital",
+        "atendimento_automatico",
+    ] = Field(description="Most relevant BMST service slug for this company.")
 
 
 # ── Lead qualification ────────────────────────────────────────────────────────
