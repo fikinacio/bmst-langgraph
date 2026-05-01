@@ -144,7 +144,10 @@ async def verificar_personalizacao(state: RevisorState) -> dict:
     )
 
     try:
-        result = json.loads(raw)
+        import re as _re
+        _fence = _re.compile(r"```(?:json)?\s*([\s\S]*?)\s*```", _re.IGNORECASE)
+        _m = _fence.search(raw)
+        result = json.loads(_m.group(1).strip() if _m else raw.strip())
         is_personalised: bool = result.get("is_personalised", False)
         reason: str           = result.get("reason", "No reason provided")
     except (json.JSONDecodeError, AttributeError):
@@ -188,7 +191,7 @@ async def preparar_aprovacao(state: RevisorState) -> dict:
 
     # Attempt to save the review record to Supabase (best-effort — do not block)
     try:
-        await save_revisao(
+        save_revisao(
             lead_id=state.get("lead_id", "unknown"),   # type: ignore[arg-type]
             texto_original=state["texto_original"],
             texto_final=texto_para_enviar,

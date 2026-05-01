@@ -71,7 +71,7 @@ async def _post(endpoint: str, payload: dict) -> dict:
     }
     last_exc: Exception | None = None
 
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+    async with httpx.AsyncClient(timeout=_TIMEOUT, follow_redirects=True) as client:
         for attempt in range(1, _MAX_RETRIES + 2):  # attempts: 1, 2, 3
             try:
                 response = await client.post(url, json=payload, headers=headers)
@@ -103,7 +103,7 @@ async def _get(endpoint: str) -> dict:
     """GET from the Evolution API (no retry — used only for status checks)."""
     url     = f"{_base_url()}{endpoint}"
     headers = {"apikey": _api_key()}
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+    async with httpx.AsyncClient(timeout=_TIMEOUT, follow_redirects=True) as client:
         try:
             response = await client.get(url, headers=headers)
             response.raise_for_status()

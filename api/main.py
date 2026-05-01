@@ -24,8 +24,9 @@ import asyncio
 import logging
 
 try:
+    from pathlib import Path
     from dotenv import load_dotenv
-    load_dotenv()
+    load_dotenv(Path(__file__).parent.parent / ".env", override=True)
 except ImportError:
     pass
 import time
@@ -253,7 +254,9 @@ async def _run_hunter_batch(request: HunterBatchRequest, checkpointer: Any) -> N
     try:
         from core.sheets_client import get_pending_leads
 
-        leads = await get_pending_leads(max_leads=request.max_leads)
+        import os as _os
+        _sheet_id = _os.environ.get("GOOGLE_SHEETS_ID", "")
+        leads = await get_pending_leads(_sheet_id)
         if not leads:
             logger.info("HUNTER batch: no pending leads found.")
             return
