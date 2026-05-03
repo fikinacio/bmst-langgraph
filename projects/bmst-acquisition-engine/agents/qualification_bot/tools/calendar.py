@@ -37,9 +37,15 @@ _MIN_LEAD_HOURS = 48
 
 
 def _get_service():
-    creds_path = os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
-    with open(creds_path) as f:
-        creds_dict = json.load(f)
+    import base64
+    raw = os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
+    if os.path.isfile(raw):
+        with open(raw) as f:
+            creds_dict = json.load(f)
+    elif raw.startswith("{"):
+        creds_dict = json.loads(raw)
+    else:
+        creds_dict = json.loads(base64.b64decode(raw).decode())
     creds = service_account.Credentials.from_service_account_info(
         creds_dict, scopes=_SCOPES
     )
