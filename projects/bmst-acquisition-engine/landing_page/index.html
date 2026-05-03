@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auditoria Gratuita de Processos — BMST</title>
+  <meta name="description"
+    content="Descubra onde a sua empresa está a perder tempo e dinheiro com processos manuais. Auditoria gratuita de 30 minutos." />
+  <style>
+    :root {
+      --primary:   #1a4a6b;
+      --secondary: #2a8a7a;
+      --accent:    #c8833a;
+      --text:      #1a1a2e;
+      --muted:     #6b7280;
+      --bg:        #f8fafc;
+      --card:      #ffffff;
+      --border:    #e5e7eb;
+      --radius:    8px;
+      --shadow:    0 2px 10px rgba(0,0,0,0.07);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ──────────────────────────────────────────────────────────── */
+    .page { max-width: 480px; margin: 0 auto; padding: 24px 16px 56px; }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    .header { text-align: center; margin-bottom: 28px; }
+    .logo   { font-size: 20px; font-weight: 700; color: var(--primary); letter-spacing: -0.4px; }
+
+    .lang-toggle {
+      display: inline-flex; gap: 3px;
+      margin-top: 10px;
+      background: var(--border); border-radius: 20px; padding: 2px;
+    }
+    .lang-btn {
+      border: none; background: transparent;
+      padding: 4px 14px; border-radius: 18px;
+      cursor: pointer; font-size: 13px; font-weight: 500;
+      color: var(--muted); transition: all 0.15s;
+    }
+    .lang-btn.active {
+      background: white; color: var(--primary);
+      font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* ── Hero ────────────────────────────────────────────────────────────── */
+    .hero {
+      background: var(--primary); color: white;
+      border-radius: 12px; padding: 28px 24px; margin-bottom: 20px;
+    }
+    .hero h1 { font-size: 21px; font-weight: 700; line-height: 1.3; margin-bottom: 10px; }
+    .hero p  { font-size: 15px; opacity: 0.88; line-height: 1.55; }
+    .badge {
+      display: inline-block; margin-top: 14px;
+      background: var(--accent); color: white;
+      font-size: 12px; font-weight: 600;
+      padding: 4px 12px; border-radius: 12px; letter-spacing: 0.3px;
+    }
+
+    /* ── Card / form ─────────────────────────────────────────────────────── */
+    .card { background: var(--card); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); }
+    .card h2 { font-size: 16px; font-weight: 600; color: var(--primary); margin-bottom: 20px; }
+
+    .field { margin-bottom: 16px; }
+
+    label {
+      display: block; font-size: 13px; font-weight: 500;
+      color: var(--text); margin-bottom: 5px;
+    }
+    input, select {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      font-size: 15px; color: var(--text); background: white;
+      outline: none; transition: border-color 0.15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    input:focus, select:focus { border-color: var(--secondary); }
+
+    .wa-row   { display: flex; gap: 8px; }
+    .wa-prefix {
+      flex-shrink: 0; padding: 11px 12px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: var(--radius); font-size: 15px;
+      color: var(--muted); font-weight: 500; white-space: nowrap;
+    }
+    .wa-row input { flex: 1; }
+
+    /* ── Submit button ───────────────────────────────────────────────────── */
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: var(--secondary); color: white;
+      border: none; border-radius: var(--radius);
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      margin-top: 8px; transition: background 0.15s; letter-spacing: 0.2px;
+    }
+    .btn-submit:hover:not(:disabled) { background: #228070; }
+    .btn-submit:disabled { background: var(--muted); cursor: not-allowed; }
+
+    /* ── Alert ───────────────────────────────────────────────────────────── */
+    .alert {
+      display: none; padding: 12px 16px;
+      border-radius: var(--radius); margin-bottom: 16px;
+      font-size: 14px; line-height: 1.4;
+    }
+    .alert-error {
+      background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
+    }
+
+    /* ── Privacy ─────────────────────────────────────────────────────────── */
+    .privacy {
+      font-size: 12px; color: var(--muted);
+      text-align: center; margin-top: 12px; line-height: 1.5;
+    }
+    .privacy a { color: var(--secondary); }
+
+    /* ── Footer ──────────────────────────────────────────────────────────── */
+    .footer {
+      text-align: center; margin-top: 28px;
+      font-size: 12px; color: var(--muted);
+    }
+
+    /* ── Language switching ──────────────────────────────────────────────── */
+    /*
+      Elements with data-lang="pt" are visible by default.
+      Elements with data-lang="en" are hidden by default.
+      Adding class "lang-en" to <body> inverts this.
+    */
+    [data-lang="en"]                          { display: none; }
+    body.lang-en [data-lang="pt"]             { display: none; }
+    body.lang-en [data-lang="en"]             { display: block; }
+    /* Inline elements need inline display, not block */
+    span[data-lang],
+    .badge[data-lang]                         { display: inline; }
+    [data-lang="en"]:is(span, .badge)         { display: none; }
+    body.lang-en [data-lang="pt"]:is(span, .badge) { display: none; }
+    body.lang-en [data-lang="en"]:is(span, .badge) { display: inline; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">BMST · Bisca Mais</div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('pt')">PT</button>
+      <button class="lang-btn"        onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1 data-lang="pt">Descubra onde a sua empresa está a perder tempo e dinheiro</h1>
+    <h1 data-lang="en">Find out where your business is losing time and money</h1>
+
+    <p data-lang="pt">Faça uma auditoria gratuita de 30 minutos com os nossos especialistas em automação. Sem compromissos.</p>
+    <p data-lang="en">Book a free 30-minute process audit with our automation specialists. No strings attached.</p>
+
+    <span class="badge" data-lang="pt">Grátis · 30 minutos · Online</span>
+    <span class="badge" data-lang="en">Free · 30 minutes · Online</span>
+  </div>
+
+  <!-- Form card -->
+  <div class="card">
+    <h2 data-lang="pt">Preencha o formulário para começar</h2>
+    <h2 data-lang="en">Fill in your details to get started</h2>
+
+    <div id="alert-error" class="alert alert-error" role="alert"></div>
+
+    <form id="lead-form" novalidate onsubmit="handleSubmit(event)">
+
+      <div class="field">
+        <label for="nome" data-lang="pt">Nome completo *</label>
+        <label for="nome" data-lang="en">Full name *</label>
+        <input type="text" id="nome" name="nome" required
+          autocomplete="given-name" placeholder="João Silva" />
+      </div>
+
+      <div class="field">
+        <label for="empresa" data-lang="pt">Empresa *</label>
+        <label for="empresa" data-lang="en">Company *</label>
+        <input type="text" id="empresa" name="empresa" required
+          autocomplete="organization" placeholder="Empresa Lda." />
+      </div>
+
+      <div class="field">
+        <label for="setor" data-lang="pt">Setor de actividade *</label>
+        <label for="setor" data-lang="en">Business sector *</label>
+        <select id="setor" name="setor" required>
+          <option value="" disabled selected data-lang="pt">Selecione o setor</option>
+          <option value="" disabled selected data-lang="en">Select sector</option>
+          <option value="Petróleo e Gás">Petróleo e Gás / Oil &amp; Gas</option>
+          <option value="Construção e Imobiliário">Construção e Imobiliário / Construction</option>
+          <option value="Logística e Transportes">Logística e Transportes / Logistics</option>
+          <option value="Telecomunicações">Telecomunicações / Telecommunications</option>
+          <option value="Retalho e Comércio">Retalho e Comércio / Retail</option>
+          <option value="Saúde">Saúde / Healthcare</option>
+          <option value="Educação">Educação / Education</option>
+          <option value="Hotelaria e Turismo">Hotelaria e Turismo / Hospitality</option>
+          <option value="Banca e Seguros">Banca e Seguros / Banking &amp; Insurance</option>
+          <option value="Outro">Outro / Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="whatsapp" data-lang="pt">WhatsApp *</label>
+        <label for="whatsapp" data-lang="en">WhatsApp *</label>
+        <div class="wa-row">
+          <span class="wa-prefix">+244</span>
+          <input type="tel" id="whatsapp" name="whatsapp" required
+            pattern="[0-9]{9}"
+            maxlength="9"
+            inputmode="numeric"
+            autocomplete="tel"
+            placeholder="923 456 789" />
+        </div>
+      </div>
+
+      <button type="submit" id="btn-submit" class="btn-submit">
+        <span data-lang="pt">Quero a minha auditoria gratuita →</span>
+        <span data-lang="en">Book my free audit →</span>
+      </button>
+    </form>
+
+    <p class="privacy" data-lang="pt">
+      Ao submeter, concorda com a nossa
+      <a href="https://www.biscaplus.com/privacidade" target="_blank" rel="noopener noreferrer">política de privacidade</a>.
+      Os seus dados são usados apenas para agendar a auditoria e nunca são partilhados com terceiros.
+    </p>
+    <p class="privacy" data-lang="en">
+      By submitting, you agree to our
+      <a href="https://www.biscaplus.com/privacidade" target="_blank" rel="noopener noreferrer">privacy policy</a>.
+      Your data is used solely to schedule the audit and is never shared with third parties.
+    </p>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>BMST · Bisca Mais Sistemas e Tecnologias · contact@biscaplus.com</p>
+  </div>
+
+</div><!-- /.page -->
+
+<script>
+  // ── Configuration ────────────────────────────────────────────────────────
+  // WEBHOOK_URL is injected at Vercel build time via the sed command in vercel.json.
+  // For local testing, replace the placeholder with your actual n8n webhook URL.
+  var WEBHOOK_URL    = "%%NEXT_PUBLIC_N8N_WEBHOOK_URL%%";
+  var BMST_WHATSAPP  = "244956873126"; // replace with real BMST business number
+
+  // ── Language toggle ──────────────────────────────────────────────────────
+  function setLang(lang) {
+    document.body.className = lang === "en" ? "lang-en" : "";
+    document.querySelectorAll(".lang-btn").forEach(function (btn, i) {
+      btn.classList.toggle("active", (i === 0 && lang === "pt") || (i === 1 && lang === "en"));
+    });
+    try { localStorage.setItem("bmst_lang", lang); } catch (_) {}
+  }
+
+  (function initLang() {
+    var saved = "";
+    try { saved = localStorage.getItem("bmst_lang") || ""; } catch (_) {}
+    var browserLang = (navigator.language || "pt").split("-")[0].toLowerCase();
+    if (saved === "en" || (!saved && browserLang === "en")) setLang("en");
+  })();
+
+  // ── buildWhatsAppLink ────────────────────────────────────────────────────
+  function buildWhatsAppLink(name, company, sector) {
+    var msg =
+      "Olá! Sou " + name + " da empresa " + company +
+      " (sector: " + sector + "). Acabei de preencher o formulário" +
+      " de auditoria gratuita no site da BMST e gostaria de saber mais. Obrigado!";
+    return "https://wa.me/" + BMST_WHATSAPP + "?text=" + encodeURIComponent(msg);
+  }
+
+  // ── Form validation helpers ──────────────────────────────────────────────
+  function isEN() { return document.body.classList.contains("lang-en"); }
+
+  function showError(msg) {
+    var el = document.getElementById("alert-error");
+    el.textContent = msg;
+    el.style.display = "block";
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function clearError() {
+    var el = document.getElementById("alert-error");
+    el.style.display = "none";
+    el.textContent = "";
+  }
+
+  // ── Form submission ──────────────────────────────────────────────────────
+  function handleSubmit(event) {
+    event.preventDefault();
+    clearError();
+
+    var nome    = document.getElementById("nome").value.trim();
+    var empresa = document.getElementById("empresa").value.trim();
+    var setor   = document.getElementById("setor").value;
+    var waRaw   = document.getElementById("whatsapp").value.replace(/\s/g, "");
+    var btn     = document.getElementById("btn-submit");
+
+    // Client-side validation
+    if (!nome || !empresa || !setor || !waRaw) {
+      showError(isEN()
+        ? "Please fill in all required fields."
+        : "Por favor preencha todos os campos obrigatórios.");
+      return;
+    }
+    if (!/^[0-9]{9}$/.test(waRaw)) {
+      showError(isEN()
+        ? "Please enter a valid 9-digit Angolan WhatsApp number."
+        : "Introduza um número de WhatsApp angolano válido (9 dígitos).");
+      return;
+    }
+
+    btn.disabled = true;
+
+    var payload = {
+      name:           nome,
+      company_name:   empresa,
+      sector:         setor,
+      whatsapp_number: "244" + waRaw,
+      source:         "landing_page",
+      submitted_at:   new Date().toISOString(),
+    };
+
+    fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        window.location.href = buildWhatsAppLink(nome, empresa, setor);
+      })
+      .catch(function (err) {
+        console.error(err);
+        showError(isEN()
+          ? "Something went wrong. Please try again or contact us directly on WhatsApp."
+          : "Ocorreu um erro ao enviar o formulário. Por favor tente novamente ou contacte-nos directamente pelo WhatsApp.");
+        btn.disabled = false;
+      });
+  }
+</script>
+</body>
+</html>

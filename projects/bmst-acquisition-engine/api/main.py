@@ -67,7 +67,7 @@ def qualify(payload: QualifyRequest):
 
     state = ConversationState(
         company_id=record.get("id", ""),
-        company_name=fields.get("company_name", ""),
+        company_name=fields.get("Name", fields.get("company_name", "")),
         contact_name=fields.get("contact_name", ""),
         whatsapp_number=str(fields.get("whatsapp_number", "")),
         sector=fields.get("sector", ""),
