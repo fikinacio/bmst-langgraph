@@ -15,3 +15,5 @@ env
 logs
 .langchain
 credentials/*.json
+nginx/
+deploy.sh

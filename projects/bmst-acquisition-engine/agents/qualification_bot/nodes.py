@@ -297,52 +297,133 @@ def qualify_fail(state: ConversationState) -> ConversationState:
 
 # ── Book slot ─────────────────────────────────────────────────────────────────
 
-def book_slot(state: ConversationState) -> ConversationState:
-    """Fetch available Calendar slots and present two options via WhatsApp."""
-    logger.info(f"book_slot | company={state.company_name}")
+def _present_slots(state: ConversationState) -> ConversationState:
+    """Fetch Calendar slots and present two options. First entry into 'booking' stage."""
+    slots = cal.get_available_slots(days_ahead=7)
+
+    if not slots:
+        fallback = (
+            f"Oi {state.contact_name or 'Cliente'}, vou verificar a disponibilidade "
+            "da nossa equipa e entro em contacto em breve para marcar a auditoria. "
+            "Obrigado pela paciência!"
+        )
+        return replace(
+            state,
+            reply_text=fallback,
+            new_stage="booking",
+            new_state="lead",
+            airtable_updates={"state": "lead", "conversation_stage": "booking"},
+            error=None,
+        )
+
+    slot_1 = slots[0]
+    slot_2 = slots[1] if len(slots) > 1 else slots[0]
+
+    user_prompt = prompts.SLOT_OPTION_PROMPT.format(
+        contact_name=state.contact_name or "Cliente",
+        company_name=state.company_name or "a sua empresa",
+        slot_1=slot_1,
+        slot_2=slot_2,
+    )
+    result = _call_llm(prompts.SYSTEM_PROMPT, user_prompt)
+
+    return replace(
+        state,
+        reply_text=result["reply_text"],
+        new_stage="booking",
+        new_state="lead",
+        available_slot_1=slot_1,
+        available_slot_2=slot_2,
+        airtable_updates={
+            "state": "lead",
+            "conversation_stage": "booking",
+            "available_slot_1": slot_1,
+            "available_slot_2": slot_2,
+        },
+        error=None,
+    )
+
+
+def _confirm_booking(state: ConversationState) -> ConversationState:
+    """Parse the user's slot choice, book it in Calendar, and confirm."""
+    slot_1 = state.available_slot_1
+    slot_2 = state.available_slot_2
+
+    # Interpret the user's reply
+    choice_prompt = prompts.SLOT_CHOICE_PROMPT.format(
+        contact_name=state.contact_name or "Cliente",
+        company_name=state.company_name or "a sua empresa",
+        slot_1=slot_1,
+        slot_2=slot_2,
+        incoming_message=state.incoming_message,
+    )
     try:
-        slots = cal.get_available_slots(days_ahead=7)
+        choice_result = _call_llm(prompts.SYSTEM_PROMPT, choice_prompt)
+        chosen = choice_result.get("extracted", {}).get("chosen_slot", "unclear")
+    except Exception as exc:
+        logger.warning(f"_confirm_booking: slot choice parse failed ({exc}), re-presenting")
+        chosen = "unclear"
 
-        if not slots:
-            # No availability — hand off to human
-            fallback = (
-                f"Oi {state.contact_name or 'Cliente'}, vou verificar a disponibilidade "
-                "da nossa equipa e entro em contacto em breve para marcar a auditoria. "
-                "Obrigado pela paciencia! "
-            )
-            return replace(
-                state,
-                reply_text=fallback,
-                new_stage="booking",
-                new_state="lead",
-                airtable_updates={"state": "lead", "conversation_stage": "booking"},
-                error=None,
-            )
-
-        slot_1 = slots[0]
-        slot_2 = slots[1] if len(slots) > 1 else slots[0]
-
-        user_prompt = prompts.SLOT_OPTION_PROMPT.format(
+    if chosen == "unclear":
+        # Re-present the same options without fetching new ones
+        re_prompt = prompts.SLOT_OPTION_PROMPT.format(
             contact_name=state.contact_name or "Cliente",
             company_name=state.company_name or "a sua empresa",
             slot_1=slot_1,
             slot_2=slot_2,
         )
-        result = _call_llm(prompts.SYSTEM_PROMPT, user_prompt)
-
+        result = _call_llm(prompts.SYSTEM_PROMPT, re_prompt)
         return replace(
             state,
             reply_text=result["reply_text"],
             new_stage="booking",
             new_state="lead",
-            airtable_updates={
-                "state": "lead",
-                "conversation_stage": "booking",
-                "available_slot_1": slot_1,
-                "available_slot_2": slot_2,
-            },
+            airtable_updates={"state": "lead", "conversation_stage": "booking"},
             error=None,
         )
+
+    confirmed_slot = slot_1 if chosen == "1" else slot_2
+    logger.info(f"_confirm_booking | chosen={chosen} | slot={confirmed_slot}")
+
+    event_id = cal.book_slot(
+        confirmed_slot,
+        state.company_name or "Empresa",
+        state.contact_name or "Cliente",
+        state.whatsapp_number,
+    )
+
+    confirm_prompt = prompts.BOOKING_CONFIRM_PROMPT.format(
+        contact_name=state.contact_name or "Cliente",
+        company_name=state.company_name or "a sua empresa",
+        confirmed_slot=confirmed_slot,
+        event_id=event_id,
+    )
+    result = _call_llm(prompts.SYSTEM_PROMPT, confirm_prompt)
+
+    return replace(
+        state,
+        reply_text=result["reply_text"],
+        new_stage="audit_scheduled",
+        new_state="audit_scheduled",
+        airtable_updates={
+            "state": "audit_scheduled",
+            "conversation_stage": "audit_scheduled",
+            "available_slot_1": None,
+            "available_slot_2": None,
+            "booked_slot": confirmed_slot,
+            "calendar_event_id": event_id,
+        },
+        error=None,
+    )
+
+
+def book_slot(state: ConversationState) -> ConversationState:
+    """Present slot options (first pass) or confirm booking (user replied with choice)."""
+    logger.info(f"book_slot | company={state.company_name} | has_slots={bool(state.available_slot_1)}")
+    try:
+        if state.available_slot_1 and state.incoming_message:
+            return _confirm_booking(state)
+        return _present_slots(state)
     except Exception as exc:
         logger.error(f"book_slot error: {exc}")
         return replace(state, error=str(exc))

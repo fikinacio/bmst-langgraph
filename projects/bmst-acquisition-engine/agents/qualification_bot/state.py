@@ -39,6 +39,10 @@ class ConversationState:
     new_stage: str = ""        # next conversation stage
     airtable_updates: dict = field(default_factory=dict)
 
+    # ── Booking ───────────────────────────────────────────────────────────────
+    available_slot_1: Optional[str] = None
+    available_slot_2: Optional[str] = None
+
     # ── Meta ──────────────────────────────────────────────────────────────────
     error: Optional[str] = None
     retry_count: int = 0

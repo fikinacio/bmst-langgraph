@@ -77,6 +77,8 @@ def qualify(payload: QualifyRequest):
         priority_process=fields.get("priority_process"),
         urgency_level=fields.get("urgency_level"),
         qualification_score=int(fields.get("qualification_score") or 0),
+        available_slot_1=fields.get("available_slot_1"),
+        available_slot_2=fields.get("available_slot_2"),
         incoming_message=payload.incoming_message,
     )
 

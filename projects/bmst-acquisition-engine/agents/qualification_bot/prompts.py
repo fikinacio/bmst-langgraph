@@ -256,6 +256,31 @@ O campo extracted deve incluir:
 Responda apenas com o JSON.
 """
 
+# ── Slot choice interpreter (between 12.14 and 12.13) ───────────────────
+
+SLOT_CHOICE_PROMPT: str = """\
+CONTEXTO:
+- Contacto: {contact_name}
+- Empresa: {company_name}
+- Opção 1: {slot_1}
+- Opção 2: {slot_2}
+- Resposta recebida: "{incoming_message}"
+
+TAREFA:
+Interprete a resposta e determine qual opção de horário o utilizador escolheu.
+Aceite qualquer forma de indicar preferência: "1", "opção 1", "o primeiro", "prefiro quinta", etc.
+
+Se escolheu claramente a Opção 1: chosen_slot = "1"
+Se escolheu claramente a Opção 2: chosen_slot = "2"
+Se a resposta for ambígua ou não indicar preferência: chosen_slot = "unclear"
+
+O reply_text deve ser "" (vazio — a confirmação é gerada num passo separado).
+O new_stage deve ser "booking".
+No campo "extracted", inclua: {{ "chosen_slot": "<1|2|unclear>" }}
+
+Responda apenas com o JSON.
+"""
+
 # ── 12.13 — Booking confirmation (after user picks a slot) ──────────────────
 
 BOOKING_CONFIRM_PROMPT: str = """\
