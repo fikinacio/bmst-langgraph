@@ -144,7 +144,8 @@ async def verificar_personalizacao(state: RevisorState) -> dict:
     )
 
     try:
-        result = json.loads(raw)
+        from core.llm import _extract_json
+        result = json.loads(_extract_json(raw))
         is_personalised: bool = result.get("is_personalised", False)
         reason: str           = result.get("reason", "No reason provided")
     except (json.JSONDecodeError, AttributeError):
