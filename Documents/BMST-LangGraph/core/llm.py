@@ -151,22 +151,29 @@ async def create_message(
     model_id = _MODEL_MAP[model]
     t0 = time.perf_counter()
 
-    # Langfuse trace (se configurado)
+    # Langfuse trace (opcional — falha silenciosamente se versão incompatível)
     lf = _get_langfuse()
     trace = generation = None
-    if lf:
-        trace = lf.trace(name=f"{agent_name}.{node_name}", tags=[agent_name, model])
-        generation = trace.generation(
-            name=node_name,
-            model=model_id,
-            input={"system": system, "user": user},
-        )
+    try:
+        if lf:
+            trace = lf.trace(name=f"{agent_name}.{node_name}", tags=[agent_name, model])
+            generation = trace.generation(
+                name=node_name,
+                model=model_id,
+                input={"system": system, "user": user},
+            )
+    except Exception as exc:
+        logger.debug("Langfuse trace falhou (ignorado): %s", exc)
+        trace = generation = None
 
     try:
         response = await _call_with_retry(system, user, model_id, max_tokens)
     except Exception:
-        if generation:
-            generation.end(level="ERROR")
+        try:
+            if generation:
+                generation.end(level="ERROR")
+        except Exception:
+            pass
         raise
 
     latency_ms = int((time.perf_counter() - t0) * 1000)
@@ -180,16 +187,19 @@ async def create_message(
         usage.input_tokens, usage.output_tokens, latency_ms,
     )
 
-    if generation:
-        generation.end(
-            output=text,
-            usage={
-                "input":  usage.input_tokens,
-                "output": usage.output_tokens,
-                "unit":   "TOKENS",
-            },
-            metadata={"latency_ms": latency_ms},
-        )
+    try:
+        if generation:
+            generation.end(
+                output=text,
+                usage={
+                    "input":  usage.input_tokens,
+                    "output": usage.output_tokens,
+                    "unit":   "TOKENS",
+                },
+                metadata={"latency_ms": latency_ms},
+            )
+    except Exception:
+        pass
 
     return text
 
@@ -242,7 +252,7 @@ async def create_json_message(
         **kwargs,
     )
     try:
-        return schema.model_validate(json.loads(raw))
+        return schema.model_validate(json.loads(_extract_json(raw)))
     except (json.JSONDecodeError, ValueError):
         logger.warning(
             "create_json_message: parse falhou na 1ª tentativa. Raw=%r", raw[:200]
@@ -256,7 +266,7 @@ async def create_json_message(
         **kwargs,
     )
     try:
-        return schema.model_validate(json.loads(raw2))
+        return schema.model_validate(json.loads(_extract_json(raw2)))
     except (json.JSONDecodeError, ValueError) as exc:
         raise ValueError(
             f"create_json_message: o LLM não produziu JSON válido após 2 tentativas.\n"

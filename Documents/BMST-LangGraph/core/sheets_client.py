@@ -72,6 +72,14 @@ def _load_credentials() -> Credentials:
 
 def _get_service():
     """Build and return the Google Sheets API service object (synchronous)."""
+    import httplib2
+    # Patch httplib2 globally to skip SSL verification in environments with
+    # self-signed certificates in the chain (e.g. corporate proxies)
+    _orig_init = httplib2.Http.__init__
+    def _no_verify_init(self, *args, **kwargs):
+        kwargs["disable_ssl_certificate_validation"] = True
+        _orig_init(self, *args, **kwargs)
+    httplib2.Http.__init__ = _no_verify_init
     creds = _load_credentials()
     return build("sheets", "v4", credentials=creds, cache_discovery=False)
 
