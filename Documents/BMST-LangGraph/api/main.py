@@ -145,7 +145,7 @@ async def health():
     async def _check_sheets() -> str:
         try:
             from core.sheets_client import get_pending_leads
-            await get_pending_leads(max_leads=1)
+            await get_pending_leads(sheet_id=settings.GOOGLE_SHEETS_ID)
             return "ok"
         except Exception as exc:
             logger.warning("Health check Sheets failed: %s", exc)
