@@ -94,6 +94,11 @@ async def _call_with_retry(
     client = _get_client()
     last_exc: Exception | None = None
 
+    # Guard against empty strings — the SDK may add cache_control to content blocks,
+    # and an empty text block with cache_control causes a 400 from the API.
+    safe_system = system.strip() or " "
+    safe_user   = user.strip()   or " "
+
     for attempt, delay in enumerate([0] + _RETRY_DELAYS, start=1):
         if delay:
             logger.warning(
@@ -106,8 +111,8 @@ async def _call_with_retry(
                 client.messages.create,
                 model=model_id,
                 max_tokens=max_tokens,
-                system=system,
-                messages=[{"role": "user", "content": user}],
+                system=safe_system,
+                messages=[{"role": "user", "content": safe_user}],
             )
             return response
         except _RETRYABLE as exc:
