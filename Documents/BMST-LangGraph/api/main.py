@@ -861,3 +861,52 @@ async def ledger_check_payments(
     return {
         "message": f"LEDGER payment check queued for project {request.projecto_id}."
     }
+
+
+@app.post(
+    "/ledger/check-all-payments",
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["ledger"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def ledger_check_all_payments(background_tasks: BackgroundTasks):
+    """
+    Query Supabase for ALL pending invoices and run a payment check for each.
+
+    This is the endpoint n8n should call on its daily schedule — it requires
+    only the X-Api-Key header and handles all Supabase querying internally.
+    Returns 202 immediately with a count of queued checks.
+    """
+    try:
+        from supabase import create_client
+        client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
+
+        result = await asyncio.to_thread(
+            lambda: client.table("deals")
+            .select("id, projecto_id, invoice_ninja_id")
+            .eq("estado_pagamento", "pendente")
+            .execute()
+        )
+        pending = result.data or []
+    except Exception as exc:
+        logger.error("ledger_check_all_payments: Supabase query failed — %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Could not query pending invoices: {exc}",
+        )
+
+    if not pending:
+        return {"message": "No pending invoices found.", "queued": 0}
+
+    for deal in pending:
+        req = LedgerCheckPaymentsRequest(
+            projecto_id=deal.get("projecto_id") or deal.get("id", ""),
+            invoice_ninja_id=deal.get("invoice_ninja_id") or "",
+        )
+        background_tasks.add_task(_run_ledger_verificar, req, _checkpointer)
+
+    logger.info("ledger_check_all_payments: queued %d payment checks", len(pending))
+    return {
+        "message": f"Payment check queued for {len(pending)} pending invoice(s).",
+        "queued": len(pending),
+    }

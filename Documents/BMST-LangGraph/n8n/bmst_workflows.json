@@ -347,5 +347,65 @@
       }
     }
 
+    ,
+
+    {
+      "name": "BMST — LEDGER Check Pagamentos Diário",
+      "active": true,
+      "nodes": [
+        {
+          "id": "ledger-schedule",
+          "name": "Às 08:30 todos os dias úteis",
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "typeVersion": 1.2,
+          "position": [200, 300],
+          "parameters": {
+            "rule": {
+              "interval": [
+                {
+                  "field": "cronExpression",
+                  "expression": "0 8 * * 1-5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "ledger-check-all",
+          "name": "POST /ledger/check-all-payments",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [440, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "http://bmst-agents:8000/ledger/check-all-payments",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                { "name": "X-Api-Key", "value": "={{ $env.BMST_API_KEY }}" }
+              ]
+            },
+            "options": { "timeout": 15000 }
+          }
+        },
+        {
+          "id": "ledger-log",
+          "name": "Log resultado",
+          "type": "n8n-nodes-base.noOp",
+          "typeVersion": 1,
+          "position": [680, 300],
+          "parameters": {}
+        }
+      ],
+      "connections": {
+        "Às 08:30 todos os dias úteis": {
+          "main": [[{ "node": "POST /ledger/check-all-payments", "type": "main", "index": 0 }]]
+        },
+        "POST /ledger/check-all-payments": {
+          "main": [[{ "node": "Log resultado", "type": "main", "index": 0 }]]
+        }
+      }
+    }
+
   ]
 }
