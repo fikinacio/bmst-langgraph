@@ -18,6 +18,12 @@ services:
         condition: service_started
     networks:
       - bmst-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   redis:
     image: redis:7-alpine
@@ -38,7 +44,6 @@ services:
     image: gotenberg/gotenberg:8
     container_name: bmst-gotenberg
     restart: unless-stopped
-    # Desabilita os módulos não usados para reduzir superfície de ataque
     command:
       - gotenberg
       - --chromium-disable-javascript=true
@@ -51,4 +56,7 @@ volumes:
 
 networks:
   bmst-net:
-    external: true   # partilha rede com n8n e Evolution API no EasyPanel
+    # external: true quando partilhado com n8n/Evolution no EasyPanel.
+    # Para ambiente standalone (sem EasyPanel), comenta a linha abaixo
+    # e o Docker cria a rede automaticamente.
+    external: true
