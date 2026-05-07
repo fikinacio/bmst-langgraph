@@ -473,6 +473,37 @@ async def closer_diagnose(request: CloserDiagnoseRequest, background_tasks: Back
     return {"message": f"CLOSER started for {request.phone} ({request.empresa})."}
 
 
+@app.get("/closer/status/{phone}", tags=["closer"])
+async def closer_status(phone: str):
+    """
+    Check whether an active CLOSER conversation exists for a given phone number.
+
+    n8n uses this to route inbound WhatsApp messages: if active=true the message
+    goes to /closer/webhook; otherwise to /hunter/webhook.
+
+    A CLOSER thread is considered active when its checkpointed state has
+    proxima_acao set (i.e. the graph is paused waiting for a reply) and the
+    lead has not been marked as 'fechado' or 'perdido'.
+    """
+    thread_id = f"closer-{phone}"
+    try:
+        checkpointer = get_checkpointer()
+        config       = {"configurable": {"thread_id": thread_id}}
+        snapshot     = await asyncio.to_thread(
+            checkpointer.get, config
+        )
+        if snapshot is None:
+            return {"phone": phone, "active": False}
+
+        channel_values = getattr(snapshot, "channel_values", {}) or {}
+        proxima_acao   = channel_values.get("proxima_acao")
+        terminal       = proxima_acao in (None, "fechado", "perdido", "finalizar")
+        return {"phone": phone, "active": not terminal}
+    except Exception as exc:
+        logger.warning("closer_status: could not read checkpointer for phone=%s — %s", phone, exc)
+        return {"phone": phone, "active": False}
+
+
 @app.post("/closer/webhook", response_model=WebhookResponse, tags=["closer"])
 async def closer_webhook(request: HunterWebhookRequest):
     """

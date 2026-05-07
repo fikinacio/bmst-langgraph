@@ -1,0 +1,351 @@
+{
+  "meta": { "instanceId": "bmst-langgraph" },
+  "workflows": [
+
+    {
+      "name": "BMST — HUNTER Batch Diário",
+      "active": true,
+      "nodes": [
+        {
+          "id": "schedule-trigger",
+          "name": "Às 09:00 todos os dias úteis",
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "typeVersion": 1.2,
+          "position": [200, 300],
+          "parameters": {
+            "rule": {
+              "interval": [
+                {
+                  "field": "cronExpression",
+                  "expression": "0 9 * * 1-5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "hunter-batch",
+          "name": "POST /hunter/batch",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [440, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "http://bmst-agents:8000/hunter/batch",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                { "name": "X-Api-Key", "value": "={{ $env.BMST_API_KEY }}" },
+                { "name": "Content-Type", "value": "application/json" }
+              ]
+            },
+            "sendBody": true,
+            "bodyParameters": {
+              "parameters": [
+                { "name": "max_leads", "value": "20" }
+              ]
+            },
+            "options": { "timeout": 10000 }
+          }
+        },
+        {
+          "id": "log-batch",
+          "name": "Log resultado",
+          "type": "n8n-nodes-base.noOp",
+          "typeVersion": 1,
+          "position": [680, 300],
+          "parameters": {}
+        }
+      ],
+      "connections": {
+        "Às 09:00 todos os dias úteis": {
+          "main": [[{ "node": "POST /hunter/batch", "type": "main", "index": 0 }]]
+        },
+        "POST /hunter/batch": {
+          "main": [[{ "node": "Log resultado", "type": "main", "index": 0 }]]
+        }
+      }
+    },
+
+    {
+      "name": "BMST — Telegram Callback (Aprovações)",
+      "active": true,
+      "nodes": [
+        {
+          "id": "telegram-webhook",
+          "name": "Telegram Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2,
+          "position": [200, 300],
+          "parameters": {
+            "path": "telegram-callback",
+            "httpMethod": "POST",
+            "responseMode": "lastNode"
+          },
+          "webhookId": "telegram-callback"
+        },
+        {
+          "id": "extract-callback",
+          "name": "Extrair callback_query",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [440, 300],
+          "parameters": {
+            "mode": "manual",
+            "fields": {
+              "values": [
+                {
+                  "name": "callback_query_id",
+                  "value": "={{ $json.body.callback_query.id }}"
+                },
+                {
+                  "name": "message_id",
+                  "value": "={{ $json.body.callback_query.message.message_id }}"
+                },
+                {
+                  "name": "data",
+                  "value": "={{ $json.body.callback_query.data.split(':')[0] }}"
+                },
+                {
+                  "name": "thread_id",
+                  "value": "={{ $json.body.callback_query.data.split(':')[1] }}"
+                },
+                {
+                  "name": "edited_text",
+                  "value": "={{ $json.body.callback_query.data.split(':')[2] || null }}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "forward-callback",
+          "name": "POST /telegram/callback",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [680, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "http://bmst-agents:8000/telegram/callback",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                { "name": "Content-Type", "value": "application/json" }
+              ]
+            },
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify({ callback_query_id: $json.callback_query_id, message_id: parseInt($json.message_id), data: $json.data, thread_id: $json.thread_id, edited_text: $json.edited_text }) }}",
+            "options": { "timeout": 30000 }
+          }
+        },
+        {
+          "id": "respond-200",
+          "name": "Responder 200 OK",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1.1,
+          "position": [920, 300],
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": "={ \"ok\": true }"
+          }
+        }
+      ],
+      "connections": {
+        "Telegram Webhook": {
+          "main": [[{ "node": "Extrair callback_query", "type": "main", "index": 0 }]]
+        },
+        "Extrair callback_query": {
+          "main": [[{ "node": "POST /telegram/callback", "type": "main", "index": 0 }]]
+        },
+        "POST /telegram/callback": {
+          "main": [[{ "node": "Responder 200 OK", "type": "main", "index": 0 }]]
+        }
+      }
+    },
+
+    {
+      "name": "BMST — WhatsApp Webhook (Evolution API)",
+      "active": true,
+      "nodes": [
+        {
+          "id": "evolution-webhook",
+          "name": "Evolution Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2,
+          "position": [200, 300],
+          "parameters": {
+            "path": "whatsapp-inbound",
+            "httpMethod": "POST",
+            "responseMode": "lastNode"
+          },
+          "webhookId": "whatsapp-inbound"
+        },
+        {
+          "id": "filter-messages",
+          "name": "Só mensagens de texto",
+          "type": "n8n-nodes-base.filter",
+          "typeVersion": 2,
+          "position": [440, 300],
+          "parameters": {
+            "conditions": {
+              "options": { "caseSensitive": false },
+              "conditions": [
+                {
+                  "leftValue": "={{ $json.body.event }}",
+                  "rightValue": "messages.upsert",
+                  "operator": { "type": "string", "operation": "equals" }
+                },
+                {
+                  "leftValue": "={{ $json.body.data.key.fromMe }}",
+                  "rightValue": false,
+                  "operator": { "type": "boolean", "operation": "equals" }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "extract-message",
+          "name": "Extrair campos",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [680, 300],
+          "parameters": {
+            "mode": "manual",
+            "fields": {
+              "values": [
+                {
+                  "name": "phone",
+                  "value": "={{ $json.body.data.key.remoteJid.replace('@s.whatsapp.net', '') }}"
+                },
+                {
+                  "name": "message",
+                  "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text || '' }}"
+                },
+                {
+                  "name": "message_id",
+                  "value": "={{ $json.body.data.key.id }}"
+                },
+                {
+                  "name": "timestamp",
+                  "value": "={{ $json.body.data.messageTimestamp }}"
+                },
+                {
+                  "name": "instance",
+                  "value": "={{ $json.body.instance }}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "check-closer-active",
+          "name": "Tem CLOSER activo?",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [920, 300],
+          "parameters": {
+            "method": "GET",
+            "url": "=http://bmst-agents:8000/closer/status/{{ $json.phone }}",
+            "options": { "timeout": 5000 },
+            "onError": "continueRegularOutput"
+          }
+        },
+        {
+          "id": "route-webhook",
+          "name": "CLOSER activo ou HUNTER?",
+          "type": "n8n-nodes-base.switch",
+          "typeVersion": 3.2,
+          "position": [1160, 300],
+          "parameters": {
+            "mode": "expression",
+            "output": "={{ $json.active === true ? 0 : 1 }}"
+          }
+        },
+        {
+          "id": "closer-webhook",
+          "name": "POST /closer/webhook",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [1400, 200],
+          "parameters": {
+            "method": "POST",
+            "url": "http://bmst-agents:8000/closer/webhook",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                { "name": "Content-Type", "value": "application/json" }
+              ]
+            },
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify({ phone: $('Extrair campos').item.json.phone, message: $('Extrair campos').item.json.message, message_id: $('Extrair campos').item.json.message_id, timestamp: parseInt($('Extrair campos').item.json.timestamp) }) }}",
+            "options": { "timeout": 30000 }
+          }
+        },
+        {
+          "id": "hunter-webhook",
+          "name": "POST /hunter/webhook",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [1400, 420],
+          "parameters": {
+            "method": "POST",
+            "url": "http://bmst-agents:8000/hunter/webhook",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                { "name": "Content-Type", "value": "application/json" }
+              ]
+            },
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify({ phone: $('Extrair campos').item.json.phone, message: $('Extrair campos').item.json.message, message_id: $('Extrair campos').item.json.message_id, timestamp: parseInt($('Extrair campos').item.json.timestamp) }) }}",
+            "options": { "timeout": 10000 }
+          }
+        },
+        {
+          "id": "respond-wa",
+          "name": "Responder Evolution 200",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1.1,
+          "position": [1640, 300],
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": "={ \"received\": true }"
+          }
+        }
+      ],
+      "connections": {
+        "Evolution Webhook": {
+          "main": [[{ "node": "Só mensagens de texto", "type": "main", "index": 0 }]]
+        },
+        "Só mensagens de texto": {
+          "main": [[{ "node": "Extrair campos", "type": "main", "index": 0 }]]
+        },
+        "Extrair campos": {
+          "main": [[{ "node": "Tem CLOSER activo?", "type": "main", "index": 0 }]]
+        },
+        "Tem CLOSER activo?": {
+          "main": [[{ "node": "CLOSER activo ou HUNTER?", "type": "main", "index": 0 }]]
+        },
+        "CLOSER activo ou HUNTER?": {
+          "main": [
+            [{ "node": "POST /closer/webhook", "type": "main", "index": 0 }],
+            [{ "node": "POST /hunter/webhook", "type": "main", "index": 0 }]
+          ]
+        },
+        "POST /closer/webhook": {
+          "main": [[{ "node": "Responder Evolution 200", "type": "main", "index": 0 }]]
+        },
+        "POST /hunter/webhook": {
+          "main": [[{ "node": "Responder Evolution 200", "type": "main", "index": 0 }]]
+        }
+      }
+    }
+
+  ]
+}
