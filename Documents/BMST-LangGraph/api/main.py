@@ -292,6 +292,44 @@ async def hunter_batch(request: HunterBatchRequest, background_tasks: Background
     return {"message": f"HUNTER batch started (max_leads={request.max_leads})."}
 
 
+@app.post(
+    "/hunter/unlock",
+    status_code=status.HTTP_200_OK,
+    tags=["hunter"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def hunter_unlock():
+    """
+    Force-release the HUNTER batch lock.
+
+    Use only if a previous batch crashed mid-run and left the lock set.
+    Safe to call even if no lock is held — Redis delete is idempotent.
+    """
+    from core.redis_client import release_hunter_lock
+    release_hunter_lock()
+    logger.info("HUNTER lock force-released via /hunter/unlock")
+    return {"message": "HUNTER lock released."}
+
+
+@app.post(
+    "/prospector/run",
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["prospector"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def prospector_run():
+    """
+    Stub endpoint called by the n8n pipeline after the PROSPECTOR n8n workflow runs.
+
+    The actual lead discovery (Google Places + Google Sheets) is handled by the
+    dedicated n8n PROSPECTOR workflow.  This endpoint exists so that the combined
+    n8n pipeline (PROSPECTOR → wait → HUNTER) can confirm the PROSPECTOR step
+    without hitting a 404 that breaks the routing logic.
+    """
+    logger.info("PROSPECTOR stub called — lead discovery handled by n8n workflow")
+    return {"message": "PROSPECTOR acknowledged. HUNTER will run after the scheduled wait."}
+
+
 @app.post("/hunter/webhook", response_model=WebhookResponse, tags=["hunter"])
 async def hunter_webhook(request: HunterWebhookRequest):
     """

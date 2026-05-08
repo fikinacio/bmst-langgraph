@@ -135,22 +135,16 @@ async def verificar_personalizacao(state: RevisorState) -> dict:
 
     logger.info("revisor.verificar_personalizacao: checking personalisation")
 
-    raw = await create_message(
+    result = await create_json_message(
         system=VERIFICAR_PERSONALIZACAO_PROMPT,
-        user=f"Check this message:\n\n---\n{texto}\n---",
+        user=f"Verifica esta mensagem:\n\n---\n{texto}\n---",
         model="haiku",
         agent_name=_AGENT,
         node_name="verificar_personalizacao",
     )
 
-    try:
-        result = json.loads(raw)
-        is_personalised: bool = result.get("is_personalised", False)
-        reason: str           = result.get("reason", "No reason provided")
-    except (json.JSONDecodeError, AttributeError):
-        logger.warning("revisor.verificar_personalizacao: JSON parse failed, assuming not personalised")
-        is_personalised = False
-        reason = "Could not parse personalisation check result."
+    is_personalised: bool = bool(result.get("is_personalised", False))
+    reason: str           = result.get("reason", "Sem razão fornecida.")
 
     if not is_personalised:
         logger.warning("revisor.verificar_personalizacao: ESCALATED — %s", reason)
