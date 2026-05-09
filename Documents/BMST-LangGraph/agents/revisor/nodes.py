@@ -11,7 +11,9 @@ from agents.revisor.state import RevisorState
 from agents.revisor.prompts import (
     CHECKLIST_AVALIACAO_PROMPT,
     AUTO_CORRECAO_PROMPT,
+    AUTO_CORRECAO_PORTUGUES_PROMPT,
     VERIFICAR_PERSONALIZACAO_PROMPT,
+    PersonalizacaoSchema,
     RevisorAvaliacaoSchema,
 )
 from core.llm import create_json_message, create_message
@@ -70,14 +72,47 @@ async def avaliar_texto(state: RevisorState) -> dict:
 
 async def auto_corrigir(state: RevisorState) -> dict:
     """
-    Automatically fix minor violations (forbidden terms, banned phrases).
+    Automatically fix violations and correct Portuguese language errors.
 
-    If the LLM responds with "ESCALATE", the text has structural problems
-    that cannot be fixed by substitution — status is set to "escalado".
+    For status="escalado": only fix Portuguese (accents, punctuation, syntax).
+    For status="corrigido": fix forbidden terms/phrases + Portuguese errors.
+
+    If the LLM responds with "ESCALATE" (corrigido path only), the text has
+    structural problems that cannot be fixed by substitution.
     """
+    current_status = state.get("status", "corrigido")
+    is_escalado = current_status == "escalado"
+
+    if is_escalado:
+        # Escalated messages: fix ONLY Portuguese language errors, keep escalado status
+        texto = state.get("texto_corrigido") or state["texto_original"]
+        logger.info(
+            "revisor.auto_corrigir: escalado mode — fixing Portuguese only (%d chars)",
+            len(texto),
+        )
+        raw = await create_message(
+            system=AUTO_CORRECAO_PORTUGUES_PROMPT,
+            user=f"Texto a corrigir:\n---\n{texto}\n---",
+            model="sonnet",
+            agent_name=_AGENT,
+            node_name="auto_corrigir_portugues",
+        )
+        texto_corrigido = raw.strip()
+        correcoes = ["Correcção de português aplicada"]
+        logger.info(
+            "revisor.auto_corrigir: Portuguese correction done (%d chars → %d chars)",
+            len(texto), len(texto_corrigido),
+        )
+        return {
+            "status":          "escalado",   # keep escalado — structural issues remain
+            "texto_corrigido": texto_corrigido,
+            "auto_correcoes":  correcoes,
+        }
+
+    # Corrigido path: fix forbidden terms/phrases + Portuguese errors
     problemas_str = "\n".join(f"- {p}" for p in state["problemas_encontrados"])
     logger.info(
-        "revisor.auto_corrigir: attempting to fix %d problem(s)",
+        "revisor.auto_corrigir: corrigido mode — fixing %d problem(s)",
         len(state["problemas_encontrados"]),
     )
 
@@ -87,29 +122,33 @@ async def auto_corrigir(state: RevisorState) -> dict:
             f"Original message:\n---\n{state['texto_original']}\n---\n\n"
             f"Problems to fix:\n{problemas_str}"
         ),
-        model="sonnet",          # sonnet for rewriting — needs natural quality
+        model="sonnet",
         agent_name=_AGENT,
         node_name="auto_corrigir",
     )
 
     # The LLM signals it cannot fix the message without restructuring
     if raw.strip().upper() == "ESCALATE":
-        logger.warning("revisor.auto_corrigir: LLM requested escalation")
+        logger.warning("revisor.auto_corrigir: LLM requested escalation — applying Portuguese correction only")
+        # Fall back to Portuguese-only correction before escalating
+        raw_pt = await create_message(
+            system=AUTO_CORRECAO_PORTUGUES_PROMPT,
+            user=f"Texto a corrigir:\n---\n{state['texto_original']}\n---",
+            model="sonnet",
+            agent_name=_AGENT,
+            node_name="auto_corrigir_portugues_fallback",
+        )
         return {
             "status":               "escalado",
             "motivo_escalonamento": (
                 "Auto-correction engine could not fix the issues without "
                 "rewriting the message structure. Founder review required."
             ),
-            "texto_corrigido": None,
-            "auto_correcoes":  [],
+            "texto_corrigido": raw_pt.strip(),
+            "auto_correcoes":  ["Correcção de português aplicada antes de escalar"],
         }
 
-    # Build a human-readable summary of what was changed
-    correcoes_feitas = [
-        f"Fixed: {p}" for p in state["problemas_encontrados"]
-    ]
-
+    correcoes_feitas = [f"Corrigido: {p}" for p in state["problemas_encontrados"]]
     logger.info(
         "revisor.auto_corrigir: corrected (%d chars → %d chars)",
         len(state["texto_original"]),
@@ -138,13 +177,14 @@ async def verificar_personalizacao(state: RevisorState) -> dict:
     result = await create_json_message(
         system=VERIFICAR_PERSONALIZACAO_PROMPT,
         user=f"Verifica esta mensagem:\n\n---\n{texto}\n---",
+        schema=PersonalizacaoSchema,
         model="haiku",
         agent_name=_AGENT,
         node_name="verificar_personalizacao",
     )
 
-    is_personalised: bool = bool(result.get("is_personalised", False))
-    reason: str           = result.get("reason", "Sem razão fornecida.")
+    is_personalised: bool = result.is_personalised
+    reason: str           = result.reason
 
     if not is_personalised:
         logger.warning("revisor.verificar_personalizacao: ESCALATED — %s", reason)

@@ -36,6 +36,7 @@ from agents.hunter.graph import get_hunter_graph
 from agents.closer.graph import get_closer_graph
 from agents.delivery.graph import get_delivery_graph
 from agents.ledger.graph import get_ledger_graph
+from agents.prospector.graph import get_prospector_graph
 from api.dependencies import verify_api_key
 from api.models import (
     BatchResponse,
@@ -50,6 +51,7 @@ from api.models import (
     LedgerCheckPaymentsRequest,
     LedgerInvoiceRequest,
     MetricsResponse,
+    ProspectorRunRequest,
     TelegramCallbackRequest,
     WebhookResponse,
 )
@@ -145,7 +147,7 @@ async def health():
     async def _check_sheets() -> str:
         try:
             from core.sheets_client import get_pending_leads
-            await get_pending_leads(max_leads=1)
+            await get_pending_leads(settings.GOOGLE_SHEETS_ID)
             return "ok"
         except Exception as exc:
             logger.warning("Health check Sheets failed: %s", exc)
@@ -243,14 +245,15 @@ async def _run_hunter_batch(request: HunterBatchRequest, checkpointer: Any) -> N
     try:
         from core.sheets_client import get_pending_leads
 
-        leads = await get_pending_leads(max_leads=request.max_leads)
+        sheet_id = request.sheet_id or settings.GOOGLE_SHEETS_ID
+        leads = await get_pending_leads(sheet_id)
         if not leads:
             logger.info("HUNTER batch: no pending leads found.")
             return
 
         thread_id = f"hunter-batch-{int(time.time())}"
         initial_state = {
-            "leads_pendentes":  leads,
+            "leads_pendentes":  [],   # carregar_leads_sheet reloads from Sheets
             "leads_processados": 0,
             "mensagens_enviadas": 0,
             "erros": [],
@@ -311,23 +314,55 @@ async def hunter_unlock():
     return {"message": "HUNTER lock released."}
 
 
+async def _run_prospector(request: ProspectorRunRequest) -> None:
+    """
+    Background task: run the PROSPECTOR graph to find, qualify, and register leads.
+
+    Searches Google Places for businesses in the configured city/sector,
+    classifies each company via LLM, writes qualified leads to Google Sheets,
+    and sends a Telegram report to the founder.
+    """
+    try:
+        graph = get_prospector_graph()
+        initial_state = {
+            "sector":           request.sector,
+            "city":             request.city,
+            "max_companies":    request.max_companies,
+            "sector_do_dia":    "",
+            "companies_raw":    [],
+            "leads_qualificados": [],
+            "leads_escritos":   0,
+            "leads_ignorados":  0,
+            "seg_c_pendentes":  [],
+            "erro":             None,
+        }
+        await graph.ainvoke(initial_state)
+        logger.info("PROSPECTOR run completed (sector=%r city=%s)", request.sector, request.city)
+    except Exception as exc:
+        logger.error("PROSPECTOR run failed: %s", exc)
+
+
 @app.post(
     "/prospector/run",
     status_code=status.HTTP_202_ACCEPTED,
     tags=["prospector"],
     dependencies=[Depends(verify_api_key)],
 )
-async def prospector_run():
+async def prospector_run(request: ProspectorRunRequest, background_tasks: BackgroundTasks):
     """
-    Stub endpoint called by the n8n pipeline after the PROSPECTOR n8n workflow runs.
+    Trigger the PROSPECTOR agent to find and qualify new leads.
 
-    The actual lead discovery (Google Places + Google Sheets) is handled by the
-    dedicated n8n PROSPECTOR workflow.  This endpoint exists so that the combined
-    n8n pipeline (PROSPECTOR → wait → HUNTER) can confirm the PROSPECTOR step
-    without hitting a 404 that breaks the routing logic.
+    Searches Google Places for businesses in the sector of the day (or the
+    sector provided in the request), classifies each company via LLM,
+    writes qualified leads to Google Sheets, and sends a Telegram report.
+    Returns 202 immediately — the search runs in the background.
     """
-    logger.info("PROSPECTOR stub called — lead discovery handled by n8n workflow")
-    return {"message": "PROSPECTOR acknowledged. HUNTER will run after the scheduled wait."}
+    background_tasks.add_task(_run_prospector, request)
+    sector_info = request.sector or "auto (dia da semana)"
+    return {
+        "message": f"PROSPECTOR iniciado (sector={sector_info}, cidade={request.city}). "
+                   f"Leads serão escritos no Google Sheets."
+    }
 
 
 @app.post("/hunter/webhook", response_model=WebhookResponse, tags=["hunter"])

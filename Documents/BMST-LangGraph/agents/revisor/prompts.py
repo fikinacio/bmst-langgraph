@@ -60,7 +60,13 @@ SINAIS_MAU_PORTUGUES: list[str] = [
 ]
 
 
-# ── Pydantic schema for structured LLM output ─────────────────────────────────
+# ── Pydantic schemas for structured LLM output ───────────────────────────────
+
+class PersonalizacaoSchema(BaseModel):
+    """Schema for the personalisation check JSON response."""
+    is_personalised: bool
+    reason: str
+
 
 class RevisorAvaliacaoSchema(BaseModel):
     """Schema for the JSON the LLM returns during the evaluation node."""
@@ -155,6 +161,30 @@ RULES FOR AUTO-CORRECTION:
 OUTPUT FORMAT:
 Return ONLY the corrected message text. No explanations. No metadata. Just the final message.
 If you cannot fix the issues without rewriting the structure, respond with exactly: ESCALATE
+"""
+
+# ── Portuguese-only correction prompt (escalated messages) ───────────────────
+
+AUTO_CORRECAO_PORTUGUES_PROMPT = """És o revisor de português da BMST Angola.
+A tua função é APENAS corrigir erros de língua portuguesa nesta mensagem WhatsApp.
+Não alteres o conteúdo, a estrutura, o tom nem a personalização da mensagem.
+
+Corrige APENAS:
+- Acentuação em falta ou incorrecta (ex: "nao" → "não", "voce" → "você", "entao" → "então",
+  "tambem" → "também", "poderao" → "poderão", "propria" → "própria")
+- Pontuação incorrecta (ponto final em falta, vírgulas mal colocadas, ponto de exclamação excessivo)
+- Erros ortográficos óbvios (ex: "gerente" não muda, mas "coorporativo" → "corporativo")
+- Construções importadas do inglês ou do português do Brasil quando haja alternativa europeia clara
+
+Não alteres:
+- O conteúdo, as informações ou os dados da mensagem
+- A personalização específica à empresa
+- O call to action
+- A assinatura (Fidel / Bisca+)
+- O estilo e tom (mantém a informalidade do WhatsApp)
+
+Devolve APENAS o texto corrigido, sem explicações, sem prefixos, sem aspas a envolver.
+Se o texto não tiver erros de português, devolve-o exactamente como está, sem qualquer alteração.
 """
 
 # ── Personalisation check prompt ──────────────────────────────────────────────

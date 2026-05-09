@@ -61,9 +61,9 @@ def _route_apos_avaliacao(state: HunterState) -> str:
     status = state.get("status", "escalado")
     if status == "aprovado":
         return "verificar_personalizacao"
-    if status == "corrigido":
-        return "auto_corrigir"
-    return "preparar_aprovacao"   # escalado → go directly to founder
+    # Both "corrigido" and "escalado" go through auto_corrigir:
+    # - corrigido: full correction; escalado: Portuguese-only correction
+    return "auto_corrigir"
 
 
 def _route_apos_auto_correcao(state: HunterState) -> str:
@@ -193,9 +193,8 @@ def build_hunter_graph() -> StateGraph:
         "avaliar_texto",
         _route_apos_avaliacao,
         {
-            "auto_corrigir":           "auto_corrigir",
+            "auto_corrigir":            "auto_corrigir",
             "verificar_personalizacao": "verificar_personalizacao",
-            "preparar_aprovacao":       "preparar_aprovacao",
         },
     )
 

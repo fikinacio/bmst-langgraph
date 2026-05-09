@@ -251,6 +251,96 @@ async def get_lead_by_whatsapp(sheet_id: str, phone: str) -> dict | None:
         return None
 
 
+def _sync_get_next_lead_id(sheet_id: str) -> str:
+    """
+    Determine the next sequential lead ID (e.g. 'ld_048') by counting data rows.
+    """
+    service = _get_service()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=sheet_id, range=f"{_TAB_NAME}!A:A")
+        .execute()
+    )
+    rows = result.get("values", [])
+    # rows includes the header row; data rows are rows[1:]
+    next_num = len(rows)   # header = row 1, so next data row index = len(rows)
+    return f"ld_{next_num:03d}"
+
+
+def _sync_append_row(sheet_id: str, row: list[Any]) -> None:
+    """Append a single row to the sheet using the Sheets API append endpoint."""
+    service = _get_service()
+    service.spreadsheets().values().append(
+        spreadsheetId=sheet_id,
+        range=f"{_TAB_NAME}!A1",
+        valueInputOption="RAW",
+        insertDataOption="INSERT_ROWS",
+        body={"values": [row]},
+    ).execute()
+
+
+async def append_leads(sheet_id: str, leads: list[dict]) -> int:
+    """
+    Append new lead rows to the leads_angola tab.
+
+    Each lead dict must follow the column schema defined in PROSPECTOR_SKILL.md:
+        empresa, sector, segmento, responsavel, cargo, whatsapp, email,
+        website, instagram, localizacao, nr_funcionarios, servico_bmst,
+        pain_point, valor_est_aoa, notas_abordagem, notas, oportunidade, fonte
+
+    Returns the number of rows successfully written.
+    """
+    from datetime import date as _date
+
+    written = 0
+    for lead in leads:
+        try:
+            lead_id = await asyncio.to_thread(_sync_get_next_lead_id, sheet_id)
+            today = _date.today().isoformat()
+
+            # Build the row following the 23-column schema (A–W)
+            row = [
+                lead_id,                                        # A: id
+                today,                                          # B: data_registo
+                lead.get("empresa", ""),                        # C: empresa
+                lead.get("sector", ""),                         # D: sector
+                lead.get("segmento", "B"),                      # E: segmento
+                lead.get("responsavel", "A confirmar"),         # F: responsavel
+                lead.get("cargo", ""),                          # G: cargo
+                lead.get("whatsapp", ""),                       # H: whatsapp
+                lead.get("email", ""),                          # I: email
+                lead.get("website", ""),                        # J: website
+                lead.get("instagram", ""),                      # K: instagram
+                lead.get("localizacao", "Luanda"),              # L: localizacao
+                lead.get("nr_funcionarios", ""),                # M: nr_funcionarios
+                lead.get("servico_bmst", ""),                   # N: servico_bmst
+                lead.get("pain_point", ""),                     # O: pain_point
+                lead.get("valor_est_aoa", ""),                  # P: valor_est_aoa
+                lead.get("notas_abordagem", ""),                # Q: notas_abordagem
+                lead.get("notas", ""),                          # R: notas
+                lead.get("oportunidade", ""),                   # S: oportunidade
+                lead.get("fonte", "Google Places"),             # T: fonte
+                "pendente",                                     # U: estado_hunter
+                "",                                             # V: data_hunter
+                "",                                             # W: resposta
+            ]
+
+            await asyncio.to_thread(_sync_append_row, sheet_id, row)
+            logger.info(
+                "append_leads: written lead_id=%s empresa=%s", lead_id, lead.get("empresa")
+            )
+            written += 1
+
+        except HttpError as exc:
+            logger.error("append_leads HTTP error (empresa=%s): %s", lead.get("empresa"), exc)
+        except Exception as exc:
+            logger.error("append_leads failed (empresa=%s): %s", lead.get("empresa"), exc)
+
+    logger.info("append_leads: %d/%d leads written to sheet=%s", written, len(leads), sheet_id)
+    return written
+
+
 async def check_duplicate(sheet_id: str, empresa: str, phone: str) -> bool:
     """
     Check whether a company name or phone number already exists in the sheet.

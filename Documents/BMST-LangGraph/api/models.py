@@ -8,6 +8,26 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
+# ── PROSPECTOR ───────────────────────────────────────────────────────────────
+
+class ProspectorRunRequest(BaseModel):
+    """Trigger a PROSPECTOR run to find and qualify new leads."""
+    sector: str = Field(
+        default="",
+        description="Business sector to search. Leave blank to auto-detect from day of week.",
+    )
+    city: str = Field(
+        default="Luanda",
+        description="City to search in.",
+    )
+    max_companies: int = Field(
+        default=20,
+        ge=1,
+        le=30,
+        description="Maximum number of qualified leads to insert.",
+    )
+
+
 # ── HUNTER ────────────────────────────────────────────────────────────────────
 
 class HunterBatchRequest(BaseModel):

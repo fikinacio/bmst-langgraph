@@ -20,17 +20,17 @@ def _route_after_avaliacao(state: RevisorState) -> str:
     After avaliar_texto, decide the correction path:
 
     aprovado  → skip auto-correction, go straight to personalisation check
-    corrigido → minor issues found, auto-correct them first
-    escalado  → structural problem, skip correction, send directly to founder
+    corrigido → minor issues found, auto-correct forbidden terms + Portuguese
+    escalado  → structural problem, but still fix Portuguese errors first
     """
     status = state.get("status", "escalado")
 
     if status == "aprovado":
         return "verificar_personalizacao"
-    if status == "corrigido":
-        return "auto_corrigir"
-    # escalado (or any unexpected value) → go to founder immediately
-    return "preparar_aprovacao"
+    # Both "corrigido" and "escalado" go through auto_corrigir:
+    # - corrigido: full correction (forbidden terms + Portuguese)
+    # - escalado: Portuguese-only correction, status remains "escalado"
+    return "auto_corrigir"
 
 
 def _route_after_auto_correcao(state: RevisorState) -> str:
@@ -95,7 +95,6 @@ def build_revisor_graph() -> StateGraph:
         {
             "verificar_personalizacao": "verificar_personalizacao",
             "auto_corrigir":            "auto_corrigir",
-            "preparar_aprovacao":       "preparar_aprovacao",
         },
     )
 
