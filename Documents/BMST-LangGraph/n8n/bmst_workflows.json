@@ -1,0 +1,597 @@
+{
+  "meta": { "instanceId": "787859976f174d8e230b66537491a287e8596a87970d157ad76faa047bf058c6" },
+  "workflows": [
+
+    {
+      "name": "BMST — Pipeline Diário (PROSPECTOR + HUNTER)",
+      "active": true,
+      "nodes": [
+        {
+          "id": "80a7d02f-39e1-43bb-86c8-49af11d2a070",
+          "name": "Pipeline 07:00 UTC (Mon-Fri)",
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "typeVersion": 1.2,
+          "position": [-720, 112],
+          "parameters": {
+            "rule": {
+              "interval": [{ "field": "cronExpression", "expression": "0 7 * * 1-5" }]
+            }
+          }
+        },
+        {
+          "id": "912e3b6c-7faa-4965-8fa9-b08e242a7f71",
+          "name": "Health Check",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [-480, 112],
+          "retryOnFail": true,
+          "maxTries": 3,
+          "waitBetweenTries": 4000,
+          "continueOnFail": true,
+          "parameters": {
+            "url": "https://agents.biscaplus.com/health",
+            "options": {
+              "timeout": 15000,
+              "response": { "response": { "neverError": true } }
+            }
+          }
+        },
+        {
+          "id": "1c2ab945-4195-44e1-b222-f803617ea216",
+          "name": "API Online?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 2,
+          "position": [-240, 112],
+          "parameters": {
+            "conditions": {
+              "combinator": "and",
+              "conditions": [
+                {
+                  "id": "cond-health",
+                  "leftValue": "={{ $json.error }}",
+                  "rightValue": "",
+                  "operator": { "type": "string", "operation": "empty" }
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "a18deab0-f62b-4248-a120-67a5ca9e8055",
+          "name": "Telegram: API Indisponivel",
+          "type": "n8n-nodes-base.telegram",
+          "typeVersion": 1.2,
+          "position": [-240, 320],
+          "parameters": {
+            "chatId": "7840733472",
+            "text": "🔴 <b>BMST Pipeline — Falha</b>\n\n<b>Etapa:</b> Health Check\n<b>Erro:</b> API biscaplus.com inacessível\n<b>Hora:</b> {{ $now.toISO() }}\n\nPipeline interrompido. Verificar servidor.",
+            "additionalFields": { "parse_mode": "HTML" }
+          },
+          "credentials": {
+            "telegramApi": { "id": "wHTt9rnHbmcI6gyL", "name": "Telegram BMST Bot" }
+          }
+        },
+        {
+          "id": "837c4123-62f7-4ba4-b2ca-d4bdcba886bf",
+          "name": "PROSPECTOR — Iniciar",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [0, 0],
+          "retryOnFail": true,
+          "maxTries": 3,
+          "waitBetweenTries": 5000,
+          "continueOnFail": true,
+          "parameters": {
+            "method": "POST",
+            "url": "https://agents.biscaplus.com/prospector/run",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "options": {
+              "timeout": 30000,
+              "response": { "response": { "neverError": true } }
+            }
+          },
+          "credentials": {
+            "httpHeaderAuth": { "id": "fiqHhWe3n1xA0oYt", "name": "BMST-API-KEY" }
+          }
+        },
+        {
+          "id": "85c6b885-feeb-4029-885e-78135a09333f",
+          "name": "Prospector Iniciado?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 2,
+          "position": [240, 0],
+          "parameters": {
+            "conditions": {
+              "combinator": "and",
+              "conditions": [
+                {
+                  "id": "cond-prospector",
+                  "leftValue": "={{ $json.error }}",
+                  "rightValue": "",
+                  "operator": { "type": "string", "operation": "empty" }
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "605e5c5b-0539-40bc-ba84-daf9e09ec35e",
+          "name": "Telegram: Prospector Falhou",
+          "type": "n8n-nodes-base.telegram",
+          "typeVersion": 1.2,
+          "position": [240, 224],
+          "parameters": {
+            "chatId": "7840733472",
+            "text": "🔴 <b>BMST Pipeline — Falha</b>\n\n<b>Etapa:</b> PROSPECTOR\n<b>Erro:</b> {{ $json.error || 'resposta inesperada' }}\n<b>Hora:</b> {{ $now.toISO() }}\n\nO HUNTER não será executado hoje.",
+            "additionalFields": { "parse_mode": "HTML" }
+          },
+          "credentials": {
+            "telegramApi": { "id": "wHTt9rnHbmcI6gyL", "name": "Telegram BMST Bot" }
+          }
+        },
+        {
+          "id": "8d071507-b5bc-488a-8d03-8dd0174889bd",
+          "name": "Aguardar Prospector (5 min)",
+          "type": "n8n-nodes-base.wait",
+          "typeVersion": 1.1,
+          "position": [480, 0],
+          "parameters": { "unit": "minutes" },
+          "webhookId": "wait-prospector-done"
+        },
+        {
+          "id": "38808021-dabc-43dd-92db-3ed85a428c7d",
+          "name": "HUNTER — Iniciar Batch",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [720, 0],
+          "retryOnFail": true,
+          "maxTries": 3,
+          "waitBetweenTries": 5000,
+          "continueOnFail": true,
+          "parameters": {
+            "method": "POST",
+            "url": "https://agents.biscaplus.com/hunter/batch",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "{\n  \"max_leads\": 20\n}",
+            "options": {
+              "timeout": 30000,
+              "response": { "response": { "neverError": true } }
+            }
+          },
+          "credentials": {
+            "httpHeaderAuth": { "id": "LwUerYZQ4uv5ZmI2", "name": "BMST-API-KEY" }
+          }
+        },
+        {
+          "id": "a5d38b7d-e050-4cdc-a2ed-340bf7890498",
+          "name": "Hunter Iniciado?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 2,
+          "position": [960, 0],
+          "parameters": {
+            "conditions": {
+              "combinator": "and",
+              "conditions": [
+                {
+                  "id": "cond-hunter",
+                  "leftValue": "={{ $json.error }}",
+                  "rightValue": "",
+                  "operator": { "type": "string", "operation": "empty" }
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "64112262-2316-4d17-b2cd-1d1083639ff3",
+          "name": "Telegram: Hunter Falhou",
+          "type": "n8n-nodes-base.telegram",
+          "typeVersion": 1.2,
+          "position": [960, 224],
+          "parameters": {
+            "chatId": "7840733472",
+            "text": "🔴 <b>BMST Pipeline — Falha</b>\n\n<b>Etapa:</b> HUNTER\n<b>Erro:</b> {{ $json.error || $json.detail || 'resposta inesperada' }}\n<b>Hora:</b> {{ $now.toISO() }}\n\nProspecção foi feita mas o envio WhatsApp não foi iniciado.",
+            "additionalFields": { "parse_mode": "HTML" }
+          },
+          "credentials": {
+            "telegramApi": { "id": "wHTt9rnHbmcI6gyL", "name": "Telegram BMST Bot" }
+          }
+        },
+        {
+          "id": "2cecbfa3-7037-4e8b-a1ae-144058df3127",
+          "name": "Pipeline Concluido",
+          "type": "n8n-nodes-base.noOp",
+          "typeVersion": 1,
+          "position": [1200, 0],
+          "parameters": {}
+        }
+      ],
+      "connections": {
+        "Pipeline 07:00 UTC (Mon-Fri)": {
+          "main": [[{ "node": "Health Check", "type": "main", "index": 0 }]]
+        },
+        "Health Check": {
+          "main": [[{ "node": "API Online?", "type": "main", "index": 0 }]]
+        },
+        "API Online?": {
+          "main": [
+            [{ "node": "PROSPECTOR — Iniciar",    "type": "main", "index": 0 }],
+            [{ "node": "Telegram: API Indisponivel", "type": "main", "index": 0 }]
+          ]
+        },
+        "PROSPECTOR — Iniciar": {
+          "main": [[{ "node": "Prospector Iniciado?", "type": "main", "index": 0 }]]
+        },
+        "Prospector Iniciado?": {
+          "main": [
+            [{ "node": "Aguardar Prospector (5 min)",  "type": "main", "index": 0 }],
+            [{ "node": "Telegram: Prospector Falhou", "type": "main", "index": 0 }]
+          ]
+        },
+        "Aguardar Prospector (5 min)": {
+          "main": [[{ "node": "HUNTER — Iniciar Batch", "type": "main", "index": 0 }]]
+        },
+        "HUNTER — Iniciar Batch": {
+          "main": [[{ "node": "Hunter Iniciado?", "type": "main", "index": 0 }]]
+        },
+        "Hunter Iniciado?": {
+          "main": [
+            [{ "node": "Pipeline Concluido",     "type": "main", "index": 0 }],
+            [{ "node": "Telegram: Hunter Falhou", "type": "main", "index": 0 }]
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "BMST — LEDGER Check Pagamentos Diário",
+      "active": true,
+      "nodes": [
+        {
+          "id": "ad7bbe8a-5c1c-4350-9a8a-0e258014d5d5",
+          "name": "LEDGER 08:30 UTC (Diario)",
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "typeVersion": 1.2,
+          "position": [-720, 608],
+          "parameters": {
+            "rule": {
+              "interval": [{ "field": "cronExpression", "expression": "30 8 * * *" }]
+            }
+          }
+        },
+        {
+          "id": "ledger-check-all-new",
+          "name": "POST /ledger/check-all-payments",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [-480, 608],
+          "retryOnFail": true,
+          "maxTries": 3,
+          "waitBetweenTries": 5000,
+          "continueOnFail": true,
+          "parameters": {
+            "method": "POST",
+            "url": "https://agents.biscaplus.com/ledger/check-all-payments",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "options": {
+              "timeout": 20000,
+              "response": { "response": { "neverError": true } }
+            }
+          },
+          "credentials": {
+            "httpHeaderAuth": { "id": "LwUerYZQ4uv5ZmI2", "name": "BMST-API-KEY" }
+          }
+        },
+        {
+          "id": "ledger-result-check",
+          "name": "Ledger OK?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 2,
+          "position": [-240, 608],
+          "parameters": {
+            "conditions": {
+              "combinator": "and",
+              "conditions": [
+                {
+                  "id": "cond-ledger-ok",
+                  "leftValue": "={{ $json.error }}",
+                  "rightValue": "",
+                  "operator": { "type": "string", "operation": "empty" }
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "ledger-ok-noop",
+          "name": "Sem Erros",
+          "type": "n8n-nodes-base.noOp",
+          "typeVersion": 1,
+          "position": [-240, 768],
+          "parameters": {}
+        },
+        {
+          "id": "ledger-fail-telegram",
+          "name": "Telegram: LEDGER Falhou",
+          "type": "n8n-nodes-base.telegram",
+          "typeVersion": 1.2,
+          "position": [0, 608],
+          "parameters": {
+            "chatId": "7840733472",
+            "text": "🔴 <b>BMST LEDGER — Falha</b>\n\n<b>Erro:</b> {{ $json.error || $json.detail || 'resposta inesperada' }}\n<b>Hora:</b> {{ $now.toISO() }}\n\nVerificação de pagamentos não foi executada hoje.",
+            "additionalFields": { "parse_mode": "HTML" }
+          },
+          "credentials": {
+            "telegramApi": { "id": "wHTt9rnHbmcI6gyL", "name": "Telegram BMST Bot" }
+          }
+        }
+      ],
+      "connections": {
+        "LEDGER 08:30 UTC (Diario)": {
+          "main": [[{ "node": "POST /ledger/check-all-payments", "type": "main", "index": 0 }]]
+        },
+        "POST /ledger/check-all-payments": {
+          "main": [[{ "node": "Ledger OK?", "type": "main", "index": 0 }]]
+        },
+        "Ledger OK?": {
+          "main": [
+            [{ "node": "Sem Erros",              "type": "main", "index": 0 }],
+            [{ "node": "Telegram: LEDGER Falhou", "type": "main", "index": 0 }]
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "BMST — Telegram Callback (Aprovações)",
+      "active": true,
+      "nodes": [
+        {
+          "id": "telegram-webhook",
+          "name": "Telegram Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2,
+          "position": [200, 300],
+          "parameters": {
+            "path": "telegram-callback",
+            "httpMethod": "POST",
+            "responseMode": "lastNode"
+          },
+          "webhookId": "telegram-callback"
+        },
+        {
+          "id": "extract-callback",
+          "name": "Extrair callback_query",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [440, 300],
+          "parameters": {
+            "mode": "manual",
+            "fields": {
+              "values": [
+                { "name": "callback_query_id", "value": "={{ $json.body.callback_query.id }}" },
+                { "name": "message_id",         "value": "={{ $json.body.callback_query.message.message_id }}" },
+                { "name": "data",               "value": "={{ $json.body.callback_query.data.split(':')[0] }}" },
+                { "name": "thread_id",          "value": "={{ $json.body.callback_query.data.split(':')[1] }}" },
+                { "name": "edited_text",        "value": "={{ $json.body.callback_query.data.split(':')[2] || null }}" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "forward-callback",
+          "name": "POST /telegram/callback",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [680, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "https://agents.biscaplus.com/telegram/callback",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+            },
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify({ callback_query_id: $json.callback_query_id, message_id: parseInt($json.message_id), data: $json.data, thread_id: $json.thread_id, edited_text: $json.edited_text }) }}",
+            "options": { "timeout": 30000 }
+          }
+        },
+        {
+          "id": "respond-200",
+          "name": "Responder 200 OK",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1.1,
+          "position": [920, 300],
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": "={ \"ok\": true }"
+          }
+        }
+      ],
+      "connections": {
+        "Telegram Webhook": {
+          "main": [[{ "node": "Extrair callback_query", "type": "main", "index": 0 }]]
+        },
+        "Extrair callback_query": {
+          "main": [[{ "node": "POST /telegram/callback", "type": "main", "index": 0 }]]
+        },
+        "POST /telegram/callback": {
+          "main": [[{ "node": "Responder 200 OK", "type": "main", "index": 0 }]]
+        }
+      }
+    },
+
+    {
+      "name": "BMST — WhatsApp Webhook (Evolution API)",
+      "active": true,
+      "nodes": [
+        {
+          "id": "evolution-webhook",
+          "name": "Evolution Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2,
+          "position": [200, 300],
+          "parameters": {
+            "path": "whatsapp-inbound",
+            "httpMethod": "POST",
+            "responseMode": "lastNode"
+          },
+          "webhookId": "whatsapp-inbound"
+        },
+        {
+          "id": "filter-messages",
+          "name": "Só mensagens de texto",
+          "type": "n8n-nodes-base.filter",
+          "typeVersion": 2,
+          "position": [440, 300],
+          "parameters": {
+            "conditions": {
+              "options": { "caseSensitive": false },
+              "conditions": [
+                {
+                  "leftValue": "={{ $json.body.event }}",
+                  "rightValue": "messages.upsert",
+                  "operator": { "type": "string", "operation": "equals" }
+                },
+                {
+                  "leftValue": "={{ $json.body.data.key.fromMe }}",
+                  "rightValue": false,
+                  "operator": { "type": "boolean", "operation": "equals" }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "extract-message",
+          "name": "Extrair campos",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [680, 300],
+          "parameters": {
+            "mode": "manual",
+            "fields": {
+              "values": [
+                { "name": "phone",      "value": "={{ $json.body.data.key.remoteJid.replace('@s.whatsapp.net', '') }}" },
+                { "name": "message",    "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text || '' }}" },
+                { "name": "message_id", "value": "={{ $json.body.data.key.id }}" },
+                { "name": "timestamp",  "value": "={{ $json.body.data.messageTimestamp }}" },
+                { "name": "instance",   "value": "={{ $json.body.instance }}" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "check-closer-active",
+          "name": "Tem CLOSER activo?",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [920, 300],
+          "parameters": {
+            "method": "GET",
+            "url": "=https://agents.biscaplus.com/closer/status/{{ $json.phone }}",
+            "options": { "timeout": 5000 },
+            "onError": "continueRegularOutput"
+          }
+        },
+        {
+          "id": "route-webhook",
+          "name": "CLOSER activo ou HUNTER?",
+          "type": "n8n-nodes-base.switch",
+          "typeVersion": 3.2,
+          "position": [1160, 300],
+          "parameters": {
+            "mode": "expression",
+            "output": "={{ $json.active === true ? 0 : 1 }}"
+          }
+        },
+        {
+          "id": "closer-webhook",
+          "name": "POST /closer/webhook",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [1400, 200],
+          "parameters": {
+            "method": "POST",
+            "url": "https://agents.biscaplus.com/closer/webhook",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+            },
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify({ phone: $('Extrair campos').item.json.phone, message: $('Extrair campos').item.json.message, message_id: $('Extrair campos').item.json.message_id, timestamp: parseInt($('Extrair campos').item.json.timestamp) }) }}",
+            "options": { "timeout": 30000 }
+          }
+        },
+        {
+          "id": "hunter-webhook",
+          "name": "POST /hunter/webhook",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [1400, 420],
+          "parameters": {
+            "method": "POST",
+            "url": "https://agents.biscaplus.com/hunter/webhook",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+            },
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify({ phone: $('Extrair campos').item.json.phone, message: $('Extrair campos').item.json.message, message_id: $('Extrair campos').item.json.message_id, timestamp: parseInt($('Extrair campos').item.json.timestamp) }) }}",
+            "options": { "timeout": 10000 }
+          }
+        },
+        {
+          "id": "respond-wa",
+          "name": "Responder Evolution 200",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1.1,
+          "position": [1640, 300],
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": "={ \"received\": true }"
+          }
+        }
+      ],
+      "connections": {
+        "Evolution Webhook": {
+          "main": [[{ "node": "Só mensagens de texto", "type": "main", "index": 0 }]]
+        },
+        "Só mensagens de texto": {
+          "main": [[{ "node": "Extrair campos", "type": "main", "index": 0 }]]
+        },
+        "Extrair campos": {
+          "main": [[{ "node": "Tem CLOSER activo?", "type": "main", "index": 0 }]]
+        },
+        "Tem CLOSER activo?": {
+          "main": [[{ "node": "CLOSER activo ou HUNTER?", "type": "main", "index": 0 }]]
+        },
+        "CLOSER activo ou HUNTER?": {
+          "main": [
+            [{ "node": "POST /closer/webhook", "type": "main", "index": 0 }],
+            [{ "node": "POST /hunter/webhook", "type": "main", "index": 0 }]
+          ]
+        },
+        "POST /closer/webhook": {
+          "main": [[{ "node": "Responder Evolution 200", "type": "main", "index": 0 }]]
+        },
+        "POST /hunter/webhook": {
+          "main": [[{ "node": "Responder Evolution 200", "type": "main", "index": 0 }]]
+        }
+      }
+    }
+
+  ]
+}

@@ -292,6 +292,44 @@ async def hunter_batch(request: HunterBatchRequest, background_tasks: Background
     return {"message": f"HUNTER batch started (max_leads={request.max_leads})."}
 
 
+@app.post(
+    "/hunter/unlock",
+    status_code=status.HTTP_200_OK,
+    tags=["hunter"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def hunter_unlock():
+    """
+    Force-release the HUNTER batch lock.
+
+    Use only if a previous batch crashed mid-run and left the lock set.
+    Safe to call even if no lock is held — Redis delete is idempotent.
+    """
+    from core.redis_client import release_hunter_lock
+    release_hunter_lock()
+    logger.info("HUNTER lock force-released via /hunter/unlock")
+    return {"message": "HUNTER lock released."}
+
+
+@app.post(
+    "/prospector/run",
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["prospector"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def prospector_run():
+    """
+    Stub endpoint called by the n8n pipeline after the PROSPECTOR n8n workflow runs.
+
+    The actual lead discovery (Google Places + Google Sheets) is handled by the
+    dedicated n8n PROSPECTOR workflow.  This endpoint exists so that the combined
+    n8n pipeline (PROSPECTOR → wait → HUNTER) can confirm the PROSPECTOR step
+    without hitting a 404 that breaks the routing logic.
+    """
+    logger.info("PROSPECTOR stub called — lead discovery handled by n8n workflow")
+    return {"message": "PROSPECTOR acknowledged. HUNTER will run after the scheduled wait."}
+
+
 @app.post("/hunter/webhook", response_model=WebhookResponse, tags=["hunter"])
 async def hunter_webhook(request: HunterWebhookRequest):
     """
@@ -471,6 +509,37 @@ async def closer_diagnose(request: CloserDiagnoseRequest, background_tasks: Back
     """
     background_tasks.add_task(_start_closer_run, request, _checkpointer)
     return {"message": f"CLOSER started for {request.phone} ({request.empresa})."}
+
+
+@app.get("/closer/status/{phone}", tags=["closer"])
+async def closer_status(phone: str):
+    """
+    Check whether an active CLOSER conversation exists for a given phone number.
+
+    n8n uses this to route inbound WhatsApp messages: if active=true the message
+    goes to /closer/webhook; otherwise to /hunter/webhook.
+
+    A CLOSER thread is considered active when its checkpointed state has
+    proxima_acao set (i.e. the graph is paused waiting for a reply) and the
+    lead has not been marked as 'fechado' or 'perdido'.
+    """
+    thread_id = f"closer-{phone}"
+    try:
+        checkpointer = get_checkpointer()
+        config       = {"configurable": {"thread_id": thread_id}}
+        snapshot     = await asyncio.to_thread(
+            checkpointer.get, config
+        )
+        if snapshot is None:
+            return {"phone": phone, "active": False}
+
+        channel_values = getattr(snapshot, "channel_values", {}) or {}
+        proxima_acao   = channel_values.get("proxima_acao")
+        terminal       = proxima_acao in (None, "fechado", "perdido", "finalizar")
+        return {"phone": phone, "active": not terminal}
+    except Exception as exc:
+        logger.warning("closer_status: could not read checkpointer for phone=%s — %s", phone, exc)
+        return {"phone": phone, "active": False}
 
 
 @app.post("/closer/webhook", response_model=WebhookResponse, tags=["closer"])
@@ -829,4 +898,53 @@ async def ledger_check_payments(
     background_tasks.add_task(_run_ledger_verificar, request, _checkpointer)
     return {
         "message": f"LEDGER payment check queued for project {request.projecto_id}."
+    }
+
+
+@app.post(
+    "/ledger/check-all-payments",
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["ledger"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def ledger_check_all_payments(background_tasks: BackgroundTasks):
+    """
+    Query Supabase for ALL pending invoices and run a payment check for each.
+
+    This is the endpoint n8n should call on its daily schedule — it requires
+    only the X-Api-Key header and handles all Supabase querying internally.
+    Returns 202 immediately with a count of queued checks.
+    """
+    try:
+        from supabase import create_client
+        client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
+
+        result = await asyncio.to_thread(
+            lambda: client.table("deals")
+            .select("id, projecto_id, invoice_ninja_id")
+            .eq("estado_pagamento", "pendente")
+            .execute()
+        )
+        pending = result.data or []
+    except Exception as exc:
+        logger.error("ledger_check_all_payments: Supabase query failed — %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Could not query pending invoices: {exc}",
+        )
+
+    if not pending:
+        return {"message": "No pending invoices found.", "queued": 0}
+
+    for deal in pending:
+        req = LedgerCheckPaymentsRequest(
+            projecto_id=deal.get("projecto_id") or deal.get("id", ""),
+            invoice_ninja_id=deal.get("invoice_ninja_id") or "",
+        )
+        background_tasks.add_task(_run_ledger_verificar, req, _checkpointer)
+
+    logger.info("ledger_check_all_payments: queued %d payment checks", len(pending))
+    return {
+        "message": f"Payment check queued for {len(pending)} pending invoice(s).",
+        "queued": len(pending),
     }

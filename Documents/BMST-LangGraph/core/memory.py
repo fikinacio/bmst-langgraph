@@ -170,6 +170,49 @@ def get_conversation_history(phone: str, limit: int = 10) -> list[dict]:
         return []
 
 
+async def get_conversation_history_compact(
+    phone: str,
+    limit: int = 50,
+    compact_threshold: int | None = None,
+) -> list[dict]:
+    """
+    Fetch conversation history from Supabase and apply compact mode when needed.
+
+    Compact mode kicks in when the number of retrieved messages exceeds
+    ``compact_threshold`` (default: ``core.llm.COMPACT_THRESHOLD``).  Older
+    messages are summarised into a single context block so that the returned
+    list is always safe to pass directly to ``create_message(history=...)``.
+
+    Args:
+        phone:             Lead phone number (Supabase lookup key).
+        limit:             Maximum rows to fetch from Supabase.
+        compact_threshold: Override the default compact threshold from llm.py.
+
+    Returns:
+        List of ``{"role": str, "content": str}`` dicts, chronologically ordered
+        and at most ``COMPACT_THRESHOLD + COMPACT_KEEP_RECENT`` entries long.
+    """
+    from core.llm import COMPACT_THRESHOLD, compact_conversation_history  # avoid circular at module level
+
+    threshold = compact_threshold if compact_threshold is not None else COMPACT_THRESHOLD
+
+    raw = get_conversation_history(phone, limit=limit)
+    if not raw:
+        return []
+
+    # Normalise to the {"role", "content"} shape expected by the LLM layer.
+    messages = [{"role": m["role"], "content": m.get("content") or ""} for m in raw]
+
+    if len(messages) > threshold:
+        logger.info(
+            "get_conversation_history_compact: compacting %d messages for phone=%s",
+            len(messages), phone,
+        )
+        messages = await compact_conversation_history(messages)
+
+    return messages
+
+
 # ── Revisões ──────────────────────────────────────────────────────────────────
 
 def save_revisao(

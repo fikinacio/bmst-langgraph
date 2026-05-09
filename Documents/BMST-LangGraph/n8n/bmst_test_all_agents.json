@@ -1,0 +1,254 @@
+{
+  "name": "BMST — TEST: Todos os Agentes (trigger manual)",
+  "active": false,
+  "nodes": [
+
+    {
+      "id": "test-trigger",
+      "name": "▶ Iniciar Teste",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-600, 300],
+      "parameters": {}
+    },
+
+    {
+      "id": "test-health",
+      "name": "1 · Health Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-360, 300],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "GET",
+        "url": "https://agents.biscaplus.com/health",
+        "options": {
+          "timeout": 10000,
+          "response": { "response": { "neverError": true } }
+        }
+      }
+    },
+
+    {
+      "id": "test-api-ok",
+      "name": "API acessível?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-120, 300],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-health-ok",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "empty" }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+
+    {
+      "id": "test-api-down",
+      "name": "Telegram: API em baixo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [-120, 520],
+      "parameters": {
+        "chatId": "7840733472",
+        "text": "🔴 <b>BMST TEST</b>\n\nAPI inacessível: <code>{{ $json.error }}</code>\n\nVerifica o servidor antes de testar.",
+        "additionalFields": { "parse_mode": "HTML" }
+      },
+      "credentials": {
+        "telegramApi": { "id": "wHTt9rnHbmcI6gyL", "name": "Telegram BMST Bot" }
+      }
+    },
+
+    {
+      "id": "test-prospector",
+      "name": "2 · POST /prospector/run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [120, 300],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/prospector/run",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 10000,
+          "response": { "response": { "neverError": true } }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": { "id": "fiqHhWe3n1xA0oYt", "name": "BMST-API-KEY" }
+      }
+    },
+
+    {
+      "id": "test-hunter",
+      "name": "3 · POST /hunter/batch (3 leads)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [360, 300],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/hunter/batch",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"max_leads\": 3\n}",
+        "options": {
+          "timeout": 15000,
+          "response": { "response": { "neverError": true } }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": { "id": "LwUerYZQ4uv5ZmI2", "name": "BMST-API-KEY" }
+      }
+    },
+
+    {
+      "id": "test-hunter-ok",
+      "name": "HUNTER arrancou?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [600, 300],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-hunter-ok",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "empty" }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+
+    {
+      "id": "test-hunter-fail",
+      "name": "Telegram: HUNTER falhou",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [600, 520],
+      "parameters": {
+        "chatId": "7840733472",
+        "text": "🔴 <b>BMST TEST — HUNTER falhou</b>\n\nErro: <code>{{ $json.error || $json.detail || 'resposta inesperada' }}</code>\n\nVerifica:\n• Credencial BMST-API-KEY (id: LwUerYZQ4uv5ZmI2)\n• Endpoint /hunter/batch no servidor",
+        "additionalFields": { "parse_mode": "HTML" }
+      },
+      "credentials": {
+        "telegramApi": { "id": "wHTt9rnHbmcI6gyL", "name": "Telegram BMST Bot" }
+      }
+    },
+
+    {
+      "id": "test-ledger",
+      "name": "4 · POST /ledger/check-all-payments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [840, 300],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/ledger/check-all-payments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 15000,
+          "response": { "response": { "neverError": true } }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": { "id": "LwUerYZQ4uv5ZmI2", "name": "BMST-API-KEY" }
+      }
+    },
+
+    {
+      "id": "test-unlock",
+      "name": "5 · POST /hunter/unlock (limpar lock)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1080, 300],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/hunter/unlock",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 10000,
+          "response": { "response": { "neverError": true } }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": { "id": "LwUerYZQ4uv5ZmI2", "name": "BMST-API-KEY" }
+      }
+    },
+
+    {
+      "id": "test-summary",
+      "name": "Telegram: Resumo do Teste",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1320, 300],
+      "parameters": {
+        "chatId": "7840733472",
+        "text": "=✅ <b>BMST TEST — Concluído</b>\n\n<b>Prospector:</b> {{ $('2 · POST /prospector/run').item.json.message || $('2 · POST /prospector/run').item.json.detail || '—' }}\n\n<b>Hunter:</b> {{ $('3 · POST /hunter/batch (3 leads)').item.json.message || $('3 · POST /hunter/batch (3 leads)').item.json.detail || '—' }}\n\n<b>Ledger:</b> {{ $('4 · POST /ledger/check-all-payments').item.json.message || $('4 · POST /ledger/check-all-payments').item.json.detail || '—' }}\n\n<b>Lock:</b> {{ $('5 · POST /hunter/unlock (limpar lock)').item.json.message || '—' }}\n\n⏰ {{ $now.toISO() }}",
+        "additionalFields": { "parse_mode": "HTML" }
+      },
+      "credentials": {
+        "telegramApi": { "id": "wHTt9rnHbmcI6gyL", "name": "Telegram BMST Bot" }
+      }
+    }
+
+  ],
+
+  "connections": {
+    "▶ Iniciar Teste": {
+      "main": [[{ "node": "1 · Health Check", "type": "main", "index": 0 }]]
+    },
+    "1 · Health Check": {
+      "main": [[{ "node": "API acessível?", "type": "main", "index": 0 }]]
+    },
+    "API acessível?": {
+      "main": [
+        [{ "node": "2 · POST /prospector/run", "type": "main", "index": 0 }],
+        [{ "node": "Telegram: API em baixo",   "type": "main", "index": 0 }]
+      ]
+    },
+    "2 · POST /prospector/run": {
+      "main": [[{ "node": "3 · POST /hunter/batch (3 leads)", "type": "main", "index": 0 }]]
+    },
+    "3 · POST /hunter/batch (3 leads)": {
+      "main": [[{ "node": "HUNTER arrancou?", "type": "main", "index": 0 }]]
+    },
+    "HUNTER arrancou?": {
+      "main": [
+        [{ "node": "4 · POST /ledger/check-all-payments", "type": "main", "index": 0 }],
+        [{ "node": "Telegram: HUNTER falhou",             "type": "main", "index": 0 }]
+      ]
+    },
+    "4 · POST /ledger/check-all-payments": {
+      "main": [[{ "node": "5 · POST /hunter/unlock (limpar lock)", "type": "main", "index": 0 }]]
+    },
+    "5 · POST /hunter/unlock (limpar lock)": {
+      "main": [[{ "node": "Telegram: Resumo do Teste", "type": "main", "index": 0 }]]
+    }
+  },
+
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "787859976f174d8e230b66537491a287e8596a87970d157ad76faa047bf058c6"
+  }
+}
