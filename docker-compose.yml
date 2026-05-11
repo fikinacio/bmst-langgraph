@@ -1,8 +1,6 @@
 services:
   bmst-agents:
-    build:
-      context: .
-      dockerfile: api/Dockerfile
+    build: .
     container_name: bmst-agents
     restart: unless-stopped
     ports:
