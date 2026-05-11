@@ -48,6 +48,10 @@ class HunterState(TypedDict):
     motivo_escalonamento:     str | None   # set when REVISOR escalates
     aprovacao_fundador:       bool | None  # founder decision via Telegram
 
+    # Context dict injected by preparar_para_revisor, read by preparar_aprovacao
+    # to build the Telegram approval message (empresa, segmento, canal, agente).
+    _revisor_contexto:        dict
+
     # Summaries written by processar_resultado_revisor (for API response / logs)
     revisao_status:           str | None
     revisao_texto_final:      str | None

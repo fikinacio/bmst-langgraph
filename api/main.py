@@ -39,6 +39,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
 
+from agents.prospector.graph import get_prospector_graph
 from agents.hunter.graph import get_hunter_graph
 from agents.closer.graph import get_closer_graph
 from agents.delivery.graph import get_delivery_graph
@@ -46,6 +47,8 @@ from agents.ledger.graph import get_ledger_graph
 from api.dependencies import verify_api_key
 from api.models import (
     BatchResponse,
+    ProspectorBatchRequest,
+    ProspectorBatchResponse,
     CloserDiagnoseRequest,
     CloserProposeRequest,
     DeliveryStartRequest,
@@ -241,6 +244,75 @@ async def metrics():
         )
 
 
+# ── PROSPECTOR ────────────────────────────────────────────────────────────────
+
+async def _run_prospector_batch(leads_raw: list[dict], checkpointer: Any) -> None:
+    """
+    Background task: enrich a list of raw leads and write them to Google Sheets.
+
+    Each lead is:
+      1. Checked for duplicates in the sheet
+      2. Classified (A/B/C) by the LLM
+      3. Given a personalised hook (notas_abordagem)
+      4. Written to Google Sheets with estado_hunter = "pendente"
+
+    The HUNTER will pick them up on its next daily batch run.
+    """
+    import time as _time
+    start = _time.monotonic()
+    thread_id = f"prospector-{int(_time.time())}"
+
+    initial_state = {
+        "leads_raw":         leads_raw,
+        "leads_processados": 0,
+        "leads_gravados":    0,
+    }
+
+    try:
+        graph  = get_prospector_graph(checkpointer=checkpointer)
+        config = {"configurable": {"thread_id": thread_id}}
+        await graph.ainvoke(initial_state, config)
+        elapsed = _time.monotonic() - start
+        logger.info(
+            "PROSPECTOR batch completed in %.1fs — thread_id=%s leads=%d",
+            elapsed, thread_id, len(leads_raw),
+        )
+    except Exception as exc:
+        logger.error("PROSPECTOR batch failed: %s", exc)
+
+
+@app.post(
+    "/prospector/batch",
+    response_model=ProspectorBatchResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["prospector"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def prospector_batch(
+    request: ProspectorBatchRequest,
+    background_tasks: BackgroundTasks,
+):
+    """
+    Enrich a batch of raw leads and load them into Google Sheets.
+
+    Returns 202 immediately. Each lead is analysed by the PROSPECTOR LLM pipeline:
+      - Segment classification (A/B/C)
+      - Pain point identification
+      - BMST service recommendation
+      - Deal value estimate
+      - Personalised opening hook (notas_abordagem)
+
+    Segment B/C leads are written with estado_hunter="pendente" and will be
+    picked up by the next HUNTER batch run.  Segment A leads are archived.
+    """
+    leads_raw = [lead.model_dump() for lead in request.leads]
+    background_tasks.add_task(_run_prospector_batch, leads_raw, _checkpointer)
+    return ProspectorBatchResponse(
+        message=f"PROSPECTOR batch started — {len(leads_raw)} lead(s) queued.",
+        leads_recebidos=len(leads_raw),
+    )
+
+
 # ── HUNTER ───────────────────────────────────────────────────────────────────
 
 async def _run_hunter_batch(request: HunterBatchRequest, checkpointer: Any) -> None:
@@ -376,16 +448,15 @@ async def telegram_callback(request: TelegramCallbackRequest):
     #   "hunter-*"  → HUNTER graph
     #   "closer-*"  → CLOSER graph
     try:
-        checkpointer = get_checkpointer()
         tid = request.thread_id
         if tid.startswith("closer-"):
-            graph = get_closer_graph(checkpointer=checkpointer)
+            graph = get_closer_graph(checkpointer=_checkpointer)
         elif tid.startswith("delivery-"):
-            graph = get_delivery_graph(checkpointer=checkpointer)
+            graph = get_delivery_graph(checkpointer=_checkpointer)
         elif tid.startswith("ledger-"):
-            graph = get_ledger_graph(checkpointer=checkpointer)
+            graph = get_ledger_graph(checkpointer=_checkpointer)
         else:
-            graph = get_hunter_graph(checkpointer=checkpointer)
+            graph = get_hunter_graph(checkpointer=_checkpointer)
 
         config = {"configurable": {"thread_id": tid}}
         await graph.ainvoke(Command(resume=resume_payload), config)
@@ -510,7 +581,7 @@ async def closer_webhook(request: HunterWebhookRequest):
 
     # Resume the interrupted CLOSER graph with the prospect's reply
     try:
-        graph  = get_closer_graph(checkpointer=get_checkpointer())
+        graph  = get_closer_graph(checkpointer=_checkpointer)
         config = {"configurable": {"thread_id": thread_id}}
         await graph.ainvoke(
             Command(resume={"texto_prospect": request.message}),
@@ -665,7 +736,7 @@ async def delivery_webhook(request: DeliveryWebhookRequest):
     The thread_id identifies the correct paused DELIVERY run.
     """
     try:
-        graph  = get_delivery_graph(checkpointer=get_checkpointer())
+        graph  = get_delivery_graph(checkpointer=_checkpointer)
         config = {"configurable": {"thread_id": request.thread_id}}
         await graph.ainvoke(
             Command(resume={"aprovado": request.aprovado}),

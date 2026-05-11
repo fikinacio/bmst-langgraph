@@ -23,9 +23,9 @@ _SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 _TAB_NAME          = "leads_angola"
 _HEADER_ROW        = 1          # row 1 is always the header
 _MAX_LEADS         = 20         # anti-spam: HUNTER processes at most 20 leads/day
-_COL_ESTADO_HUNTER = "U"        # column U  → estado_hunter
-_COL_DATA_HUNTER   = "V"        # column V  → data_hunter
-_COL_RESPOSTA      = "W"        # column W  → resposta
+_COL_ESTADO_HUNTER = "Q"        # column Q  → estado_hunter
+_COL_DATA_HUNTER   = "R"        # column R  → data_hunter
+_COL_RESPOSTA      = "S"        # column S  → resposta
 _COL_SEGMENTO      = "segmento" # header name used to identify segment A leads
 _COL_ESTADO        = "estado_hunter"
 _COL_WHATSAPP      = "whatsapp"
@@ -248,6 +248,61 @@ async def get_lead_by_whatsapp(sheet_id: str, phone: str) -> dict | None:
 
     except Exception as exc:
         logger.error("get_lead_by_whatsapp failed (phone=%s): %s", phone, exc)
+        return None
+
+
+def _sync_append_row(sheet_id: str, row_values: list) -> int:
+    """Append a single row and return its 1-based row index."""
+    import re as _re
+    service = _get_service()
+    result = (
+        service.spreadsheets()
+        .values()
+        .append(
+            spreadsheetId=sheet_id,
+            range=f"{_TAB_NAME}!A1",
+            valueInputOption="RAW",
+            insertDataOption="INSERT_ROWS",
+            body={"values": [row_values]},
+        )
+        .execute()
+    )
+    updated = result.get("updates", {}).get("updatedRange", "")
+    m = _re.search(r"!A(\d+)", updated)
+    return int(m.group(1)) if m else 0
+
+
+async def append_lead_row(sheet_id: str, lead: dict) -> int | None:
+    """
+    Append a new lead row to the leads_angola tab.
+
+    lead: dict mapping column header names → values.
+    Returns the 1-based row index of the new row, or None on failure.
+
+    The function reads the header row first to determine column order so
+    the caller does not need to know the exact column letters.
+    """
+    try:
+        headers, _ = await asyncio.to_thread(_sync_get_all_rows, sheet_id)
+        if not headers:
+            logger.error("append_lead_row: sheet has no headers (sheet=%s)", sheet_id)
+            return None
+
+        headers = [h.strip() for h in headers]
+        row_values = [str(lead.get(h, "")) for h in headers]
+
+        row_index = await asyncio.to_thread(_sync_append_row, sheet_id, row_values)
+        logger.info(
+            "append_lead_row: appended empresa=%s at row=%d",
+            lead.get("empresa", "?"), row_index,
+        )
+        return row_index or None
+
+    except HttpError as exc:
+        logger.error("append_lead_row HTTP error (sheet=%s): %s", sheet_id, exc)
+        return None
+    except Exception as exc:
+        logger.error("append_lead_row failed (sheet=%s): %s", sheet_id, exc)
         return None
 
 
