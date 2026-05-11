@@ -1,7 +1,6 @@
 services:
   bmst-agents:
     build: .
-    container_name: bmst-agents
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -12,14 +11,11 @@ services:
     volumes:
       - ./secrets:/app/secrets:ro
     depends_on:
-      redis:
-        condition: service_healthy
-      gotenberg:
-        condition: service_started
+      - redis
+      - gotenberg
 
   redis:
     image: redis:7-alpine
-    container_name: bmst-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
@@ -32,7 +28,6 @@ services:
 
   gotenberg:
     image: gotenberg/gotenberg:8
-    container_name: bmst-gotenberg
     restart: unless-stopped
     command:
       - gotenberg

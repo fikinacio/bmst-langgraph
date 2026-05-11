@@ -1,0 +1,5 @@
+services:
+  bmst-agents:
+    build:
+      context: .
+      dockerfile: Dockerfile
