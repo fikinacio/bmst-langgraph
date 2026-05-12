@@ -148,7 +148,7 @@ async def health():
     async def _check_sheets() -> str:
         try:
             from core.sheets_client import get_pending_leads
-            await get_pending_leads(max_leads=1)
+            await get_pending_leads(settings.GOOGLE_SHEETS_ID)
             return "ok"
         except Exception as exc:
             logger.warning("Health check Sheets failed: %s", exc)
@@ -287,7 +287,7 @@ async def _run_hunter_batch(request: HunterBatchRequest, checkpointer: Any) -> N
     try:
         from core.sheets_client import get_pending_leads
 
-        leads = await get_pending_leads(max_leads=request.max_leads)
+        leads = await get_pending_leads(settings.GOOGLE_SHEETS_ID)
         if not leads:
             logger.info("HUNTER batch: no pending leads found.")
             return
@@ -450,15 +450,14 @@ async def telegram_webhook(payload: dict):
         resume_payload = {"aprovado": True,  "texto_editado": None}
 
     try:
-        checkpointer = get_checkpointer()
         if thread_id.startswith("closer-"):
-            graph = get_closer_graph(checkpointer=checkpointer)
+            graph = get_closer_graph(checkpointer=_checkpointer)
         elif thread_id.startswith("delivery-"):
-            graph = get_delivery_graph(checkpointer=checkpointer)
+            graph = get_delivery_graph(checkpointer=_checkpointer)
         elif thread_id.startswith("ledger-"):
-            graph = get_ledger_graph(checkpointer=checkpointer)
+            graph = get_ledger_graph(checkpointer=_checkpointer)
         else:
-            graph = get_hunter_graph(checkpointer=checkpointer)
+            graph = get_hunter_graph(checkpointer=_checkpointer)
 
         config = {"configurable": {"thread_id": thread_id}}
         await graph.ainvoke(Command(resume=resume_payload), config)
