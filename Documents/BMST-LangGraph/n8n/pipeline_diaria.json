@@ -1,0 +1,313 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "80a7d02f-39e1-43bb-86c8-49af11d2a070",
+      "name": "Pipeline 07:00 UTC (Mon-Fri)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-720, 112]
+    },
+    {
+      "parameters": {
+        "url": "https://agents.biscaplus.com/health",
+        "options": {
+          "response": {"response": {"neverError": true}},
+          "timeout": 15000
+        }
+      },
+      "id": "912e3b6c-7faa-4965-8fa9-b08e242a7f71",
+      "name": "Health Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-480, 112],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 4000,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": false, "leftValue": "", "typeValidation": "loose", "version": 1},
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-health",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {"type": "string", "operation": "empty"}
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1c2ab945-4195-44e1-b222-f803617ea216",
+      "name": "API Online?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-240, 112]
+    },
+    {
+      "parameters": {
+        "chatId": "7840733472",
+        "text": "=🔴 *BMST Pipeline — Falha*\n\n*Etapa:* Health Check\n*Erro:* API biscaplus.com inacessivel\n*Hora:* {{ $now.toISO() }}\n\nO pipeline foi interrompido.",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "a18deab0-f62b-4248-a120-67a5ca9e8055",
+      "name": "Telegram: API Indisponivel",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [-240, 320],
+      "credentials": {
+        "telegramApi": {"id": "wHTt9rnHbmcI6gyL", "name": "Telegram BMST Bot"}
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/hunter/batch",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"max_leads\": 20\n}",
+        "options": {
+          "response": {"response": {"neverError": true}},
+          "timeout": 30000
+        }
+      },
+      "id": "38808021-dabc-43dd-92db-3ed85a428c7d",
+      "name": "HUNTER — Iniciar Batch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 112],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {"id": "LwUerYZQ4uv5ZmI2", "name": "BMST-API-KEY"}
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": false, "leftValue": "", "typeValidation": "loose", "version": 1},
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-hunter",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {"type": "string", "operation": "empty"}
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a5d38b7d-e050-4cdc-a2ed-340bf7890498",
+      "name": "Hunter Iniciado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [240, 112]
+    },
+    {
+      "parameters": {
+        "chatId": "7840733472",
+        "text": "=🔴 *BMST Pipeline — Falha*\n\n*Etapa:* HUNTER\n*Erro:* {{ $json.error || 'resposta inesperada' }}\n*Hora:* {{ $now.toISO() }}\n\nEnvio WhatsApp nao iniciado.",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "64112262-2316-4d17-b2cd-1d1083639ff3",
+      "name": "Telegram: Hunter Falhou",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [240, 320],
+      "credentials": {
+        "telegramApi": {"id": "wHTt9rnHbmcI6gyL", "name": "Telegram BMST Bot"}
+      }
+    },
+    {
+      "parameters": {},
+      "id": "2cecbfa3-7037-4e8b-a1ae-144058df3127",
+      "name": "Pipeline Concluido",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [480, 112]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "ad7bbe8a-5c1c-4350-9a8a-0e258014d5d5",
+      "name": "LEDGER 08:30 UTC (Diario)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-720, 608]
+    },
+    {
+      "parameters": {
+        "url": "https://hcwaihggwhjgpmibnhxy.supabase.co/rest/v1/revisoes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {"name": "status", "value": "eq.pendente"},
+            {"name": "select", "value": "lead_id"}
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{"name": "Prefer", "value": "return=representation"}]
+        },
+        "options": {
+          "response": {"response": {"neverError": true}},
+          "timeout": 15000
+        }
+      },
+      "id": "0b4ce842-ae8e-4ea4-aa41-8293d79fcf3d",
+      "name": "GET Faturas Pendentes (Supabase)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-480, 608],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {"id": "CMX2PZYBe53MtIi3", "name": "apikey"}
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 1},
+          "conditions": [
+            {
+              "id": "cond-no-error",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {"type": "boolean", "operation": "false", "singleValue": true}
+            },
+            {
+              "id": "cond-has-items",
+              "leftValue": "={{ Array.isArray($json) && $json.length > 0 }}",
+              "rightValue": true,
+              "operator": {"type": "boolean", "operation": "equals"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8d978f28-21e4-4136-bf4c-8fcc00202dba",
+      "name": "Ha Faturas Pendentes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-240, 608]
+    },
+    {
+      "parameters": {"options": {}},
+      "id": "7dffa9f5-892c-4458-ac19-f512e009a074",
+      "name": "Split por Fatura",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [0, 528]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.biscaplus.com/ledger/check-payments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"projecto_id\": \"{{ $json.lead_id }}\",\n  \"invoice_ninja_id\": \"\"\n}",
+        "options": {
+          "response": {"response": {"neverError": true}},
+          "timeout": 30000
+        }
+      },
+      "id": "933a4e6f-aec5-4857-a2ed-716213649745",
+      "name": "POST /ledger/check-payments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 528],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {"id": "CMX2PZYBe53MtIi3", "name": "apikey"}
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {},
+      "id": "d12b89ae-f5d6-493a-b527-27605cf10fbd",
+      "name": "Sem Faturas Hoje",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-240, 768]
+    }
+  ],
+  "connections": {
+    "Pipeline 07:00 UTC (Mon-Fri)": {
+      "main": [[{"node": "Health Check", "type": "main", "index": 0}]]
+    },
+    "Health Check": {
+      "main": [[{"node": "API Online?", "type": "main", "index": 0}]]
+    },
+    "API Online?": {
+      "main": [
+        [{"node": "HUNTER — Iniciar Batch", "type": "main", "index": 0}],
+        [{"node": "Telegram: API Indisponivel", "type": "main", "index": 0}]
+      ]
+    },
+    "HUNTER — Iniciar Batch": {
+      "main": [[{"node": "Hunter Iniciado?", "type": "main", "index": 0}]]
+    },
+    "Hunter Iniciado?": {
+      "main": [
+        [{"node": "Pipeline Concluido", "type": "main", "index": 0}],
+        [{"node": "Telegram: Hunter Falhou", "type": "main", "index": 0}]
+      ]
+    },
+    "LEDGER 08:30 UTC (Diario)": {
+      "main": [[{"node": "GET Faturas Pendentes (Supabase)", "type": "main", "index": 0}]]
+    },
+    "GET Faturas Pendentes (Supabase)": {
+      "main": [[{"node": "Ha Faturas Pendentes?", "type": "main", "index": 0}]]
+    },
+    "Ha Faturas Pendentes?": {
+      "main": [
+        [{"node": "Split por Fatura", "type": "main", "index": 0}],
+        [{"node": "Sem Faturas Hoje", "type": "main", "index": 0}]
+      ]
+    },
+    "Split por Fatura": {
+      "main": [[{"node": "POST /ledger/check-payments", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "787859976f174d8e230b66537491a287e8596a87970d157ad76faa047bf058c6"
+  }
+}
