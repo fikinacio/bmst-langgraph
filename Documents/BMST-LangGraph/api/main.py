@@ -33,6 +33,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
 
 from agents.hunter.graph import get_hunter_graph
+from agents.prospector.graph import get_prospector_graph
 from agents.closer.graph import get_closer_graph
 from agents.delivery.graph import get_delivery_graph
 from agents.ledger.graph import get_ledger_graph
@@ -40,6 +41,8 @@ from api.dependencies import verify_api_key
 from api.models import (
     BatchResponse,
     CloserDiagnoseRequest,
+    ProspectorBatchRequest,
+    ProspectorBatchResponse,
     CloserProposeRequest,
     DeliveryStartRequest,
     DeliveryUpdateRequest,
@@ -228,6 +231,47 @@ async def metrics():
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Could not retrieve metrics from Supabase.",
         )
+
+
+# ── PROSPECTOR ───────────────────────────────────────────────────────────────
+
+async def _run_prospector_batch(leads_raw: list[dict], checkpointer: Any) -> None:
+    import time as _time
+    start = _time.monotonic()
+    thread_id = f"prospector-{int(_time.time())}"
+    initial_state = {
+        "leads_raw":         leads_raw,
+        "leads_processados": 0,
+        "leads_gravados":    0,
+    }
+    try:
+        graph  = get_prospector_graph(checkpointer=checkpointer)
+        config = {"configurable": {"thread_id": thread_id}}
+        await graph.ainvoke(initial_state, config)
+        elapsed = _time.monotonic() - start
+        logger.info(
+            "PROSPECTOR batch completed in %.1fs — thread_id=%s leads=%d",
+            elapsed, thread_id, len(leads_raw),
+        )
+    except Exception as exc:
+        logger.error("PROSPECTOR batch failed: %s", exc)
+
+
+@app.post(
+    "/prospector/batch",
+    response_model=ProspectorBatchResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["prospector"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def prospector_batch(request: ProspectorBatchRequest, background_tasks: BackgroundTasks):
+    """Enrich a batch of raw leads and write them to Google Sheets."""
+    leads_raw = [lead.model_dump() for lead in request.leads]
+    background_tasks.add_task(_run_prospector_batch, leads_raw, _checkpointer)
+    return ProspectorBatchResponse(
+        message=f"PROSPECTOR batch started — {len(leads_raw)} lead(s) queued.",
+        leads_recebidos=len(leads_raw),
+    )
 
 
 # ── HUNTER ───────────────────────────────────────────────────────────────────

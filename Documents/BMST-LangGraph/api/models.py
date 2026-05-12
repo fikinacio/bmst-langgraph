@@ -8,6 +8,33 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
+# ── PROSPECTOR ───────────────────────────────────────────────────────────────
+
+class ProspectorLeadInput(BaseModel):
+    """Raw company data for one lead to be enriched by the PROSPECTOR."""
+    empresa:         str = Field(..., description="Company name.")
+    sector:          str = Field(..., description="Business sector.")
+    responsavel:     str = Field(default="", description="Name of the decision-maker.")
+    whatsapp:        str = Field(default="", description="WhatsApp number.")
+    website:         str = Field(default="", description="Company website URL.")
+    instagram:       str = Field(default="", description="Instagram handle or URL.")
+    localizacao:     str = Field(default="", description="City or province.")
+    nr_funcionarios: str = Field(default="", description="Number of employees.")
+    fonte:           str = Field(default="manual", description="Lead source.")
+    notas_manuais:   str = Field(default="", description="Free-text notes for the LLM.")
+
+
+class ProspectorBatchRequest(BaseModel):
+    """Trigger a PROSPECTOR batch enrichment run."""
+    leads: list[ProspectorLeadInput] = Field(..., min_length=1, max_length=50)
+
+
+class ProspectorBatchResponse(BaseModel):
+    """Summary returned immediately after a PROSPECTOR batch is queued."""
+    message: str
+    leads_recebidos: int
+
+
 # ── HUNTER ────────────────────────────────────────────────────────────────────
 
 class HunterBatchRequest(BaseModel):
