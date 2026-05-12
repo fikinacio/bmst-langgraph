@@ -47,10 +47,7 @@ class HunterState(TypedDict):
     qualidade_estimada:       str | None   # "alta" | "media" | "baixa"
     motivo_escalonamento:     str | None   # set when REVISOR escalates
     aprovacao_fundador:       bool | None  # founder decision via Telegram
-
-    # Context dict injected by preparar_para_revisor, read by preparar_aprovacao
-    # to build the Telegram approval message (empresa, segmento, canal, agente).
-    _revisor_contexto:        dict
+    _revisor_contexto:        dict         # empresa/segmento/canal/agente for Telegram msg
 
     # Summaries written by processar_resultado_revisor (for API response / logs)
     revisao_status:           str | None
@@ -67,3 +64,4 @@ class HunterState(TypedDict):
     leads_pendentes:          list[dict]    # full list loaded from the sheet
     leads_processados:        int           # index of the next lead to process
     mensagens_enviadas:       int           # counter for the daily report
+    thread_id:                str | None    # LangGraph thread_id for Telegram callback routing

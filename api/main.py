@@ -22,13 +22,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-
-try:
-    from pathlib import Path
-    from dotenv import load_dotenv
-    load_dotenv(Path(__file__).parent.parent / ".env", override=True)
-except ImportError:
-    pass
 import time
 from contextlib import asynccontextmanager
 from datetime import date
@@ -39,17 +32,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
 
-from agents.prospector.graph import get_prospector_graph
 from agents.hunter.graph import get_hunter_graph
+from agents.prospector.graph import get_prospector_graph
 from agents.closer.graph import get_closer_graph
 from agents.delivery.graph import get_delivery_graph
 from agents.ledger.graph import get_ledger_graph
 from api.dependencies import verify_api_key
 from api.models import (
     BatchResponse,
+    CloserDiagnoseRequest,
     ProspectorBatchRequest,
     ProspectorBatchResponse,
-    CloserDiagnoseRequest,
     CloserProposeRequest,
     DeliveryStartRequest,
     DeliveryUpdateRequest,
@@ -154,12 +147,8 @@ async def health():
 
     async def _check_sheets() -> str:
         try:
-            import os
             from core.sheets_client import get_pending_leads
-            sheet_id = os.environ.get("GOOGLE_SHEETS_ID", "")
-            if not sheet_id:
-                return "error"
-            await get_pending_leads(sheet_id)
+            await get_pending_leads(max_leads=1)
             return "ok"
         except Exception as exc:
             logger.warning("Health check Sheets failed: %s", exc)
@@ -169,7 +158,7 @@ async def health():
         asyncio.wait_for(_check_redis(),    timeout=5),
         asyncio.wait_for(_check_supabase(), timeout=5),
         asyncio.wait_for(_check_evolution(), timeout=5),
-        asyncio.wait_for(_check_sheets(),   timeout=20),
+        asyncio.wait_for(_check_sheets(),   timeout=5),
         return_exceptions=True,
     )
 
@@ -244,30 +233,17 @@ async def metrics():
         )
 
 
-# ── PROSPECTOR ────────────────────────────────────────────────────────────────
+# ── PROSPECTOR ───────────────────────────────────────────────────────────────
 
 async def _run_prospector_batch(leads_raw: list[dict], checkpointer: Any) -> None:
-    """
-    Background task: enrich a list of raw leads and write them to Google Sheets.
-
-    Each lead is:
-      1. Checked for duplicates in the sheet
-      2. Classified (A/B/C) by the LLM
-      3. Given a personalised hook (notas_abordagem)
-      4. Written to Google Sheets with estado_hunter = "pendente"
-
-    The HUNTER will pick them up on its next daily batch run.
-    """
     import time as _time
     start = _time.monotonic()
     thread_id = f"prospector-{int(_time.time())}"
-
     initial_state = {
         "leads_raw":         leads_raw,
         "leads_processados": 0,
         "leads_gravados":    0,
     }
-
     try:
         graph  = get_prospector_graph(checkpointer=checkpointer)
         config = {"configurable": {"thread_id": thread_id}}
@@ -288,23 +264,8 @@ async def _run_prospector_batch(leads_raw: list[dict], checkpointer: Any) -> Non
     tags=["prospector"],
     dependencies=[Depends(verify_api_key)],
 )
-async def prospector_batch(
-    request: ProspectorBatchRequest,
-    background_tasks: BackgroundTasks,
-):
-    """
-    Enrich a batch of raw leads and load them into Google Sheets.
-
-    Returns 202 immediately. Each lead is analysed by the PROSPECTOR LLM pipeline:
-      - Segment classification (A/B/C)
-      - Pain point identification
-      - BMST service recommendation
-      - Deal value estimate
-      - Personalised opening hook (notas_abordagem)
-
-    Segment B/C leads are written with estado_hunter="pendente" and will be
-    picked up by the next HUNTER batch run.  Segment A leads are archived.
-    """
+async def prospector_batch(request: ProspectorBatchRequest, background_tasks: BackgroundTasks):
+    """Enrich a batch of raw leads and write them to Google Sheets."""
     leads_raw = [lead.model_dump() for lead in request.leads]
     background_tasks.add_task(_run_prospector_batch, leads_raw, _checkpointer)
     return ProspectorBatchResponse(
@@ -326,19 +287,17 @@ async def _run_hunter_batch(request: HunterBatchRequest, checkpointer: Any) -> N
     try:
         from core.sheets_client import get_pending_leads
 
-        import os as _os
-        _sheet_id = _os.environ.get("GOOGLE_SHEETS_ID", "")
-        leads = await get_pending_leads(_sheet_id)
+        leads = await get_pending_leads(max_leads=request.max_leads)
         if not leads:
             logger.info("HUNTER batch: no pending leads found.")
             return
 
         thread_id = f"hunter-batch-{int(time.time())}"
         initial_state = {
-            "leads_pendentes":  leads,
+            "leads_pendentes":   leads,
             "leads_processados": 0,
             "mensagens_enviadas": 0,
-            "erros": [],
+            "thread_id":         thread_id,
         }
 
         graph = get_hunter_graph(checkpointer=checkpointer)
@@ -377,6 +336,44 @@ async def hunter_batch(request: HunterBatchRequest, background_tasks: Background
     return {"message": f"HUNTER batch started (max_leads={request.max_leads})."}
 
 
+@app.post(
+    "/hunter/unlock",
+    status_code=status.HTTP_200_OK,
+    tags=["hunter"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def hunter_unlock():
+    """
+    Force-release the HUNTER batch lock.
+
+    Use only if a previous batch crashed mid-run and left the lock set.
+    Safe to call even if no lock is held — Redis delete is idempotent.
+    """
+    from core.redis_client import release_hunter_lock
+    release_hunter_lock()
+    logger.info("HUNTER lock force-released via /hunter/unlock")
+    return {"message": "HUNTER lock released."}
+
+
+@app.post(
+    "/prospector/run",
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["prospector"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def prospector_run():
+    """
+    Stub endpoint called by the n8n pipeline after the PROSPECTOR n8n workflow runs.
+
+    The actual lead discovery (Google Places + Google Sheets) is handled by the
+    dedicated n8n PROSPECTOR workflow.  This endpoint exists so that the combined
+    n8n pipeline (PROSPECTOR → wait → HUNTER) can confirm the PROSPECTOR step
+    without hitting a 404 that breaks the routing logic.
+    """
+    logger.info("PROSPECTOR stub called — lead discovery handled by n8n workflow")
+    return {"message": "PROSPECTOR acknowledged. HUNTER will run after the scheduled wait."}
+
+
 @app.post("/hunter/webhook", response_model=WebhookResponse, tags=["hunter"])
 async def hunter_webhook(request: HunterWebhookRequest):
     """
@@ -406,6 +403,70 @@ async def hunter_webhook(request: HunterWebhookRequest):
     )
 
     return WebhookResponse(success=True, action="queued")
+
+
+# ── TELEGRAM WEBHOOK (raw Telegram format) ────────────────────────────────────
+
+@app.post("/telegram/webhook", tags=["telegram"])
+async def telegram_webhook(payload: dict):
+    """
+    Raw Telegram webhook endpoint — set this as the bot webhook URL.
+
+    Receives callback_query updates when the founder taps an inline button.
+    Parses the raw Telegram format and routes to the graph resume logic.
+
+    Set with:
+      POST https://api.telegram.org/bot<TOKEN>/setWebhook
+      {"url": "https://agents.biscaplus.com/telegram/webhook"}
+    """
+    from core.telegram_client import answer_callback_query
+
+    callback_query = payload.get("callback_query")
+    if not callback_query:
+        return {"ok": True}   # not a button tap — ignore
+
+    cq_id      = callback_query.get("id", "")
+    message_id = callback_query.get("message", {}).get("message_id", 0)
+    raw_data   = callback_query.get("data", "")   # e.g. "aprovar:hunter-batch-123"
+
+    # Parse "action:thread_id" from callback_data
+    parts     = raw_data.split(":", 1)
+    action    = parts[0] if parts else ""
+    thread_id = parts[1] if len(parts) > 1 else ""
+
+    if action not in ("aprovar", "editar", "rejeitar"):
+        return {"ok": True}
+
+    try:
+        await answer_callback_query(callback_query_id=cq_id, text="A processar...")
+    except Exception as exc:
+        logger.warning("telegram_webhook: answer_callback_query failed: %s", exc)
+
+    if action == "aprovar":
+        resume_payload = {"aprovado": True,  "texto_editado": None}
+    elif action == "rejeitar":
+        resume_payload = {"aprovado": False, "texto_editado": None}
+    else:
+        resume_payload = {"aprovado": True,  "texto_editado": None}
+
+    try:
+        checkpointer = get_checkpointer()
+        if thread_id.startswith("closer-"):
+            graph = get_closer_graph(checkpointer=checkpointer)
+        elif thread_id.startswith("delivery-"):
+            graph = get_delivery_graph(checkpointer=checkpointer)
+        elif thread_id.startswith("ledger-"):
+            graph = get_ledger_graph(checkpointer=checkpointer)
+        else:
+            graph = get_hunter_graph(checkpointer=checkpointer)
+
+        config = {"configurable": {"thread_id": thread_id}}
+        await graph.ainvoke(Command(resume=resume_payload), config)
+        logger.info("telegram_webhook: resumed thread_id=%s action=%s", thread_id, action)
+    except Exception as exc:
+        logger.error("telegram_webhook: failed to resume thread_id=%s — %s", thread_id, exc)
+
+    return {"ok": True}
 
 
 # ── TELEGRAM CALLBACK ─────────────────────────────────────────────────────────
@@ -448,15 +509,16 @@ async def telegram_callback(request: TelegramCallbackRequest):
     #   "hunter-*"  → HUNTER graph
     #   "closer-*"  → CLOSER graph
     try:
+        checkpointer = get_checkpointer()
         tid = request.thread_id
         if tid.startswith("closer-"):
-            graph = get_closer_graph(checkpointer=_checkpointer)
+            graph = get_closer_graph(checkpointer=checkpointer)
         elif tid.startswith("delivery-"):
-            graph = get_delivery_graph(checkpointer=_checkpointer)
+            graph = get_delivery_graph(checkpointer=checkpointer)
         elif tid.startswith("ledger-"):
-            graph = get_ledger_graph(checkpointer=_checkpointer)
+            graph = get_ledger_graph(checkpointer=checkpointer)
         else:
-            graph = get_hunter_graph(checkpointer=_checkpointer)
+            graph = get_hunter_graph(checkpointer=checkpointer)
 
         config = {"configurable": {"thread_id": tid}}
         await graph.ainvoke(Command(resume=resume_payload), config)
@@ -557,6 +619,37 @@ async def closer_diagnose(request: CloserDiagnoseRequest, background_tasks: Back
     return {"message": f"CLOSER started for {request.phone} ({request.empresa})."}
 
 
+@app.get("/closer/status/{phone}", tags=["closer"])
+async def closer_status(phone: str):
+    """
+    Check whether an active CLOSER conversation exists for a given phone number.
+
+    n8n uses this to route inbound WhatsApp messages: if active=true the message
+    goes to /closer/webhook; otherwise to /hunter/webhook.
+
+    A CLOSER thread is considered active when its checkpointed state has
+    proxima_acao set (i.e. the graph is paused waiting for a reply) and the
+    lead has not been marked as 'fechado' or 'perdido'.
+    """
+    thread_id = f"closer-{phone}"
+    try:
+        checkpointer = get_checkpointer()
+        config       = {"configurable": {"thread_id": thread_id}}
+        snapshot     = await asyncio.to_thread(
+            checkpointer.get, config
+        )
+        if snapshot is None:
+            return {"phone": phone, "active": False}
+
+        channel_values = getattr(snapshot, "channel_values", {}) or {}
+        proxima_acao   = channel_values.get("proxima_acao")
+        terminal       = proxima_acao in (None, "fechado", "perdido", "finalizar")
+        return {"phone": phone, "active": not terminal}
+    except Exception as exc:
+        logger.warning("closer_status: could not read checkpointer for phone=%s — %s", phone, exc)
+        return {"phone": phone, "active": False}
+
+
 @app.post("/closer/webhook", response_model=WebhookResponse, tags=["closer"])
 async def closer_webhook(request: HunterWebhookRequest):
     """
@@ -581,7 +674,7 @@ async def closer_webhook(request: HunterWebhookRequest):
 
     # Resume the interrupted CLOSER graph with the prospect's reply
     try:
-        graph  = get_closer_graph(checkpointer=_checkpointer)
+        graph  = get_closer_graph(checkpointer=get_checkpointer())
         config = {"configurable": {"thread_id": thread_id}}
         await graph.ainvoke(
             Command(resume={"texto_prospect": request.message}),
@@ -736,7 +829,7 @@ async def delivery_webhook(request: DeliveryWebhookRequest):
     The thread_id identifies the correct paused DELIVERY run.
     """
     try:
-        graph  = get_delivery_graph(checkpointer=_checkpointer)
+        graph  = get_delivery_graph(checkpointer=get_checkpointer())
         config = {"configurable": {"thread_id": request.thread_id}}
         await graph.ainvoke(
             Command(resume={"aprovado": request.aprovado}),
@@ -913,4 +1006,53 @@ async def ledger_check_payments(
     background_tasks.add_task(_run_ledger_verificar, request, _checkpointer)
     return {
         "message": f"LEDGER payment check queued for project {request.projecto_id}."
+    }
+
+
+@app.post(
+    "/ledger/check-all-payments",
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["ledger"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def ledger_check_all_payments(background_tasks: BackgroundTasks):
+    """
+    Query Supabase for ALL pending invoices and run a payment check for each.
+
+    This is the endpoint n8n should call on its daily schedule — it requires
+    only the X-Api-Key header and handles all Supabase querying internally.
+    Returns 202 immediately with a count of queued checks.
+    """
+    try:
+        from supabase import create_client
+        client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
+
+        result = await asyncio.to_thread(
+            lambda: client.table("deals")
+            .select("id, projecto_id, invoice_ninja_id")
+            .eq("estado_pagamento", "pendente")
+            .execute()
+        )
+        pending = result.data or []
+    except Exception as exc:
+        logger.error("ledger_check_all_payments: Supabase query failed — %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Could not query pending invoices: {exc}",
+        )
+
+    if not pending:
+        return {"message": "No pending invoices found.", "queued": 0}
+
+    for deal in pending:
+        req = LedgerCheckPaymentsRequest(
+            projecto_id=deal.get("projecto_id") or deal.get("id", ""),
+            invoice_ninja_id=deal.get("invoice_ninja_id") or "",
+        )
+        background_tasks.add_task(_run_ledger_verificar, req, _checkpointer)
+
+    logger.info("ledger_check_all_payments: queued %d payment checks", len(pending))
+    return {
+        "message": f"Payment check queued for {len(pending)} pending invoice(s).",
+        "queued": len(pending),
     }

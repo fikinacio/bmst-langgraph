@@ -135,25 +135,16 @@ async def verificar_personalizacao(state: RevisorState) -> dict:
 
     logger.info("revisor.verificar_personalizacao: checking personalisation")
 
-    raw = await create_message(
+    result = await create_json_message(
         system=VERIFICAR_PERSONALIZACAO_PROMPT,
-        user=f"Check this message:\n\n---\n{texto}\n---",
+        user=f"Verifica esta mensagem:\n\n---\n{texto}\n---",
         model="haiku",
         agent_name=_AGENT,
         node_name="verificar_personalizacao",
     )
 
-    try:
-        import re as _re
-        _fence = _re.compile(r"```(?:json)?\s*([\s\S]*?)\s*```", _re.IGNORECASE)
-        _m = _fence.search(raw)
-        result = json.loads(_m.group(1).strip() if _m else raw.strip())
-        is_personalised: bool = result.get("is_personalised", False)
-        reason: str           = result.get("reason", "No reason provided")
-    except (json.JSONDecodeError, AttributeError):
-        logger.warning("revisor.verificar_personalizacao: JSON parse failed, assuming not personalised")
-        is_personalised = False
-        reason = "Could not parse personalisation check result."
+    is_personalised: bool = bool(result.get("is_personalised", False))
+    reason: str           = result.get("reason", "Sem razão fornecida.")
 
     if not is_personalised:
         logger.warning("revisor.verificar_personalizacao: ESCALATED — %s", reason)
@@ -191,7 +182,7 @@ async def preparar_aprovacao(state: RevisorState) -> dict:
 
     # Attempt to save the review record to Supabase (best-effort — do not block)
     try:
-        save_revisao(
+        await save_revisao(
             lead_id=state.get("lead_id", "unknown"),   # type: ignore[arg-type]
             texto_original=state["texto_original"],
             texto_final=texto_para_enviar,
@@ -207,6 +198,7 @@ async def preparar_aprovacao(state: RevisorState) -> dict:
         mensagem_cliente=texto_para_enviar,
         contexto=contexto,
         revisao_notas=revisao_notas,
+        thread_id=state.get("thread_id", ""),
     )
     logger.info(
         "preparar_aprovacao: Telegram message sent (id=%s), entering interrupt",
@@ -249,16 +241,18 @@ def _format_revisao_notes(state: RevisorState, is_escalado: bool) -> str:
     """Build a concise human-readable summary of what the REVISOR found and changed."""
     parts: list[str] = []
 
-    if state.get("auto_correcoes"):
-        parts.append("Auto-corrections: " + "; ".join(state["auto_correcoes"]))
-
     if state.get("problemas_encontrados"):
-        parts.append("Problems found: " + "; ".join(state["problemas_encontrados"]))
+        problems = "\n  • " + "\n  • ".join(state["problemas_encontrados"])
+        parts.append(f"🔍 <b>Problemas encontrados:</b>{problems}")
+
+    if state.get("auto_correcoes"):
+        fixes = "\n  • " + "\n  • ".join(state["auto_correcoes"])
+        parts.append(f"✏️ <b>Correcções aplicadas:</b>{fixes}")
 
     if is_escalado and state.get("motivo_escalonamento"):
-        parts.append(f"⚠️ Escalated: {state['motivo_escalonamento']}")
+        parts.append(f"⚠️ <b>Motivo de escalamento:</b>\n  {state['motivo_escalonamento']}")
 
     if not parts:
-        parts.append("none — text approved as-is")
+        parts.append("✅ Texto aprovado sem alterações")
 
-    return " | ".join(parts)
+    return "\n\n".join(parts)
