@@ -294,10 +294,10 @@ async def _run_hunter_batch(request: HunterBatchRequest, checkpointer: Any) -> N
 
         thread_id = f"hunter-batch-{int(time.time())}"
         initial_state = {
-            "leads_pendentes":  leads,
+            "leads_pendentes":   leads,
             "leads_processados": 0,
             "mensagens_enviadas": 0,
-            "erros": [],
+            "thread_id":         thread_id,
         }
 
         graph = get_hunter_graph(checkpointer=checkpointer)
@@ -403,6 +403,70 @@ async def hunter_webhook(request: HunterWebhookRequest):
     )
 
     return WebhookResponse(success=True, action="queued")
+
+
+# ── TELEGRAM WEBHOOK (raw Telegram format) ────────────────────────────────────
+
+@app.post("/telegram/webhook", tags=["telegram"])
+async def telegram_webhook(payload: dict):
+    """
+    Raw Telegram webhook endpoint — set this as the bot webhook URL.
+
+    Receives callback_query updates when the founder taps an inline button.
+    Parses the raw Telegram format and routes to the graph resume logic.
+
+    Set with:
+      POST https://api.telegram.org/bot<TOKEN>/setWebhook
+      {"url": "https://agents.biscaplus.com/telegram/webhook"}
+    """
+    from core.telegram_client import answer_callback_query
+
+    callback_query = payload.get("callback_query")
+    if not callback_query:
+        return {"ok": True}   # not a button tap — ignore
+
+    cq_id      = callback_query.get("id", "")
+    message_id = callback_query.get("message", {}).get("message_id", 0)
+    raw_data   = callback_query.get("data", "")   # e.g. "aprovar:hunter-batch-123"
+
+    # Parse "action:thread_id" from callback_data
+    parts     = raw_data.split(":", 1)
+    action    = parts[0] if parts else ""
+    thread_id = parts[1] if len(parts) > 1 else ""
+
+    if action not in ("aprovar", "editar", "rejeitar"):
+        return {"ok": True}
+
+    try:
+        await answer_callback_query(callback_query_id=cq_id, text="A processar...")
+    except Exception as exc:
+        logger.warning("telegram_webhook: answer_callback_query failed: %s", exc)
+
+    if action == "aprovar":
+        resume_payload = {"aprovado": True,  "texto_editado": None}
+    elif action == "rejeitar":
+        resume_payload = {"aprovado": False, "texto_editado": None}
+    else:
+        resume_payload = {"aprovado": True,  "texto_editado": None}
+
+    try:
+        checkpointer = get_checkpointer()
+        if thread_id.startswith("closer-"):
+            graph = get_closer_graph(checkpointer=checkpointer)
+        elif thread_id.startswith("delivery-"):
+            graph = get_delivery_graph(checkpointer=checkpointer)
+        elif thread_id.startswith("ledger-"):
+            graph = get_ledger_graph(checkpointer=checkpointer)
+        else:
+            graph = get_hunter_graph(checkpointer=checkpointer)
+
+        config = {"configurable": {"thread_id": thread_id}}
+        await graph.ainvoke(Command(resume=resume_payload), config)
+        logger.info("telegram_webhook: resumed thread_id=%s action=%s", thread_id, action)
+    except Exception as exc:
+        logger.error("telegram_webhook: failed to resume thread_id=%s — %s", thread_id, exc)
+
+    return {"ok": True}
 
 
 # ── TELEGRAM CALLBACK ─────────────────────────────────────────────────────────

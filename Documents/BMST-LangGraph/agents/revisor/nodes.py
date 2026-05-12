@@ -198,6 +198,7 @@ async def preparar_aprovacao(state: RevisorState) -> dict:
         mensagem_cliente=texto_para_enviar,
         contexto=contexto,
         revisao_notas=revisao_notas,
+        thread_id=state.get("thread_id", ""),
     )
     logger.info(
         "preparar_aprovacao: Telegram message sent (id=%s), entering interrupt",

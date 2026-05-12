@@ -63,3 +63,4 @@ class HunterState(TypedDict):
     leads_pendentes:          list[dict]    # full list loaded from the sheet
     leads_processados:        int           # index of the next lead to process
     mensagens_enviadas:       int           # counter for the daily report
+    thread_id:                str | None    # LangGraph thread_id for Telegram callback routing
