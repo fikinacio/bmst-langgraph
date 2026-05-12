@@ -1,7 +1,6 @@
 services:
-  api:
+  bmst-agents:
     build: .
-    container_name: bmst-api
     restart: unless-stopped
     env_file: .env
     ports:
