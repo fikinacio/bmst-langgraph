@@ -47,6 +47,7 @@ class HunterState(TypedDict):
     qualidade_estimada:       str | None   # "alta" | "media" | "baixa"
     motivo_escalonamento:     str | None   # set when REVISOR escalates
     aprovacao_fundador:       bool | None  # founder decision via Telegram
+    _revisor_contexto:        dict         # empresa/segmento/canal/agente for Telegram msg
 
     # Summaries written by processar_resultado_revisor (for API response / logs)
     revisao_status:           str | None

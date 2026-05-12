@@ -61,15 +61,12 @@ def _route_apos_avaliacao(state: HunterState) -> str:
     status = state.get("status", "escalado")
     if status == "aprovado":
         return "verificar_personalizacao"
-    if status == "corrigido":
-        return "auto_corrigir"
-    return "preparar_aprovacao"   # escalado → go directly to founder
+    # Both "corrigido" and "escalado" go through auto_corrigir first
+    return "auto_corrigir"
 
 
 def _route_apos_auto_correcao(state: HunterState) -> str:
-    """After auto-correction: check personalisation or escalate to founder."""
-    if state.get("status") == "escalado":
-        return "preparar_aprovacao"
+    """After auto-correction: always go to personalisation check then founder approval."""
     return "verificar_personalizacao"
 
 
