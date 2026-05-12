@@ -241,16 +241,18 @@ def _format_revisao_notes(state: RevisorState, is_escalado: bool) -> str:
     """Build a concise human-readable summary of what the REVISOR found and changed."""
     parts: list[str] = []
 
-    if state.get("auto_correcoes"):
-        parts.append("Auto-corrections: " + "; ".join(state["auto_correcoes"]))
-
     if state.get("problemas_encontrados"):
-        parts.append("Problems found: " + "; ".join(state["problemas_encontrados"]))
+        problems = "\n  • " + "\n  • ".join(state["problemas_encontrados"])
+        parts.append(f"🔍 <b>Problemas encontrados:</b>{problems}")
+
+    if state.get("auto_correcoes"):
+        fixes = "\n  • " + "\n  • ".join(state["auto_correcoes"])
+        parts.append(f"✏️ <b>Correcções aplicadas:</b>{fixes}")
 
     if is_escalado and state.get("motivo_escalonamento"):
-        parts.append(f"⚠️ Escalated: {state['motivo_escalonamento']}")
+        parts.append(f"⚠️ <b>Motivo de escalamento:</b>\n  {state['motivo_escalonamento']}")
 
     if not parts:
-        parts.append("none — text approved as-is")
+        parts.append("✅ Texto aprovado sem alterações")
 
-    return " | ".join(parts)
+    return "\n\n".join(parts)

@@ -131,11 +131,12 @@ async def send_approval_request(
         f"🏢 <b>Empresa:</b> {empresa}{seg_label}\n"
         f"📲 <b>Canal:</b> {canal}\n"
         f"🤖 <b>Agente:</b> {agente}\n\n"
-        f"<b>Mensagem a enviar:</b>\n"
+        f"<b>Análise do REVISOR:</b>\n"
+        f"{revisao_notas or '✅ Texto aprovado sem alterações'}\n\n"
+        f"<b>Mensagem final a enviar:</b>\n"
         f"<code>{'─' * 30}</code>\n"
         f"{mensagem_cliente}\n"
-        f"<code>{'─' * 30}</code>\n\n"
-        f"<b>Revisões:</b> {revisao_notas or 'nenhuma — texto aprovado sem alterações'}"
+        f"<code>{'─' * 30}</code>"
     )
 
     # Inline keyboard: three buttons in one row.
