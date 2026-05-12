@@ -379,7 +379,7 @@ async def create_json_message(
         **kwargs,
     )
     try:
-        return schema.model_validate(json.loads(raw))
+        return schema.model_validate(json.loads(_extract_json(raw)))
     except (json.JSONDecodeError, ValueError):
         logger.warning(
             "create_json_message: parse falhou na 1ª tentativa. Raw=%r", raw[:200]
@@ -394,7 +394,7 @@ async def create_json_message(
         **kwargs,
     )
     try:
-        return schema.model_validate(json.loads(raw2))
+        return schema.model_validate(json.loads(_extract_json(raw2)))
     except (json.JSONDecodeError, ValueError) as exc:
         raise ValueError(
             f"create_json_message: o LLM não produziu JSON válido após 2 tentativas.\n"
