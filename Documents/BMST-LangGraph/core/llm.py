@@ -293,18 +293,25 @@ async def create_message(
     lf = _get_langfuse()
     trace = generation = None
     if lf:
-        trace = lf.trace(name=f"{agent_name}.{node_name}", tags=[agent_name, model])
-        generation = trace.generation(
-            name=node_name,
-            model=model_id,
-            input={"system": system, "user": user},
-        )
+        try:
+            trace = lf.trace(name=f"{agent_name}.{node_name}", tags=[agent_name, model])
+            generation = trace.generation(
+                name=node_name,
+                model=model_id,
+                input={"system": system, "user": user},
+            )
+        except Exception as lf_exc:
+            logger.warning("Langfuse trace failed (ignored): %s", lf_exc)
+            trace = generation = None
 
     try:
         response = await _call_with_retry(system, model_id, max_tokens, messages)
     except Exception:
         if generation:
-            generation.end(level="ERROR")
+            try:
+                generation.end(level="ERROR")
+            except Exception:
+                pass
         raise
 
     latency_ms = int((time.perf_counter() - t0) * 1000)
