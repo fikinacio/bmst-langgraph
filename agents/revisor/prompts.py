@@ -81,6 +81,12 @@ class RevisorAvaliacaoSchema(BaseModel):
     """
 
 
+class PersonalizacaoSchema(BaseModel):
+    """Schema for the JSON the LLM returns during the personalisation check."""
+    is_personalised: bool
+    reason: str
+
+
 # ── Evaluation prompt ─────────────────────────────────────────────────────────
 
 CHECKLIST_AVALIACAO_PROMPT = f"""You are the REVISOR, the communication quality controller for BMST Angola.

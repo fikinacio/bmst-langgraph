@@ -12,6 +12,7 @@ from agents.revisor.prompts import (
     CHECKLIST_AVALIACAO_PROMPT,
     AUTO_CORRECAO_PROMPT,
     VERIFICAR_PERSONALIZACAO_PROMPT,
+    PersonalizacaoSchema,
     RevisorAvaliacaoSchema,
 )
 from core.llm import create_json_message, create_message
@@ -138,13 +139,14 @@ async def verificar_personalizacao(state: RevisorState) -> dict:
     result = await create_json_message(
         system=VERIFICAR_PERSONALIZACAO_PROMPT,
         user=f"Verifica esta mensagem:\n\n---\n{texto}\n---",
+        schema=PersonalizacaoSchema,
         model="haiku",
         agent_name=_AGENT,
         node_name="verificar_personalizacao",
     )
 
-    is_personalised: bool = bool(result.get("is_personalised", False))
-    reason: str           = result.get("reason", "Sem razão fornecida.")
+    is_personalised: bool = result.is_personalised
+    reason: str           = result.reason or "Sem razão fornecida."
 
     if not is_personalised:
         logger.warning("revisor.verificar_personalizacao: ESCALATED — %s", reason)
