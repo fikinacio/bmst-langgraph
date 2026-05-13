@@ -44,10 +44,23 @@ SINAIS_IA: list[str] = [
     "Message opens with 'Espero' or 'Venho'",
     "No short sentence (under 8 words) exists anywhere in the text",
     "Excessive formal politeness that no real person would write in WhatsApp",
+    "Uses bullet points or numbered lists inside a WhatsApp message",
+    "Uses en-dashes (—) or em-dashes to structure thoughts like a document",
+    "Every paragraph follows an identical rhythm: observation → consequence → offer → CTA",
+    "Vocabulary is unusually elevated and uniform — no colloquialisms, no contractions",
+]
+
+SINAIS_MAU_PORTUGUES: list[str] = [
+    "Ausência de acentuação obrigatória (ex.: 'nao' em vez de 'não')",
+    "Erros de pontuação graves (ex.: vírgulas a separar sujeito e predicado, ponto final em falta)",
+    "Construções sintácticas incorrectas ou importadas do inglês",
+    "Uso de 'você' e 'tu' misturados no mesmo texto",
+    "Verbos com regência incorrecta (ex.: 'ajudar a você' em vez de 'ajudá-lo')",
+    "Palavras com ortografia errada ou brasileirismos evidentes (ex.: 'voce', 'tambem', 'entao')",
 ]
 
 
-# ── Pydantic schema for structured LLM output ─────────────────────────────────
+# ── Pydantic schemas for structured LLM output ───────────────────────────────
 
 class RevisorAvaliacaoSchema(BaseModel):
     """Schema for the JSON the LLM returns during the evaluation node."""
@@ -89,36 +102,41 @@ class PersonalizacaoSchema(BaseModel):
 
 # ── Evaluation prompt ─────────────────────────────────────────────────────────
 
-CHECKLIST_AVALIACAO_PROMPT = f"""You are the REVISOR, the communication quality controller for BMST Angola.
-Your only job is to evaluate whether a WhatsApp message is safe to send to a business prospect.
+CHECKLIST_AVALIACAO_PROMPT = f"""És o REVISOR, controlador de qualidade de comunicação da BMST Angola.
+A tua única função é avaliar se uma mensagem WhatsApp está apta a ser enviada a um prospecto.
 
-The message must:
-1. Sound written by a real human (Fidel Kussunga, the founder) — NOT by an AI
-2. Contain NO forbidden terms
-3. Contain NO banned opening phrases typical of AI-generated text
-4. Include at LEAST ONE specific reference to the prospect's company or observed situation
-5. Be concise: maximum 5 lines / 3 short paragraphs for WhatsApp
+A mensagem DEVE:
+1. Parecer escrita por um humano real (Fidel Kussunga, o fundador) — NUNCA por uma IA
+2. Estar escrita em português europeu (pt-PT) correcto: acentuação, pontuação, sintaxe e lógica impecáveis
+3. Não conter termos proibidos
+4. Não começar com frases banidas típicas de texto gerado por IA
+5. Incluir PELO MENOS UMA referência específica à empresa ou situação observada
+6. Ser concisa: máximo 5 linhas / 3 parágrafos curtos para WhatsApp
 
-FORBIDDEN TERMS (any occurrence = automatic problem):
+TERMOS PROIBIDOS (qualquer ocorrência = problema automático):
 {chr(10).join(f'  - "{t}"' for t in TERMOS_PROIBIDOS)}
 
-BANNED OPENING PHRASES (any occurrence = automatic problem):
+FRASES BANIDAS (qualquer ocorrência = problema automático):
 {chr(10).join(f'  - "{f}"' for f in FRASES_BANIDAS)}
 
-AI WRITING SIGNALS (check for these patterns):
+SINAIS DE TEXTO GERADO POR IA (verificar estes padrões):
 {chr(10).join(f'  - {s}' for s in SINAIS_IA)}
 
-ROUTING RULES:
-- status = "aprovado"  → no violations found at all
-- status = "corrigido" → only LEVEL 1 violations (forbidden terms or banned phrases)
-                         that can be swapped out without changing the message structure
-- status = "escalado"  → ANY of the following:
-    * No specific company reference (message is generic)
-    * 3+ AI writing signals detected
-    * The entire message structure needs rewriting (not just word substitution)
-    * "automatizado" is used in a clearly technical/AI context
+SINAIS DE MÁ QUALIDADE EM PORTUGUÊS (verificar estes padrões):
+{chr(10).join(f'  - {s}' for s in SINAIS_MAU_PORTUGUES)}
 
-Respond with valid JSON only. No markdown. No explanation outside the JSON.
+REGRAS DE ENCAMINHAMENTO:
+- status = "aprovado"  → sem violações de qualquer tipo
+- status = "corrigido" → apenas violações de NÍVEL 1 (termos proibidos ou frases banidas)
+                         que podem ser substituídas sem alterar a estrutura da mensagem
+- status = "escalado"  → QUALQUER uma das seguintes:
+    * Sem referência específica à empresa (mensagem genérica)
+    * 3+ sinais de IA detectados
+    * Erros graves de português (acentuação, pontuação, sintaxe)
+    * A estrutura inteira precisa de ser reescrita (não apenas substituição de palavras)
+    * "automatizado" em contexto claramente técnico/IA
+
+Responde APENAS com JSON válido. Sem markdown. Sem explicação fora do JSON.
 Schema: {{"status": "aprovado|corrigido|escalado", "problemas_encontrados": [...], "qualidade_estimada": "alta|media|baixa", "motivo_escalonamento": null or "string"}}
 """
 
@@ -147,20 +165,19 @@ If you cannot fix the issues without rewriting the structure, respond with exact
 
 # ── Personalisation check prompt ──────────────────────────────────────────────
 
-VERIFICAR_PERSONALIZACAO_PROMPT = """You are checking whether a WhatsApp message contains
-genuine personalisation specific to the target company.
+VERIFICAR_PERSONALIZACAO_PROMPT = """Verifica se uma mensagem WhatsApp contém personalização genuína e específica para a empresa visada.
 
-A personalised message MUST include at least ONE of:
-- A specific observation about the company (e.g. "I noticed your Instagram has many unanswered comments")
-- A reference to the company's sector and a concrete pain point
-- The decision-maker's name used naturally (not just in the greeting)
-- A reference to something specific about how the company operates
+Uma mensagem PERSONALIZADA deve incluir PELO MENOS UM dos seguintes:
+- Uma observação específica sobre a empresa (ex.: "Vi que o vosso Instagram tem muitas perguntas sem resposta")
+- Referência ao sector da empresa e a um problema concreto observado
+- O nome do decisor usado naturalmente (não só na saudação)
+- Referência a algo específico sobre o modo de operação da empresa
 
-A GENERIC message uses only:
-- Generic phrases like "improve customer service" with no company-specific context
-- Just the company name in the greeting and nowhere else
-- Templates that could apply to any company without modification
+Uma mensagem GENÉRICA usa apenas:
+- Frases genéricas como "melhorar o atendimento ao cliente" sem contexto específico da empresa
+- Apenas o nome da empresa na saudação e em mais nenhum lugar
+- Modelos que se poderiam aplicar a qualquer empresa sem modificação
 
-Respond with JSON only:
-{{"is_personalised": true/false, "reason": "one sentence explaining your decision"}}
+Responde APENAS com JSON válido. Sem markdown. Sem texto fora do JSON:
+{"is_personalised": true/false, "reason": "uma frase a explicar a tua decisão em português"}
 """
