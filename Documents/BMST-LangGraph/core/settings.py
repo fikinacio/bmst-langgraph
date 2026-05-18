@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     # ── Evolution API (WhatsApp) ──────────────────────────────────────────────
     EVOLUTION_API_URL: str = "http://localhost:8080"
     EVOLUTION_API_KEY: str = ""
-    EVOLUTION_INSTANCE: str = "bmst"
+    EVOLUTION_INSTANCE: str = "biscaplus"
 
     # ── Telegram ──────────────────────────────────────────────────────────────
     TELEGRAM_BOT_TOKEN: str = ""

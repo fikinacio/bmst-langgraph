@@ -1,7 +1,6 @@
 services:
   bmst-agents:
     build: .
-    container_name: bmst-agents
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -27,7 +26,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: bmst-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
@@ -37,19 +35,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-    networks:
-      - bmst-net
 
   gotenberg:
     image: gotenberg/gotenberg:8
-    container_name: bmst-gotenberg
     restart: unless-stopped
     command:
       - gotenberg
       - --chromium-disable-javascript=true
       - --chromium-allow-list=file:///tmp/.*
-    networks:
-      - bmst-net
 
 volumes:
   redis-data:

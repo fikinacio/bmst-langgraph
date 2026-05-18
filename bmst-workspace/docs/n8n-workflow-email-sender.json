@@ -1,0 +1,73 @@
+{
+  "name": "BMST Email Send",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bmst-email-send",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f6d3cfc7-3872-4de1-a4b1-acccb950f939",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-400, -128],
+      "webhookId": "bmst-email-send"
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const inp = $input.first().json.body;\nreturn [{\n  json: {\n    session_id: inp.session_id,\n    payload: JSON.stringify({\n      from: 'BMST <nexus@biscaplus.com>',\n      to: [inp.para],\n      subject: inp.assunto,\n      text: inp.corpo\n    })\n  }\n}];"
+      },
+      "id": "b1a2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Build Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-144, -128]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer re_GMtRc3sX_HrPf2pYoa9B7tocV2WLGVAYm" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.payload }}",
+        "options": {}
+      },
+      "id": "945d6607-4433-4d09-8abc-f206c6c5a2ff",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [144, -128]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'enviado', session_id: $('Build Body').item.json.session_id }) }}",
+        "options": {}
+      },
+      "id": "ed4f2875-5132-4452-9a34-f398443925f8",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [400, -128]
+    }
+  ],
+  "connections": {
+    "Webhook":    { "main": [[{ "node": "Build Body",         "type": "main", "index": 0 }]] },
+    "Build Body": { "main": [[{ "node": "Send Email",         "type": "main", "index": 0 }]] },
+    "Send Email": { "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]] }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

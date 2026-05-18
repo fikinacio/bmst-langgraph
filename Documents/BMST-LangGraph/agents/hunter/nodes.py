@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-import time
 
 from agents.hunter.state import HunterState
 from agents.hunter.prompts import (
@@ -460,8 +459,8 @@ async def enviar_whatsapp(state: HunterState) -> dict:
 
     logger.info("hunter.enviar_whatsapp: sent to %s (message_id=%s)", phone, message_id)
 
-    # Anti-spam delay: 90 seconds between messages, non-blocking
-    await asyncio.to_thread(time.sleep, 90)
+    # Anti-spam delay: 90 seconds between messages
+    await asyncio.sleep(90)
 
     return {
         "mensagem_enviada":    True,
