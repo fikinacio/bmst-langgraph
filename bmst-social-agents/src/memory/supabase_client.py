@@ -98,6 +98,7 @@ class SupabaseMemory:
             .insert(
                 {
                     "review_id": review_result.review_id,
+                    "session_id": review_result.session_id,
                     "platform": review_result.platform.value,
                     "quality_score": review_result.quality_score,
                     "ai_detection_score": review_result.ai_detection_score,

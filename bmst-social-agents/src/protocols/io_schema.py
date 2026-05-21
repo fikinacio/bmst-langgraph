@@ -149,6 +149,7 @@ class ReviewResult(BaseModel):
     """
 
     review_id: str
+    session_id: str
     platform: Platform
     quality_score: float = Field(ge=0.0, le=1.0)
     ai_detection_score: float = Field(ge=0.0, le=1.0)
