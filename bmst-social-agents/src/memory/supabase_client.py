@@ -190,6 +190,24 @@ class SupabaseMemory:
     # published_topics
     # ------------------------------------------------------------------
 
+    async def get_last_pillar(self) -> Optional[str]:
+        """Return the pillar of the most recently published topic, or None.
+
+        Used by SCOUT to rotate content pillars day-to-day: if yesterday's
+        pillar was 'ai', today SCOUT prefers 'automation' candidates and
+        vice versa.
+        """
+        result = await (
+            self._client.table("published_topics")
+            .select("pillar")
+            .order("created_at", desc=True)
+            .limit(1)
+            .execute()
+        )
+        if result.data:
+            return result.data[0].get("pillar")
+        return None
+
     async def get_published_topics(self, days: int = 7) -> list[str]:
         """Return topics published within the last N days for deduplication."""
         since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
