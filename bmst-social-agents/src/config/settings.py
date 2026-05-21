@@ -68,6 +68,12 @@ class Settings(BaseSettings):
     writer_max_tokens: int = 1024
     writer_language: str = "pt"
 
+    # ── REVISOR agent ─────────────────────────────────────────────────────────
+    # Dedicated model for the quality judge call. When unset, REVISOR uses
+    # writer_model. Set this to a cheaper model (e.g. claude-haiku) to reduce
+    # cost on the daily quality-check call.
+    revisor_model: Optional[str] = None
+
     # ── CAROUSEL agent ────────────────────────────────────────────────────────
     canva_api_token: Optional[str] = None
     canva_brand_kit_id: Optional[str] = None

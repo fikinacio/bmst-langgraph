@@ -159,6 +159,38 @@ class SupabaseMemory:
             extra={"review_id": review_id, "decision": decision},
         )
 
+    async def update_approval_by_session(
+        self,
+        session_id: str,
+        decision: str,
+        note: Optional[str],
+    ) -> None:
+        """Update all pending review rows for a session with one human decision.
+
+        REVISOR logs one review row per content piece (post or carousel) sharing
+        the same session_id. A single human decision applies to the whole bundle,
+        so the webhook updates every row in one call. The `human_decision IS NULL`
+        filter ensures we never overwrite a decision already recorded — re-runs
+        of the webhook for the same session are idempotent.
+        """
+        await (
+            self._client.table("review_log")
+            .update(
+                {
+                    "human_decision": decision,
+                    "human_note": note,
+                    "human_decided_at": datetime.now(timezone.utc).isoformat(),
+                }
+            )
+            .eq("session_id", session_id)
+            .is_("human_decision", "null")
+            .execute()
+        )
+        logger.info(
+            "Approval updated for session",
+            extra={"session_id": session_id, "decision": decision},
+        )
+
     # ------------------------------------------------------------------
     # publication_log
     # ------------------------------------------------------------------

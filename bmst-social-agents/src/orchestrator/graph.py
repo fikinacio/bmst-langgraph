@@ -134,6 +134,12 @@ async def setup_checkpointer() -> None:
     logger.info("AsyncRedisSaver indices initialised on %s", settings.redis_url)
 
 
+# Maximum auto-resume hops after a REVISOR interrupt. Normal flow has at most
+# 3 revision cycles, so 5 is generous. Anything beyond indicates a
+# misconfiguration (e.g. router never reaches END) rather than legitimate retry.
+MAX_AUTO_RESUMES: int = 5
+
+
 async def run_graph(session_id: str) -> SocialAgentState:
     """Run the full pipeline for a given session_id.
 
@@ -141,10 +147,20 @@ async def run_graph(session_id: str) -> SocialAgentState:
     session_id as the LangGraph thread_id (so checkpoints are scoped to the
     session), and returns the final state.
 
-    Note: when the graph pauses at the REVISOR interrupt, this call returns
-    with pending_approval=True. To resume after human approval, the caller
-    must use compiled_graph.aupdate_state() then ainvoke(None, config) with
-    the same thread_id.
+    REVISOR interrupt handling:
+      The graph pauses after REVISOR via interrupt_after=['revisor']. Three
+      kinds of pauses can happen:
+        1. HUMAN approval needed → REVISOR set pending_approval=True.
+           run_graph returns; the WhatsApp webhook resumes later.
+        2. AI-flagged content → REVISOR set approval_decision='revision_requested'
+           and pending_approval=False. No webhook is coming; we resume here.
+        3. Max revisions reached → REVISOR set approval_decision='rejected'
+           and pending_approval=False. No webhook is coming; we resume here.
+
+      The loop below auto-resumes the graph for cases 2 and 3 by calling
+      ainvoke(None, config) until either pending_approval becomes True or
+      the graph reaches END (snapshot.next is empty). MAX_AUTO_RESUMES caps
+      the loop so a misconfigured router can't spin forever.
     """
     initial_state: SocialAgentState = {
         "session_id": session_id,
@@ -172,14 +188,40 @@ async def run_graph(session_id: str) -> SocialAgentState:
     config = {"configurable": {"thread_id": session_id}}
     logger.info("Graph run starting", extra={"session_id": session_id})
 
-    final_state = await compiled_graph.ainvoke(initial_state, config=config)
+    state = await compiled_graph.ainvoke(initial_state, config=config)
+
+    # Auto-resume loop for AI-flag and escalation paths (no webhook coming)
+    resumes = 0
+    while not state.get("pending_approval") and resumes < MAX_AUTO_RESUMES:
+        snapshot = await compiled_graph.aget_state(config)
+        if not snapshot.next:
+            # Graph reached END — nothing more to do
+            break
+        logger.info(
+            "Auto-resuming graph past REVISOR interrupt",
+            extra={
+                "session_id": session_id,
+                "resume_count": resumes + 1,
+                "next_nodes": list(snapshot.next),
+            },
+        )
+        state = await compiled_graph.ainvoke(None, config=config)
+        resumes += 1
+
+    if resumes >= MAX_AUTO_RESUMES:
+        logger.error(
+            "Graph exceeded auto-resume safety bound — possible misconfiguration",
+            extra={"session_id": session_id, "max_auto_resumes": MAX_AUTO_RESUMES},
+        )
 
     logger.info(
         "Graph run finished",
         extra={
             "session_id": session_id,
-            "final_agent": final_state.get("current_agent"),
-            "status": final_state.get("status"),
+            "final_agent": state.get("current_agent"),
+            "status": state.get("status"),
+            "auto_resumes": resumes,
+            "pending_approval": state.get("pending_approval"),
         },
     )
-    return final_state
+    return state
