@@ -60,7 +60,7 @@ async def generate_carousel_slide(
 
     Returns None if Canva is unconfigured or any step fails.
     """
-    if not settings.canva_api_token or not settings.canva_brand_kit_id:
+    if not settings.canva_api_token or not settings.canva_template_id:
         logger.warning("Canva unconfigured, skipping slide generation")
         return None
 
@@ -93,7 +93,7 @@ async def generate_post_image(
 
     Returns None if Canva is unconfigured or any step fails.
     """
-    if not settings.canva_api_token or not settings.canva_brand_kit_id:
+    if not settings.canva_api_token or not settings.canva_template_id:
         logger.warning("Canva unconfigured, skipping post image")
         return None
 
@@ -143,7 +143,7 @@ async def _autofill_and_export(
         autofill_response = await client.post(
             f"{_CANVA_BASE_URL}/autofills",
             json={
-                "brand_template_id": settings.canva_brand_kit_id,
+                "brand_template_id": settings.canva_template_id,
                 "data": autofill_data,
                 "title": template_label,
             },

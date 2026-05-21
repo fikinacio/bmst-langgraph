@@ -71,6 +71,9 @@ class Settings(BaseSettings):
     # ── CAROUSEL agent ────────────────────────────────────────────────────────
     canva_api_token: Optional[str] = None
     canva_brand_kit_id: Optional[str] = None
+    # Brand template ID — distinct from brand kit. Canva separates the layout
+    # (template) from the colours/fonts (brand kit). Required for autofill.
+    canva_template_id: Optional[str] = None
     carousel_default_slides: int = 5
 
     # ── PUBLISHER agent — LinkedIn ─────────────────────────────────────────────
@@ -82,6 +85,12 @@ class Settings(BaseSettings):
     # ── PUBLISHER agent — Instagram ────────────────────────────────────────────
     instagram_access_token: Optional[str] = None
     instagram_account_id: Optional[str] = None
+
+    # ── PUBLISHER agent — Facebook ─────────────────────────────────────────────
+    # Set this when the Facebook page being published to is different from the
+    # one linked to the Instagram Business account. Falls back to
+    # instagram_account_id in meta_api.post_facebook() when unset.
+    facebook_page_id: Optional[str] = None
 
     # ── Langfuse (observability) ───────────────────────────────────────────────
     langfuse_public_key: Optional[str] = None

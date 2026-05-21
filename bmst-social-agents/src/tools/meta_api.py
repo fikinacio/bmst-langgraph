@@ -100,16 +100,18 @@ async def post_facebook(
     If image_url is provided, posts to /photos (image post with message as caption).
     Otherwise posts text to /feed.
 
-    Note: this uses INSTAGRAM_ACCOUNT_ID temporarily as the page identifier
-    is not separately configured. In a future iteration add FACEBOOK_PAGE_ID
-    to settings if Instagram and Facebook accounts diverge.
+    Uses settings.facebook_page_id when set; otherwise falls back to
+    settings.instagram_account_id (the page linked to the IG Business account).
     """
     if not settings.instagram_access_token:
         raise MetaAPIError("Meta access token not configured")
 
-    page_id = settings.instagram_account_id  # see docstring note
+    page_id = settings.facebook_page_id or settings.instagram_account_id
     if not page_id:
-        raise MetaAPIError("Facebook page ID not configured")
+        raise MetaAPIError(
+            "Facebook page ID not configured "
+            "(set FACEBOOK_PAGE_ID or INSTAGRAM_ACCOUNT_ID)"
+        )
 
     endpoint = "photos" if image_url else "feed"
     payload = {
