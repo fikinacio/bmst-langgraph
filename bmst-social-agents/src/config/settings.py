@@ -51,10 +51,17 @@ class Settings(BaseSettings):
     revisor_approval_timeout_seconds: int = 3600
 
     # ── SCOUT agent ───────────────────────────────────────────────────────────
-    brave_search_api_key: Optional[str] = None
+    # Tavily is purpose-built for AI agents: native relevance scoring and
+    # article-extract endpoint.
+    tavily_api_key: Optional[str] = None
     scout_rss_feeds: str = ""  # comma-separated URLs
     scout_lookback_days: int = 1
     scout_max_articles: int = 10
+
+    # ── REVISOR agent — AI-content detection ─────────────────────────────────
+    # GPTZero primary; Claude heuristic is the fallback when this is unset
+    # or the API call fails.
+    gptzero_api_key: Optional[str] = None
 
     # ── WRITER agent ──────────────────────────────────────────────────────────
     writer_model: str = "claude-sonnet-4-6"
