@@ -67,6 +67,13 @@ QUERIES: list[str] = [
 
 
 # Keyword sets used by _classify_pillar(). Lowercased; multi-word tokens are matched as substrings.
+#
+# BACKLOG: AI_KEYWORDS and AUTOMATION_KEYWORDS use plain
+# substring matching. Two-char terms ("ai", "ia", "ml")
+# risk false positives on common Portuguese words
+# (e.g. "ia" in "tecnologia", "ml" in "html").
+# Apply word-boundary matching (≤2 chars rule from WRITER)
+# if pillar misclassification becomes a noticeable issue.
 AI_KEYWORDS: set[str] = {
     "ai", "artificial intelligence", "ia", "genai", "llm",
     "ml", "machine learning", "deep learning", "neural network",
