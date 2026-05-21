@@ -2,20 +2,38 @@
 
 Wires SCOUT → WRITER → CAROUSEL → REVISOR → PUBLISHER with conditional edges.
 The graph pauses after REVISOR (interrupt_after) so a human can approve via
-WhatsApp before publishing. State is persisted by MemorySaver between the
-pause and resume.
+WhatsApp before publishing. State is persisted by AsyncRedisSaver between
+the pause and resume so the HITL flow survives process restarts.
+
+Checkpoint storage:
+    Backend:     Redis (same instance as src/memory/redis_client.py)
+    Key pattern: written by langgraph-checkpoint-redis:
+                   checkpoint:{thread_id}:{namespace}:{checkpoint_id}
+                   checkpoint_blob:{thread_id}:{namespace}:{channel}:{version}
+                   checkpoint_write:{thread_id}:{namespace}:{ckpt_id}:{task_id}
+                 thread_id is the pipeline session_id, so each pipeline run
+                 has its own isolated checkpoint set. No prefix collision with
+                 the bmst:social:working: working-memory keys.
+
+    Connection:  this saver opens its own client pool against settings.redis_url
+                 rather than reusing the RedisMemory client object. Same Redis
+                 instance, separate pool — keeps module import order simple.
 
 Public surface:
-    compiled_graph: the compiled LangGraph instance (importable everywhere).
-    run_graph(session_id): convenience runner that builds initial state and
-        invokes the graph end-to-end with a thread_id.
+    compiled_graph:         the compiled LangGraph instance (importable everywhere).
+    setup_checkpointer():   idempotent async — call once at app startup or
+                            transparently from run_graph().
+    run_graph(session_id):  convenience runner that ensures setup, builds the
+                            initial state, and invokes the graph end-to-end.
 """
 
 import logging
 from datetime import date
 
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.redis.aio import AsyncRedisSaver
 from langgraph.graph import END, START, StateGraph
+
+from src.config.settings import settings
 
 from src.agents.carousel.node import carousel_node
 from src.agents.publisher.node import publisher_node
@@ -86,15 +104,34 @@ def build_graph() -> StateGraph:
     return graph
 
 
-# ── Compile the graph at import time ────────────────────────────────────────
-# MemorySaver is in-memory only; state is lost on process restart.
-# For production HITL persistence, swap for PostgresSaver or RedisSaver.
-_checkpointer = MemorySaver()
+# ── Checkpointer + graph compilation ────────────────────────────────────────
+# AsyncRedisSaver is constructed sync (no I/O) but requires asetup() to be
+# awaited once before the first graph operation, to create the RediSearch
+# indices. Construction at module import is safe; setup is lazy.
+_checkpointer = AsyncRedisSaver(redis_url=settings.redis_url)
 
 compiled_graph = build_graph().compile(
     checkpointer=_checkpointer,
     interrupt_after=["revisor"],
 )
+
+# Tracks whether asetup() has already run for this process
+_checkpointer_setup_done = False
+
+
+async def setup_checkpointer() -> None:
+    """Idempotent RediSearch index initialisation for the checkpointer.
+
+    Safe to call multiple times — subsequent calls are no-ops. Call once at
+    application startup (e.g. FastAPI lifespan) or rely on run_graph() to
+    invoke it transparently on first use.
+    """
+    global _checkpointer_setup_done
+    if _checkpointer_setup_done:
+        return
+    await _checkpointer.asetup()
+    _checkpointer_setup_done = True
+    logger.info("AsyncRedisSaver indices initialised on %s", settings.redis_url)
 
 
 async def run_graph(session_id: str) -> SocialAgentState:
@@ -128,6 +165,9 @@ async def run_graph(session_id: str) -> SocialAgentState:
         "confidence": 1.0,
         "errors": [],
     }
+
+    # Ensure the Redis checkpointer indices exist before the first op
+    await setup_checkpointer()
 
     config = {"configurable": {"thread_id": session_id}}
     logger.info("Graph run starting", extra={"session_id": session_id})
