@@ -114,8 +114,14 @@ def _patch_publisher(
     linkedin_result: dict | Exception | None = None,
     instagram_result: dict | Exception | None = None,
     facebook_result: dict | Exception | None = None,
+    is_approved: bool = True,
 ):
-    """Patch every external IO point inside the publisher module."""
+    """Patch every external IO point inside the publisher module.
+
+    Mocks added for the P1/P3/P5/P6 additions:
+        - SupabaseMemory.is_session_approved (returns is_approved)
+        - whatsapp.send_text (no-op AsyncMock — used by P3/P5/P6)
+    """
 
     def _side_effect(fixed):
         async def fn(*args, **kwargs):
@@ -131,6 +137,9 @@ def _patch_publisher(
     supa_mock = AsyncMock()
     supa_mock.log_publication = AsyncMock(return_value="row-id")
     supa_mock.save_topic = AsyncMock(return_value=None)
+    supa_mock.is_session_approved = AsyncMock(return_value=is_approved)
+
+    whatsapp_mock = AsyncMock(return_value={"status": "sent"})
 
     return [
         patch.object(
@@ -146,7 +155,8 @@ def _patch_publisher(
             new=AsyncMock(side_effect=_side_effect(facebook_result or fb_default)),
         ),
         patch.object(publisher, "SupabaseMemory", return_value=supa_mock),
-    ], supa_mock
+        patch.object(publisher.whatsapp, "send_text", new=whatsapp_mock),
+    ], supa_mock, whatsapp_mock
 
 
 # ---------------------------------------------------------------------------
@@ -156,8 +166,8 @@ def _patch_publisher(
 
 async def test_publisher_happy_path(base_state):
     """All 3 publishable platforms succeed; TikTok skipped to manual_delivery."""
-    patches, _ = _patch_publisher()
-    with patches[0], patches[1], patches[2], patches[3]:
+    patches, _, _ = _patch_publisher()
+    with patches[0], patches[1], patches[2], patches[3], patches[4]:
         result = await publisher.publisher_node(base_state)
 
     assert result["status"] == StatusType.TASK_COMPLETE
@@ -172,8 +182,8 @@ async def test_publisher_happy_path(base_state):
 
 async def test_publisher_partial_failure(base_state):
     """LinkedIn fails, others succeed → TASK_COMPLETE with 1 failed result."""
-    patches, _ = _patch_publisher(linkedin_result=Exception("OAuth expired"))
-    with patches[0], patches[1], patches[2], patches[3]:
+    patches, _, _ = _patch_publisher(linkedin_result=Exception("OAuth expired"))
+    with patches[0], patches[1], patches[2], patches[3], patches[4]:
         result = await publisher.publisher_node(base_state)
 
     assert result["status"] == StatusType.TASK_COMPLETE
@@ -189,8 +199,8 @@ async def test_publisher_partial_failure(base_state):
 async def test_publisher_no_carousel_skips_instagram(base_state):
     """When carousel is None → no image → Instagram skipped as manual_delivery."""
     state_no_carousel = {**base_state, "carousel": None}
-    patches, _ = _patch_publisher()
-    with patches[0], patches[1], patches[2], patches[3]:
+    patches, _, _ = _patch_publisher()
+    with patches[0], patches[1], patches[2], patches[3], patches[4]:
         result = await publisher.publisher_node(state_no_carousel)
 
     ig_result = next(
@@ -202,8 +212,8 @@ async def test_publisher_no_carousel_skips_instagram(base_state):
 
 async def test_publisher_saves_topic_with_pillar(base_state):
     """supabase.save_topic is called with the selected_pillar from state."""
-    patches, supa_mock = _patch_publisher()
-    with patches[0], patches[1], patches[2], patches[3]:
+    patches, supa_mock, _ = _patch_publisher()
+    with patches[0], patches[1], patches[2], patches[3], patches[4]:
         await publisher.publisher_node(base_state)
 
     supa_mock.save_topic.assert_awaited_once()
@@ -219,12 +229,12 @@ async def test_publisher_saves_topic_with_pillar(base_state):
 
 async def test_publisher_all_fail(base_state):
     """Every publish raises → EXECUTION_FAULT path."""
-    patches, _ = _patch_publisher(
+    patches, _, _ = _patch_publisher(
         linkedin_result=Exception("LinkedIn down"),
         instagram_result=Exception("Meta down"),
         facebook_result=Exception("Meta down"),
     )
-    with patches[0], patches[1], patches[2], patches[3]:
+    with patches[0], patches[1], patches[2], patches[3], patches[4]:
         result = await publisher.publisher_node(base_state)
 
     # All 3 actual publish attempts fail; TikTok still records manual_delivery,
@@ -239,3 +249,42 @@ async def test_publisher_all_fail(base_state):
     assert statuses.count("manual_delivery") == 1
     # Confidence = 0 published / 4 total = 0.0
     assert result["confidence"] == pytest.approx(0.0)
+
+
+# ---------------------------------------------------------------------------
+# P1 — Supabase approval verification
+# ---------------------------------------------------------------------------
+
+
+async def test_publisher_approval_verification(base_state):
+    """PUBLISHER queries SupabaseMemory.is_session_approved before publishing."""
+    patches, supa, _ = _patch_publisher(is_approved=True)
+    with patches[0], patches[1], patches[2], patches[3], patches[4]:
+        result = await publisher.publisher_node(base_state)
+
+    # The approval check was performed against the session_id from state
+    supa.is_session_approved.assert_awaited_once_with(base_state["session_id"])
+    # And publishing proceeded normally
+    assert result["status"] == StatusType.TASK_COMPLETE
+
+
+async def test_publisher_no_approval_safety_fault(base_state):
+    """No approved review_log row → SAFETY_FAULT, no publishing attempted."""
+    patches, supa, whatsapp_mock = _patch_publisher(is_approved=False)
+    # Patch all the publish tools so we can assert they were never called
+    with patches[0], patches[1], patches[2], patches[3], patches[4]:
+        result = await publisher.publisher_node(base_state)
+
+    # SAFETY_FAULT → ESCALATE_HUMAN action, FAILED status, 0.0 confidence
+    assert result["status"] == StatusType.FAILED
+    assert result["action"] == ActionType.ESCALATE_HUMAN
+    assert result["confidence"] == 0.0
+    # Errors list captures the fault
+    assert any(e.get("agent") == "publisher" for e in result.get("errors", []))
+
+    # Critical guarantee: no publishing happened
+    # log_publication and save_topic must not have been called
+    supa.log_publication.assert_not_awaited()
+    supa.save_topic.assert_not_awaited()
+    # No WhatsApp sent (no TikTok delivery, no summary, no failure alert)
+    whatsapp_mock.assert_not_awaited()

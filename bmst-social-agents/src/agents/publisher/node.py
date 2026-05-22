@@ -44,7 +44,7 @@ from src.protocols.io_schema import (
     PublicationResult,
 )
 from src.protocols.vocabulary import ActionType, FaultType, Platform, StatusType
-from src.tools import linkedin_api, meta_api
+from src.tools import linkedin_api, meta_api, whatsapp
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +52,12 @@ logger = logging.getLogger(__name__)
 # Default pillar to record when SCOUT didn't classify (shouldn't happen in
 # practice, but defensive — keeps the published_topics check constraint happy).
 _DEFAULT_PILLAR: str = "ai"
+
+# Threshold of failed platforms above which PUBLISHER alerts the approver
+# via WhatsApp (P5). With 3 publishable platforms (LinkedIn, Instagram,
+# Facebook) and TikTok as manual_delivery, hitting this threshold means
+# every API publish failed.
+_FAILURE_ALERT_THRESHOLD: int = 3
 
 
 # ---------------------------------------------------------------------------
@@ -157,6 +163,109 @@ async def _publish_facebook(
         return _make_failure_result(Platform.FACEBOOK, exc)
 
 
+async def _publish_tiktok(post: PlatformPost) -> PublicationResult:
+    """TikTok manual delivery (P3) — send caption to approver via WhatsApp.
+
+    TikTok publishing isn't implemented in the tools layer, so PUBLISHER
+    delivers the caption + hashtags to the approver via WhatsApp. They
+    post it manually. The PublicationResult records status='manual_delivery'
+    regardless of whether the WhatsApp send itself succeeded — the approver
+    can recover the caption from any logging if needed.
+    """
+    hashtags_text = " ".join(post.hashtags)
+    msg = (
+        "📱 TikTok content ready for manual posting:\n\n"
+        f"{post.caption}\n\n"
+        f"Hashtags: {hashtags_text}"
+    )
+    try:
+        await whatsapp.send_text(settings.revisor_approver_phone, msg)
+        logger.info("TikTok caption delivered via WhatsApp")
+    except Exception as exc:  # noqa: BLE001
+        logger.error(
+            "TikTok WhatsApp delivery failed",
+            extra={"error": str(exc)},
+        )
+
+    return _make_skip_result(
+        Platform.TIKTOK,
+        "tiktok publishing requires manual delivery — caption sent via WhatsApp",
+    )
+
+
+async def _send_failure_alert(
+    session_id: str,
+    failed_count: int,
+    failed_platforms: list[str],
+) -> None:
+    """Send a WhatsApp alert when 3 or more platforms failed (P5).
+
+    Best-effort: a failure to send the alert itself is logged but does not
+    propagate, so PUBLISHER can still complete its return cycle.
+    """
+    alert = (
+        "⚠️ PUBLISHER alert — multiple platform failures\n"
+        f"Session: {session_id}\n"
+        f"Failures: {failed_count}\n"
+        f"Failed platforms: {', '.join(failed_platforms)}\n"
+        "Review publication_log in Supabase."
+    )
+    try:
+        await whatsapp.send_text(settings.revisor_approver_phone, alert)
+        logger.info("PUBLISHER failure alert sent", extra={"session_id": session_id})
+    except Exception as exc:  # noqa: BLE001
+        logger.error(
+            "PUBLISHER failure alert WhatsApp send failed",
+            extra={"session_id": session_id, "error": str(exc)},
+        )
+
+
+def _build_summary_message(results: list[PublicationResult]) -> str:
+    """Build the final summary text PUBLISHER sends to the approver (P6).
+
+    Format per spec:
+        ✅ Daily content published:
+        Instagram: <url|failed>
+        Facebook: <url|failed>
+        LinkedIn: <url|failed>
+        TikTok: sent for manual posting
+    """
+    by_platform: dict[Platform, PublicationResult] = {r.platform: r for r in results}
+
+    def _line(label: str, platform: Platform) -> str:
+        result = by_platform.get(platform)
+        if result is None:
+            return f"{label}: not attempted"
+        if result.status == "published" and result.post_url:
+            return f"{label}: {result.post_url}"
+        if result.status == "published":
+            return f"{label}: published (no URL)"
+        return f"{label}: failed"
+
+    return "\n".join(
+        [
+            "✅ Daily content published:",
+            _line("Instagram", Platform.INSTAGRAM),
+            _line("Facebook", Platform.FACEBOOK),
+            _line("LinkedIn", Platform.LINKEDIN),
+            "TikTok: sent for manual posting",
+        ]
+    )
+
+
+async def _send_summary(session_id: str, results: list[PublicationResult]) -> None:
+    """Send the final summary WhatsApp to the approver (P6). Best-effort."""
+    summary = _build_summary_message(results)
+    try:
+        await whatsapp.send_text(settings.revisor_approver_phone, summary)
+        logger.info("PUBLISHER summary sent", extra={"session_id": session_id})
+    except Exception as exc:  # noqa: BLE001
+        logger.error(
+            "PUBLISHER summary WhatsApp send failed",
+            extra={"session_id": session_id, "error": str(exc)},
+        )
+
+
 def _fault_state(fault_output: AgentOutput, error_context: Any) -> dict:
     return {
         "current_agent": "publisher",
@@ -197,6 +306,34 @@ async def publisher_node(state: SocialAgentState) -> dict:
             "no posts or carousel to publish",
         )
 
+    # ── P1: Supabase approval verification ───────────────────────────────────
+    # Mandatory safety check before any publish. Even if state['approval_decision']
+    # says 'approved', we re-verify against review_log so a state-injection bug
+    # or webhook misfire can't slip unapproved content through.
+    supa = SupabaseMemory()
+    try:
+        await supa.connect()
+        is_approved = await supa.is_session_approved(session_id)
+    except Exception as exc:  # noqa: BLE001 — fail-safe: any check failure → SAFETY_FAULT
+        logger.error(
+            "PUBLISHER approval check failed",
+            extra={"session_id": session_id, "error": str(exc)},
+        )
+        return _fault_state(
+            handler.handle(FaultType.SAFETY_FAULT, {"step": "approval_check"}, retry_count=0),
+            f"approval verification could not be performed: {exc}",
+        )
+
+    if not is_approved:
+        logger.error(
+            "PUBLISHER halted — no approved review_log row for session",
+            extra={"session_id": session_id},
+        )
+        return _fault_state(
+            handler.handle(FaultType.SAFETY_FAULT, {"step": "not_approved"}, retry_count=0),
+            f"no approved review_log row for session {session_id}",
+        )
+
     image_url = _resolve_image_url(carousel)
     logger.info(
         "PUBLISHER resolved image",
@@ -216,13 +353,10 @@ async def publisher_node(state: SocialAgentState) -> dict:
     if facebook_post is not None:
         publish_tasks.append(_publish_facebook(facebook_post, image_url))
 
-    # TikTok: no tool exists yet; record as manual_delivery
-    if posts.get("tiktok") is not None:
-        tiktok_result = _make_skip_result(
-            Platform.TIKTOK,
-            "tiktok publishing not implemented — manual delivery required",
-        )
-        publish_tasks.append(asyncio.sleep(0, result=tiktok_result))  # type: ignore[call-overload]
+    # TikTok: P3 — send caption to approver via WhatsApp, record manual_delivery
+    tiktok_post = posts.get("tiktok")
+    if tiktok_post is not None:
+        publish_tasks.append(_publish_tiktok(tiktok_post))
 
     publication_results: list[PublicationResult] = list(
         await asyncio.gather(*publish_tasks)
@@ -243,10 +377,9 @@ async def publisher_node(state: SocialAgentState) -> dict:
         },
     )
 
-    # Persist publication log + topic dedup record
-    supa = SupabaseMemory()
+    # Persist publication log + topic dedup record. The Supabase client was
+    # already connected during the P1 approval check above; reusing it here.
     try:
-        await supa.connect()
         await asyncio.gather(*(supa.log_publication(r) for r in publication_results))
         if selected_topic is not None:
             await supa.save_topic(
@@ -260,6 +393,21 @@ async def publisher_node(state: SocialAgentState) -> dict:
             "PUBLISHER persistence failed",
             extra={"session_id": session_id, "error": str(exc)},
         )
+
+    # ── P5: failure alert ───────────────────────────────────────────────────
+    # When the number of failed platforms hits the threshold (3, meaning all
+    # 3 API platforms failed), notify the approver via WhatsApp before any
+    # return path. Best-effort — alert failure doesn't change the agent outcome.
+    if failed_count >= _FAILURE_ALERT_THRESHOLD:
+        failed_platforms = [
+            r.platform.value for r in publication_results if r.status == "failed"
+        ]
+        await _send_failure_alert(session_id, failed_count, failed_platforms)
+
+    # ── P6: final summary ───────────────────────────────────────────────────
+    # Sent once per run regardless of success/failure mix, so the approver
+    # always knows the outcome of the daily publish cycle.
+    await _send_summary(session_id, publication_results)
 
     # Status: if every attempt failed, fault the agent. Otherwise success.
     if publication_results and failed_count == len(publication_results):

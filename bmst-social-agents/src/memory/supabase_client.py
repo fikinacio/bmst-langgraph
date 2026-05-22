@@ -159,6 +159,25 @@ class SupabaseMemory:
             extra={"review_id": review_id, "decision": decision},
         )
 
+    async def is_session_approved(self, session_id: str) -> bool:
+        """Return True if any review_log row for this session is approved.
+
+        PUBLISHER uses this as a mandatory safety check before publishing —
+        defence-in-depth on top of state['approval_decision']. The 'decision'
+        the spec refers to is conceptually the HUMAN decision (the field
+        stored as human_decision in the review_log table). The AI recommendation
+        column is ai_recommendation, which is irrelevant for this gate.
+        """
+        result = await (
+            self._client.table("review_log")
+            .select("id")
+            .eq("session_id", session_id)
+            .eq("human_decision", "approved")
+            .limit(1)
+            .execute()
+        )
+        return bool(result.data)
+
     async def get_latest_pending_session(self, approver: str) -> Optional[str]:
         """Return the session_id of the most recent unresolved review for this approver.
 
