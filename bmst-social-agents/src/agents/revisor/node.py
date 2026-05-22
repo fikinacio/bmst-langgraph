@@ -39,6 +39,7 @@ from typing import Any, Optional
 from anthropic import AsyncAnthropic
 from pydantic import ValidationError
 
+from src.agents.writer.node import PLATFORM_SPECS, _count_prohibited_terms
 from src.config.settings import settings
 from src.memory.supabase_client import SupabaseMemory
 from src.orchestrator.state import SocialAgentState
@@ -80,6 +81,16 @@ no prose, no markdown fences.
 # Max revisions before forcing escalation (matches router constant)
 _MAX_REVISIONS: int = 3
 
+# Confidence threshold: content scoring below this is sent back to WRITER
+# even when the AI-detection score is clean. Provides defence-in-depth:
+# Claude's judge call might give a high score while structural checks
+# below still fail (e.g. char overflow, hashtag count mismatch).
+_CONFIDENCE_THRESHOLD: float = 0.80
+
+# Maximum number of issues to surface in the revision_note sent to WRITER.
+# Truncates the prompt while preserving the most actionable feedback.
+_MAX_ISSUES_IN_NOTE: int = 10
+
 # Approver display name (matches the approvers table seed)
 _APPROVER_NAME: str = "Fidel Inácio Kussunga"
 
@@ -110,6 +121,61 @@ def _build_content_bundle(
         for slide in carousel.slides:
             lines.append(f"  Slide {slide.slide_number}: {slide.headline} — {slide.body}")
     return "\n".join(lines)
+
+
+def _check_platform_compliance(post: PlatformPost) -> list[str]:
+    """Verify per-platform mechanical constraints. Returns human-readable issues.
+
+    Defence-in-depth: WRITER's _score_post already applies these checks at
+    generation time, but REVISOR re-verifies before approval to catch any
+    drift between what WRITER produced and what the platform actually accepts.
+
+    Checks:
+        - caption.char_count must be <= platform max
+        - len(hashtags) must be within [min_hashtags, max_hashtags] for the
+          platform
+    """
+    spec = PLATFORM_SPECS.get(post.platform)
+    if spec is None:
+        return []
+
+    issues: list[str] = []
+
+    if post.char_count > spec["max_chars"]:
+        issues.append(
+            f"{post.platform.value}: caption is {post.char_count} chars, "
+            f"exceeds platform maximum of {spec['max_chars']}"
+        )
+
+    n_hashtags = len(post.hashtags)
+    if n_hashtags < spec["min_hashtags"]:
+        issues.append(
+            f"{post.platform.value}: {n_hashtags} hashtags is below "
+            f"platform minimum of {spec['min_hashtags']}"
+        )
+    elif n_hashtags > spec["max_hashtags"]:
+        issues.append(
+            f"{post.platform.value}: {n_hashtags} hashtags exceeds "
+            f"platform maximum of {spec['max_hashtags']}"
+        )
+
+    return issues
+
+
+def _check_prohibited_terms_in_post(post: PlatformPost) -> list[str]:
+    """Independent prohibited-terms check (defence-in-depth over WRITER).
+
+    Uses WRITER's PROHIBITED_TERMS + _count_prohibited_terms so both agents
+    agree on the rule set. If WRITER ever leaks a banned term past its own
+    scoring (e.g. low-confidence post was accepted), REVISOR catches it here.
+    """
+    count = _count_prohibited_terms(post.caption)
+    if count > 0:
+        return [
+            f"{post.platform.value}: {count} prohibited term(s) detected "
+            "in caption (see WRITER PROHIBITED_TERMS)"
+        ]
+    return []
 
 
 def _build_preview(
@@ -308,8 +374,20 @@ async def revisor_node(state: SocialAgentState) -> dict:
     # ── Phase 1 — automatic scoring ───────────────────────────────────────────
     content_bundle = _build_content_bundle(posts, carousel)
 
-    quality_score, issues = await _score_quality(content_bundle)
+    quality_score, judge_issues = await _score_quality(content_bundle)
     ai_detection_score = await _score_ai_detection(posts, carousel)
+
+    # Defence-in-depth structural checks per platform (G1 + G2).
+    # These run independently of the Claude judge so structural drift
+    # between WRITER and the platform's actual rules can't slip through.
+    compliance_issues: list[str] = []
+    prohibited_issues: list[str] = []
+    for post in posts.values():
+        compliance_issues.extend(_check_platform_compliance(post))
+        prohibited_issues.extend(_check_prohibited_terms_in_post(post))
+
+    # Issues used by both review_log (audit) and the revision_note (feedback)
+    issues: list[str] = list(judge_issues) + compliance_issues + prohibited_issues
 
     logger.info(
         "REVISOR scores",
@@ -317,7 +395,9 @@ async def revisor_node(state: SocialAgentState) -> dict:
             "session_id": session_id,
             "quality_score": round(quality_score, 3),
             "ai_detection_score": round(ai_detection_score, 3),
-            "issue_count": len(issues),
+            "judge_issues": len(judge_issues),
+            "compliance_issues": len(compliance_issues),
+            "prohibited_issues": len(prohibited_issues),
         },
     )
 
@@ -399,6 +479,53 @@ async def revisor_node(state: SocialAgentState) -> dict:
             "review_results": review_results,
             "approval_decision": "revision_requested",
             "revision_note": ai_revision_note,
+            "pending_approval": False,
+        }
+
+    # Branch B+: QUALITY-FLAG — confidence below threshold or structural
+    # violations detected. Route back to WRITER with the issues list so the
+    # next revision can address them specifically.
+    quality_below_threshold = confidence < _CONFIDENCE_THRESHOLD
+    has_structural_violations = bool(compliance_issues or prohibited_issues)
+
+    if quality_below_threshold or has_structural_violations:
+        # Build a concise feedback note containing the most actionable issues.
+        capped_issues = issues[:_MAX_ISSUES_IN_NOTE]
+        truncation_note = (
+            f" (+{len(issues) - _MAX_ISSUES_IN_NOTE} more)"
+            if len(issues) > _MAX_ISSUES_IN_NOTE
+            else ""
+        )
+        quality_note = (
+            "Quality issues detected — please address: "
+            + "; ".join(capped_issues)
+            + truncation_note
+            if capped_issues
+            else (
+                f"Confidence {confidence:.2f} is below threshold "
+                f"{_CONFIDENCE_THRESHOLD:.2f}. Tighten brand voice and clarity."
+            )
+        )
+
+        logger.info(
+            "REVISOR quality-flagging content for revision",
+            extra={
+                "session_id": session_id,
+                "confidence": round(confidence, 3),
+                "below_threshold": quality_below_threshold,
+                "structural_violations": has_structural_violations,
+                "issue_count": len(issues),
+            },
+        )
+
+        return {
+            "current_agent": "revisor",
+            "action": ActionType.DELEGATE_AGENT,
+            "status": StatusType.BLOCKED,
+            "confidence": confidence,
+            "review_results": review_results,
+            "approval_decision": "revision_requested",
+            "revision_note": quality_note,
             "pending_approval": False,
         }
 

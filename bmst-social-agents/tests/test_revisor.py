@@ -244,3 +244,106 @@ async def test_revisor_logs_per_content_piece(base_state):
     # Each row has a unique review_id
     review_ids = {r.review_id for r in result["review_results"]}
     assert len(review_ids) == 5
+
+
+# ---------------------------------------------------------------------------
+# Group A — defence-in-depth checks (G1 + G2 + G3 + G4)
+# ---------------------------------------------------------------------------
+
+
+async def test_revisor_platform_compliance_instagram(base_state):
+    """Instagram caption over 2200 chars → routed back to WRITER with issues."""
+    # Replace the Instagram post with an over-limit caption (3000 chars)
+    state = {
+        **base_state,
+        "posts": {
+            **base_state["posts"],
+            "instagram": PlatformPost(
+                platform=Platform.INSTAGRAM,
+                caption="a" * 3000,  # 3000 chars > 2200 IG limit
+                hashtags=["#a", "#b", "#c", "#d", "#e"],
+                image_brief="brief",
+            ),
+        },
+    }
+    judge = _fake_claude_judge(score=0.95, issues=[])  # judge says clean
+    patches, _, ws, _ = _patch_revisor_deps(
+        judge_response=judge, ai_detection_score=0.2,  # also clean on AI side
+    )
+
+    with patches[0], patches[1], patches[2], patches[3]:
+        result = await revisor.revisor_node(state)
+
+    # Compliance violation → QUALITY-FLAG branch
+    assert result["approval_decision"] == "revision_requested"
+    assert result["pending_approval"] is False
+    assert result["status"] == StatusType.BLOCKED
+    assert result["action"] == ActionType.DELEGATE_AGENT
+    # Note mentions the char overflow
+    note = result.get("revision_note", "")
+    assert "instagram" in note.lower()
+    assert "3000" in note
+    assert "2200" in note
+    # No WhatsApp sent on the quality-flag path
+    ws.assert_not_awaited()
+
+
+async def test_revisor_platform_compliance_linkedin(base_state):
+    """LinkedIn post with 10 hashtags → routed back to WRITER (LI max is 5)."""
+    state = {
+        **base_state,
+        "posts": {
+            **base_state["posts"],
+            "linkedin": PlatformPost(
+                platform=Platform.LINKEDIN,
+                caption="Reflexão profissional sobre processos digitais.",
+                hashtags=[f"#tag{i}" for i in range(10)],  # 10 hashtags > 5 max
+                image_brief="brief",
+            ),
+        },
+    }
+    judge = _fake_claude_judge(score=0.95, issues=[])
+    patches, _, ws, _ = _patch_revisor_deps(
+        judge_response=judge, ai_detection_score=0.2,
+    )
+
+    with patches[0], patches[1], patches[2], patches[3]:
+        result = await revisor.revisor_node(state)
+
+    assert result["approval_decision"] == "revision_requested"
+    assert result["pending_approval"] is False
+    note = result.get("revision_note", "")
+    assert "linkedin" in note.lower()
+    assert "10 hashtags" in note  # exact phrasing from the helper
+    ws.assert_not_awaited()
+
+
+async def test_revisor_prohibited_terms(base_state):
+    """Any prohibited term in any caption → routed back to WRITER."""
+    state = {
+        **base_state,
+        "posts": {
+            **base_state["posts"],
+            "facebook": PlatformPost(
+                platform=Platform.FACEBOOK,
+                caption="O chatbot vai mudar tudo — IA aplicada no escritório.",
+                hashtags=["#a", "#b", "#c"],
+                image_brief="brief",
+            ),
+        },
+    }
+    judge = _fake_claude_judge(score=0.95, issues=[])
+    patches, _, ws, _ = _patch_revisor_deps(
+        judge_response=judge, ai_detection_score=0.2,  # clean AI score
+    )
+
+    with patches[0], patches[1], patches[2], patches[3]:
+        result = await revisor.revisor_node(state)
+
+    # Caught by the prohibited-terms guard, not the AI-flag guard
+    assert result["approval_decision"] == "revision_requested"
+    assert result["pending_approval"] is False
+    note = result.get("revision_note", "")
+    assert "facebook" in note.lower()
+    assert "prohibited" in note.lower()
+    ws.assert_not_awaited()
