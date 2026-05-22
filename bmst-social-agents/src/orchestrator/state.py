@@ -33,6 +33,9 @@ class SocialAgentState(TypedDict):
     # ── SCOUT output ─────────────────────────────────────────────────────────
     research_briefs: list[ResearchBrief]
     selected_topic: Optional[ResearchBrief]
+    # Pillar of the selected topic — 'ai' or 'automation'. SCOUT writes it,
+    # PUBLISHER reads it to call supabase.save_topic() for rotation tracking.
+    selected_pillar: Optional[str]
 
     # ── WRITER output ────────────────────────────────────────────────────────
     # Keyed by platform name (e.g. "linkedin" → PlatformPost)

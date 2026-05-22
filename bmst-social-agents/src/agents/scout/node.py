@@ -173,8 +173,11 @@ async def _build_brief(result: dict, llm: AsyncAnthropic) -> ResearchBrief:
     own relevance_score in the brief, which may differ slightly after
     reading the article. Pydantic validates summary length (<=150 words).
 
-    # TODO: add scout_model to settings (e.g. claude-haiku)
-    # to reduce cost on daily summarisation calls
+    # DEFERRED: a dedicated scout_model setting (e.g. claude-haiku) would
+    # reduce cost on daily summarisation calls. REVISOR already has its own
+    # revisor_model setting; SCOUT could follow the same pattern. Not
+    # implemented now because daily Tavily+Claude usage is well within budget
+    # and adding the setting is an enhancement, not a fix.
     """
     user_prompt = (
         "Build a research brief for this article.\n\n"
@@ -393,6 +396,9 @@ async def scout_node(state: SocialAgentState) -> dict:
     # fully-built brief; building a brief per Tavily result would mean
     # 7×10 = up to 70 Claude calls per run, which isn't worth the cost
     # since only selected_topic is consumed downstream by WRITER.
+    # The selected result's "_pillar" was set during classification above.
+    selected_pillar = top_result.get("_pillar")
+
     return {
         "current_agent": "scout",
         "action": ActionType.COMPLETE,
@@ -400,4 +406,5 @@ async def scout_node(state: SocialAgentState) -> dict:
         "confidence": selected_brief.relevance_score,
         "research_briefs": [selected_brief],
         "selected_topic": selected_brief,
+        "selected_pillar": selected_pillar,
     }

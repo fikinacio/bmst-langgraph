@@ -167,6 +167,7 @@ async def run_graph(session_id: str) -> SocialAgentState:
         "run_date": date.today().isoformat(),
         "research_briefs": [],
         "selected_topic": None,
+        "selected_pillar": None,
         "posts": {},
         "carousel": None,
         "review_results": [],

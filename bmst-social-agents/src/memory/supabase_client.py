@@ -159,6 +159,26 @@ class SupabaseMemory:
             extra={"review_id": review_id, "decision": decision},
         )
 
+    async def get_latest_pending_session(self, approver: str) -> Optional[str]:
+        """Return the session_id of the most recent unresolved review for this approver.
+
+        Used by the WhatsApp webhook to identify which session the human's
+        reply applies to. Picks the most-recently-created row where
+        human_decision IS NULL and approver matches.
+        """
+        result = await (
+            self._client.table("review_log")
+            .select("session_id, created_at")
+            .is_("human_decision", "null")
+            .eq("approver", approver)
+            .order("created_at", desc=True)
+            .limit(1)
+            .execute()
+        )
+        if result.data:
+            return result.data[0].get("session_id")
+        return None
+
     async def update_approval_by_session(
         self,
         session_id: str,
