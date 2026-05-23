@@ -1,0 +1,295 @@
+metadata:
+  version: "1.0.0"
+  agent: "publisher"
+  description: "Evaluation dataset for the PUBLISHER agent — multi-platform publication and fault handling."
+
+# Shared fixtures
+_posts_anchor: &posts
+  instagram:
+    platform: "instagram"
+    caption: "Caption para Instagram sobre automação. #angola #tech #fidelinacio #bmst #empreender"
+    hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+    image_brief: "Escritório moderno em Luanda"
+  linkedin:
+    platform: "linkedin"
+    caption: "Post profissional sobre automação em PMEs angolanas. #angola #automacao #pme"
+    hashtags: ["#angola", "#automacao", "#pme"]
+    image_brief: "Diagrama de fluxo de trabalho"
+  facebook:
+    platform: "facebook"
+    caption: "Post comunitário sobre automação digital. #angola #negócios"
+    hashtags: ["#angola", "#negócios"]
+    image_brief: "Equipa satisfeita"
+  tiktok:
+    platform: "tiktok"
+    caption: "3 passos para automatizar o seu negócio. #angola #tech #bmst"
+    hashtags: ["#angola", "#tech", "#bmst"]
+    image_brief: "Vídeo dinâmico TikTok"
+
+_carousel_anchor: &carousel
+  carousel_title: "5 Passos para Automatizar a Sua PME"
+  platform: "instagram"
+  slides:
+    - slide_number: 1
+      headline: "Está preso em tarefas repetitivas?"
+      body: "A maioria das PMEs angolanas perde horas por semana em processos manuais."
+      visual_brief: "Relógio com horas perdidas"
+      canva_asset_url: "https://canva.example/slide_1.png"
+    - slide_number: 2
+      headline: "Passo 1: Mapeie os processos"
+      body: "Liste tudo o que faz manualmente e priorize pelo impacto."
+      visual_brief: "Lista de processos"
+      canva_asset_url: "https://canva.example/slide_2.png"
+    - slide_number: 3
+      headline: "Comece hoje"
+      body: "Contacte a BMST para uma análise gratuita do seu negócio."
+      visual_brief: "CTA BMST"
+      canva_asset_url: "https://canva.example/slide_3.png"
+  caption: "5 passos para automatizar a sua PME."
+  hashtags: ["#angola", "#automacao", "#bmst"]
+
+_brief_anchor: &brief
+  topic: "Automação de processos em PMEs angolanas"
+  source_url: "https://angola.example.com/automation"
+  summary: "Empresas angolanas adoptam automação para ganhar eficiência operacional."
+  relevance_score: 0.88
+  content_angles:
+    - "ROI de automação em PMEs"
+    - "Casos práticos em Luanda"
+  platforms_fit:
+    - linkedin
+    - instagram
+
+cases:
+
+  # ── Happy Path ────────────────────────────────────────────────────────────
+
+  - id: "publisher_hp_001"
+    description: "All 3 API platforms succeed + TikTok manual delivery — full success."
+    agent_target: "publisher"
+    scenario_type: "happy_path"
+    mocks:
+      is_approved: true
+      linkedin_error: null
+      instagram_error: null
+      facebook_error: null
+      has_carousel: true
+    input:
+      session_id: "ds-publisher-001"
+      run_date: "2026-05-23"
+      posts: *posts
+      carousel: *carousel
+      selected_topic: *brief
+      selected_pillar: "automation"
+      approval_decision: "approved"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.60
+      confidence_max: 0.80
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "all_platforms", "tiktok_manual"]
+
+  - id: "publisher_hp_002"
+    description: "No carousel — Instagram falls back to manual_delivery, others publish normally."
+    agent_target: "publisher"
+    scenario_type: "happy_path"
+    mocks:
+      is_approved: true
+      linkedin_error: null
+      instagram_error: null
+      facebook_error: null
+      has_carousel: false
+    input:
+      session_id: "ds-publisher-002"
+      run_date: "2026-05-23"
+      posts: *posts
+      carousel: null
+      selected_topic: *brief
+      selected_pillar: "ai"
+      approval_decision: "approved"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.40
+      confidence_max: 0.70
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "no_carousel", "instagram_manual"]
+
+  # ── Partial Success ───────────────────────────────────────────────────────
+
+  - id: "publisher_ps_001"
+    description: "Instagram API fails — 1 failed, LinkedIn+Facebook published, TikTok manual."
+    agent_target: "publisher"
+    scenario_type: "partial_success"
+    mocks:
+      is_approved: true
+      linkedin_error: null
+      instagram_error: "Meta API 503 Service Unavailable"
+      facebook_error: null
+      has_carousel: true
+    input:
+      session_id: "ds-publisher-ps-001"
+      run_date: "2026-05-23"
+      posts: *posts
+      carousel: *carousel
+      selected_topic: *brief
+      selected_pillar: "automation"
+      approval_decision: "approved"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.30
+      confidence_max: 0.70
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["partial_success", "instagram_fail", "meta_error"]
+
+  - id: "publisher_ps_002"
+    description: "LinkedIn API fails — 1 failed, Instagram+Facebook published, TikTok manual."
+    agent_target: "publisher"
+    scenario_type: "partial_success"
+    mocks:
+      is_approved: true
+      linkedin_error: "LinkedIn OAuth token expired"
+      instagram_error: null
+      facebook_error: null
+      has_carousel: true
+    input:
+      session_id: "ds-publisher-ps-002"
+      run_date: "2026-05-23"
+      posts: *posts
+      carousel: *carousel
+      selected_topic: *brief
+      selected_pillar: "ai"
+      approval_decision: "approved"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.30
+      confidence_max: 0.70
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["partial_success", "linkedin_fail", "oauth_error"]
+
+  # ── TikTok Delivery ───────────────────────────────────────────────────────
+
+  - id: "publisher_tk_001"
+    description: "TikTok manual delivery: WhatsApp sent with content package, manual_delivery recorded."
+    agent_target: "publisher"
+    scenario_type: "tiktok_delivery"
+    mocks:
+      is_approved: true
+      linkedin_error: null
+      instagram_error: null
+      facebook_error: null
+      has_carousel: true
+    input:
+      session_id: "ds-publisher-tk-001"
+      run_date: "2026-05-23"
+      posts: *posts
+      carousel: *carousel
+      selected_topic: *brief
+      selected_pillar: "automation"
+      approval_decision: "approved"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.60
+      confidence_max: 0.80
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["tiktok_delivery", "whatsapp_delivery", "manual_delivery"]
+
+  # ── Fault Scenarios ───────────────────────────────────────────────────────
+
+  - id: "publisher_fs_001"
+    description: "No approval record in Supabase — SAFETY_FAULT, zero publishing attempted."
+    agent_target: "publisher"
+    scenario_type: "fault_scenario"
+    mocks:
+      is_approved: false
+      linkedin_error: null
+      instagram_error: null
+      facebook_error: null
+      has_carousel: true
+    input:
+      session_id: "ds-publisher-fs-001"
+      run_date: "2026-05-23"
+      posts: *posts
+      carousel: *carousel
+      selected_topic: *brief
+      selected_pillar: "automation"
+      approval_decision: "approved"
+    expected_output:
+      action: "escalate_human"
+      status: "failed"
+      confidence_min: 0.00
+      confidence_max: 0.10
+    expected_behavior:
+      should_escalate: true
+      should_block: true
+    tags: ["fault_scenario", "safety_fault", "no_approval", "zero_publishing"]
+
+  - id: "publisher_fs_002"
+    description: "All 3 API platforms fail — only TikTok manual_delivery succeeds, confidence 0.0."
+    agent_target: "publisher"
+    scenario_type: "fault_scenario"
+    mocks:
+      is_approved: true
+      linkedin_error: "LinkedIn API unreachable"
+      instagram_error: "Meta API unreachable"
+      facebook_error: "Meta API unreachable"
+      has_carousel: true
+    input:
+      session_id: "ds-publisher-fs-002"
+      run_date: "2026-05-23"
+      posts: *posts
+      carousel: *carousel
+      selected_topic: *brief
+      selected_pillar: "ai"
+      approval_decision: "approved"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.00
+      confidence_max: 0.10
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["fault_scenario", "all_platforms_fail", "only_tiktok_succeeds"]
+
+  - id: "publisher_fs_003"
+    description: "Meta API rate limit (HTTP 429 treated as exception) — IG+FB fail, LI and TikTok succeed."
+    agent_target: "publisher"
+    scenario_type: "fault_scenario"
+    mocks:
+      is_approved: true
+      linkedin_error: null
+      instagram_error: "Meta Graph API rate limit exceeded (HTTP 429)"
+      facebook_error: "Meta Graph API rate limit exceeded (HTTP 429)"
+      has_carousel: true
+    input:
+      session_id: "ds-publisher-fs-003"
+      run_date: "2026-05-23"
+      posts: *posts
+      carousel: *carousel
+      selected_topic: *brief
+      selected_pillar: "automation"
+      approval_decision: "approved"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.15
+      confidence_max: 0.45
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["fault_scenario", "rate_limit", "meta_429", "partial_failure"]

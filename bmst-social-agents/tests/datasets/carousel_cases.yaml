@@ -1,0 +1,392 @@
+metadata:
+  version: "1.0.0"
+  agent: "carousel"
+  description: "Evaluation dataset for the CAROUSEL agent — slide structure and Canva image generation."
+
+# Shared inputs reused across cases
+_brief_anchor: &brief
+  topic: "Automação de processos em PMEs angolanas"
+  source_url: "https://angola.example.com/automation"
+  summary: "Empresas angolanas adoptam automação para ganhar eficiência operacional."
+  relevance_score: 0.88
+  content_angles:
+    - "ROI de automação em PMEs"
+    - "Casos práticos em Luanda"
+    - "Primeiros passos para digitalizar"
+  platforms_fit:
+    - linkedin
+    - instagram
+
+_posts_anchor: &posts
+  instagram:
+    platform: "instagram"
+    caption: "Hook. Body. CTA. #angola #tech #fidelinacio #bmst #empreender"
+    hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+    image_brief: "Escritório moderno em Luanda"
+  linkedin:
+    platform: "linkedin"
+    caption: "Post profissional sobre automação em PMEs. #angola #automacao #pme"
+    hashtags: ["#angola", "#automacao", "#pme"]
+    image_brief: "Diagrama de fluxo de trabalho"
+  facebook:
+    platform: "facebook"
+    caption: "Post comunitário sobre automação. #angola #negócios"
+    hashtags: ["#angola", "#negócios"]
+    image_brief: "Equipa satisfeita"
+  tiktok:
+    platform: "tiktok"
+    caption: "Post TikTok rápido. #angola #tech #bmst"
+    hashtags: ["#angola", "#tech", "#bmst"]
+    image_brief: "Vídeo dinâmico"
+
+cases:
+
+  # ── Happy Path ────────────────────────────────────────────────────────────
+
+  - id: "carousel_hp_001"
+    description: "Standard 5-slide carousel — all Canva images generated successfully."
+    agent_target: "carousel"
+    scenario_type: "happy_path"
+    mocks:
+      claude_carousel:
+        carousel_title: "5 Passos para Automatizar a Sua PME"
+        platform: "instagram"
+        slides:
+          - slide_number: 1
+            headline: "Está preso em tarefas que um sistema podia fazer?"
+            body: "A maioria das PMEs angolanas ainda perde horas por semana em processos repetitivos."
+            visual_brief: "Relógio com horas perdidas visíveis"
+            canva_asset_url: null
+          - slide_number: 2
+            headline: "Passo 1: Mapeie os seus processos"
+            body: "Liste tudo o que faz manualmente. Facturas, relatórios, comunicações internas."
+            visual_brief: "Lista de processos com checkboxes"
+            canva_asset_url: null
+          - slide_number: 3
+            headline: "Passo 2: Priorize pelo impacto"
+            body: "Comece pelo processo que mais tempo consome. Um processo certo muda tudo."
+            visual_brief: "Matriz de impacto vs esforço"
+            canva_asset_url: null
+          - slide_number: 4
+            headline: "Passo 3: Escolha a ferramenta certa"
+            body: "Não existe ferramenta universal. Existe a ferramenta certa para o seu contexto."
+            visual_brief: "Comparação visual de 3 ferramentas"
+            canva_asset_url: null
+          - slide_number: 5
+            headline: "Comece hoje — a BMST ajuda"
+            body: "Contacte a BMST para uma análise gratuita do potencial de automação do seu negócio."
+            visual_brief: "CTA com logo BMST e contacto"
+            canva_asset_url: null
+        caption: "5 passos concretos para automatizar a sua PME em Angola. Qual é o seu passo 1?"
+        hashtags: ["#angola", "#automacao", "#bmst", "#empreender"]
+      canva_urls:
+        - "https://canva.example/carousel_001_slide_1.png"
+        - "https://canva.example/carousel_001_slide_2.png"
+        - "https://canva.example/carousel_001_slide_3.png"
+        - "https://canva.example/carousel_001_slide_4.png"
+        - "https://canva.example/carousel_001_slide_5.png"
+    input:
+      session_id: "ds-carousel-001"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      posts: *posts
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.95
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "5_slides", "all_canva_success"]
+
+  - id: "carousel_hp_002"
+    description: "7-slide carousel — all Canva images succeed, higher slide count."
+    agent_target: "carousel"
+    scenario_type: "happy_path"
+    mocks:
+      claude_carousel:
+        carousel_title: "7 Erros que Impedem a sua PME de Crescer"
+        platform: "instagram"
+        slides:
+          - slide_number: 1
+            headline: "Porquê as boas equipas ficam presas em empresas que não crescem?"
+            body: "Não é falta de talento. São 7 erros de sistema que travam o crescimento."
+            visual_brief: "Equipa frustrada em escritório"
+            canva_asset_url: null
+          - slide_number: 2
+            headline: "Erro 1: Aprovações manuais"
+            body: "Cada aprovação manual cria um gargalo. Sistemas automáticos eliminam filas."
+            visual_brief: "Fila de espera vs aprovação automática"
+            canva_asset_url: null
+          - slide_number: 3
+            headline: "Erro 2: Dados em silos"
+            body: "Informação fragmentada em Excel, WhatsApp e papel cria decisões cegas."
+            visual_brief: "Dados fragmentados vs dashboard centralizado"
+            canva_asset_url: null
+          - slide_number: 4
+            headline: "Erro 3: Relatórios manuais"
+            body: "Relatórios feitos à mão demoram horas e chegam tarde. Automatize-os."
+            visual_brief: "Pessoa a fazer relatório vs relatório automático"
+            canva_asset_url: null
+          - slide_number: 5
+            headline: "Erro 4: Comunicação sem registo"
+            body: "Acordos em WhatsApp perdem-se. Sistemas de registo protegem o negócio."
+            visual_brief: "Mensagens WhatsApp vs CRM organizado"
+            canva_asset_url: null
+          - slide_number: 6
+            headline: "Erro 5: Onboarding manual"
+            body: "Cada novo colaborador reinventa a roda. Processos documentados mudam isso."
+            visual_brief: "Onboarding caótico vs processo estruturado"
+            canva_asset_url: null
+          - slide_number: 7
+            headline: "Está pronto para corrigir estes erros?"
+            body: "A BMST ajuda PMEs angolanas a eliminar estes bloqueios. Fale connosco."
+            visual_brief: "CTA com contacto BMST"
+            canva_asset_url: null
+        caption: "7 erros de sistema que travam o crescimento das PMEs angolanas. Quantos reconhece?"
+        hashtags: ["#angola", "#crescimento", "#bmst", "#pme"]
+      canva_urls:
+        - "https://canva.example/carousel_002_slide_1.png"
+        - "https://canva.example/carousel_002_slide_2.png"
+        - "https://canva.example/carousel_002_slide_3.png"
+        - "https://canva.example/carousel_002_slide_4.png"
+        - "https://canva.example/carousel_002_slide_5.png"
+        - "https://canva.example/carousel_002_slide_6.png"
+        - "https://canva.example/carousel_002_slide_7.png"
+    input:
+      session_id: "ds-carousel-002"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      posts: *posts
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.95
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "7_slides", "all_canva_success"]
+
+  # ── Edge Cases ────────────────────────────────────────────────────────────
+
+  - id: "carousel_ec_001"
+    description: "Canva fails for 3 of 5 slides — confidence degrades, still TASK_COMPLETE."
+    agent_target: "carousel"
+    scenario_type: "edge_case"
+    mocks:
+      claude_carousel:
+        carousel_title: "3 Razões Para Automatizar Hoje"
+        platform: "instagram"
+        slides:
+          - slide_number: 1
+            headline: "Porquê automatizar agora e não depois?"
+            body: "Cada dia sem automação tem um custo invisível: tempo, erros, oportunidades perdidas."
+            visual_brief: "Relógio com custo acumulado"
+            canva_asset_url: null
+          - slide_number: 2
+            headline: "Razão 1: Tempo é o recurso mais escasso"
+            body: "Sistemas automáticos recuperam entre 1 e 3 horas diárias por colaborador."
+            visual_brief: "Gráfico de tempo recuperado"
+            canva_asset_url: null
+          - slide_number: 3
+            headline: "Razão 2: Erros humanos custam dinheiro"
+            body: "Automação reduz erros de processamento em até 80% nas operações repetitivas."
+            visual_brief: "Antes e depois: erros reduzidos"
+            canva_asset_url: null
+          - slide_number: 4
+            headline: "Razão 3: Escalar sem contratar"
+            body: "Com processos automáticos, o volume de trabalho cresce sem o custo de mais pessoas."
+            visual_brief: "Gráfico de escala vs custo de pessoal"
+            canva_asset_url: null
+          - slide_number: 5
+            headline: "O próximo passo é seu"
+            body: "Contacte a BMST e descubra quanto tempo está a perder por mês no seu negócio."
+            visual_brief: "CTA com BMST"
+            canva_asset_url: null
+        caption: "3 razões para automatizar hoje. Qual é a que mais ressoa consigo?"
+        hashtags: ["#angola", "#automacao", "#bmst", "#empreender"]
+      canva_urls:
+        - "https://canva.example/carousel_ec_001_slide_1.png"
+        - null
+        - "https://canva.example/carousel_ec_001_slide_3.png"
+        - null
+        - null
+    input:
+      session_id: "ds-carousel-ec-001"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      posts: *posts
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.40
+      confidence_max: 0.70
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["edge_case", "canva_partial_failure", "3_slides_failed"]
+
+  - id: "carousel_ec_002"
+    description: "Topic with no clear slide structure — broad subject, writer structures freely."
+    agent_target: "carousel"
+    scenario_type: "edge_case"
+    mocks:
+      claude_carousel:
+        carousel_title: "O Futuro do Trabalho em Angola"
+        platform: "instagram"
+        slides:
+          - slide_number: 1
+            headline: "Como será trabalhar em Angola daqui a 5 anos?"
+            body: "A tecnologia está a mudar o trabalho. Angola não é excepção — é oportunidade."
+            visual_brief: "Visão futurista de escritório angolano"
+            canva_asset_url: null
+          - slide_number: 2
+            headline: "Tendência 1: Trabalho híbrido e remoto"
+            body: "Ferramentas digitais permitem equipas distribuídas sem perda de coordenação."
+            visual_brief: "Mapa de Angola com pontos de trabalho remoto"
+            canva_asset_url: null
+          - slide_number: 3
+            headline: "Tendência 2: Sistemas que substituem tarefas repetitivas"
+            body: "Não empregos — tarefas. A mudança liberta pessoas para trabalho de maior valor."
+            visual_brief: "Gráfico de tarefas antes e depois de automação"
+            canva_asset_url: null
+          - slide_number: 4
+            headline: "O que isto significa para si?"
+            body: "Adaptar ou ficar para trás. A boa notícia: adaptar nunca foi tão acessível."
+            visual_brief: "Pessoa a tomar decisão de adaptação"
+            canva_asset_url: null
+          - slide_number: 5
+            headline: "A BMST prepara empresas para este futuro"
+            body: "Fale connosco e saiba como preparar o seu negócio para os próximos 5 anos."
+            visual_brief: "CTA BMST com visão de futuro"
+            canva_asset_url: null
+        caption: "O futuro do trabalho em Angola está a chegar mais rápido do que pensa. Está preparado?"
+        hashtags: ["#angola", "#futurodotrabalho", "#bmst", "#digital"]
+      canva_urls:
+        - "https://canva.example/carousel_ec_002_slide_1.png"
+        - "https://canva.example/carousel_ec_002_slide_2.png"
+        - "https://canva.example/carousel_ec_002_slide_3.png"
+        - "https://canva.example/carousel_ec_002_slide_4.png"
+        - "https://canva.example/carousel_ec_002_slide_5.png"
+    input:
+      session_id: "ds-carousel-ec-002"
+      run_date: "2026-05-23"
+      selected_topic:
+        topic: "Futuro do trabalho em Angola — tendências emergentes"
+        source_url: "https://future.example.com/angola-work"
+        summary: "Análise de tendências futuras do trabalho em Angola, incluindo digitalização e automação."
+        relevance_score: 0.76
+        content_angles:
+          - "Trabalho híbrido em Angola"
+          - "Automação e mercado de trabalho"
+        platforms_fit:
+          - instagram
+          - linkedin
+      posts: *posts
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.80
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["edge_case", "broad_topic", "free_structure"]
+
+  # ── Fault Scenarios ───────────────────────────────────────────────────────
+
+  - id: "carousel_fs_001"
+    description: "Canva API completely down — all slides return None, confidence near zero."
+    agent_target: "carousel"
+    scenario_type: "fault_scenario"
+    mocks:
+      claude_carousel:
+        carousel_title: "Automação Passo a Passo"
+        platform: "instagram"
+        slides:
+          - slide_number: 1
+            headline: "Onde começa a automação numa PME?"
+            body: "Começa sempre pelo processo mais doloroso. Identifique-o e comece por aí."
+            visual_brief: "Mapa de processo com ponto de partida destacado"
+            canva_asset_url: null
+          - slide_number: 2
+            headline: "Audite antes de automatizar"
+            body: "Automatizar um processo quebrado apenas acelera o problema. Corrija primeiro."
+            visual_brief: "Auditoria de processo com notas de melhoria"
+            canva_asset_url: null
+          - slide_number: 3
+            headline: "Escolha ferramentas com integração nativa"
+            body: "Ferramentas que não falam entre si criam novos silos. Prefira ecossistemas."
+            visual_brief: "Diagrama de integração entre ferramentas"
+            canva_asset_url: null
+          - slide_number: 4
+            headline: "Meça o impacto desde o primeiro dia"
+            body: "Sem métricas não há aprendizagem. Defina KPIs antes de implementar."
+            visual_brief: "Dashboard de KPIs de automação"
+            canva_asset_url: null
+          - slide_number: 5
+            headline: "Itere, não perfeccione"
+            body: "Uma automação simples hoje bate um plano perfeito para amanhã. Comece."
+            visual_brief: "Ciclo iterativo de melhoria contínua"
+            canva_asset_url: null
+        caption: "Automação passo a passo para PMEs angolanas. Por onde começa o seu negócio?"
+        hashtags: ["#angola", "#automacao", "#bmst", "#pme"]
+      canva_urls:
+        - null
+        - null
+        - null
+        - null
+        - null
+    input:
+      session_id: "ds-carousel-fs-001"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      posts: *posts
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.00
+      confidence_max: 0.30
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["fault_scenario", "canva_down", "all_slides_failed"]
+
+  - id: "carousel_fs_002"
+    description: "Claude returns only 2 slides (below min 3) — ValidationError → EXECUTION_FAULT."
+    agent_target: "carousel"
+    scenario_type: "fault_scenario"
+    mocks:
+      claude_carousel:
+        carousel_title: "Automação Rápida"
+        platform: "instagram"
+        slides:
+          - slide_number: 1
+            headline: "Porquê automatizar?"
+            body: "Poupa tempo e reduz erros no seu negócio angolano."
+            visual_brief: "Imagem de poupança de tempo"
+            canva_asset_url: null
+          - slide_number: 2
+            headline: "Contacte a BMST"
+            body: "Fale com a BMST para começar a automatizar o seu negócio hoje."
+            visual_brief: "CTA BMST"
+            canva_asset_url: null
+      canva_urls:
+        - null
+        - null
+    input:
+      session_id: "ds-carousel-fs-002"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      posts: *posts
+    expected_output:
+      action: "fail"
+      status: "failed"
+      confidence_min: 0.00
+      confidence_max: 0.30
+    expected_behavior:
+      should_escalate: false
+      should_block: true
+    tags: ["fault_scenario", "too_few_slides", "validation_error", "schema_fault"]

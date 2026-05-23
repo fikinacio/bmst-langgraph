@@ -1,0 +1,507 @@
+metadata:
+  version: "1.0.0"
+  agent: "writer"
+  description: "Evaluation dataset for the WRITER agent — platform-specific content generation."
+
+# Shared research brief used by most writer test cases
+_brief_anchor: &brief
+  topic: "Automação de processos em PMEs angolanas"
+  source_url: "https://angola.example.com/automation"
+  summary: >
+    Empresas angolanas de pequena e média dimensão estão a adoptar automação
+    de processos para ganhar eficiência operacional e reduzir custos manuais.
+  relevance_score: 0.88
+  content_angles:
+    - "ROI de automação em PMEs"
+    - "Casos práticos em Luanda"
+    - "Primeiros passos para digitalizar"
+  platforms_fit:
+    - linkedin
+    - instagram
+    - facebook
+    - tiktok
+
+cases:
+
+  # ── Happy Path ────────────────────────────────────────────────────────────
+
+  - id: "writer_hp_001"
+    description: "Fresh write for all 4 platforms — clean content, no prohibited terms."
+    agent_target: "writer"
+    scenario_type: "happy_path"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "Está a gerir tudo manualmente no seu negócio? Há uma forma melhor. Sistemas automáticos poupam horas por semana. Experimente e veja o impacto directo. #angola #tech #empreender #bmst #fidelinacio"
+          hashtags: ["#angola", "#tech", "#empreender", "#bmst", "#fidelinacio"]
+          image_brief: "Foto de um escritório moderno em Luanda com ecrãs mostrando dashboards"
+        - platform: "linkedin"
+          caption: "A automação de processos deixou de ser exclusiva das grandes empresas. PMEs em Angola já utilizam fluxos automáticos para facturas, relatórios e comunicações. O resultado: menos erros, mais tempo para crescer. Como está a preparar o seu negócio?"
+          hashtags: ["#angola", "#automacao", "#pme"]
+          image_brief: "Diagrama de fluxo de trabalho automático"
+        - platform: "facebook"
+          caption: "No meu trabalho com empresas angolanas, vejo sempre o mesmo padrão: equipas excelentes presas em tarefas repetitivas. A automação liberta essa energia para o que realmente importa. Quem já fez esta mudança, conta?"
+          hashtags: ["#angola", "#empreender"]
+          image_brief: "Equipa de trabalho satisfeita em escritório angolano"
+        - platform: "tiktok"
+          caption: "3 processos que a sua empresa devia automatizar já. Facturas manuais? Fora. Relatórios em Excel? Fora. E-mails repetitivos? Fora. A sua equipa merece melhor. #angola #tech #bmst"
+          hashtags: ["#angola", "#tech", "#bmst"]
+          image_brief: "Vídeo dinâmico com texto animado sobre automação"
+    input:
+      session_id: "ds-writer-001"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      selected_pillar: "automation"
+      revision_note: null
+      revision_count: 0
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.90
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "all_platforms", "clean_content"]
+
+  - id: "writer_hp_002"
+    description: "Fresh write with LinkedIn-heavy topic — professional tone, thought leadership."
+    agent_target: "writer"
+    scenario_type: "happy_path"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "Passei 5 anos a ajudar empresas a crescer com sistemas melhores. O maior obstáculo? Processos manuais que devoram tempo. Veja como mudámos isso em Luanda. #angola #tech #fidelinacio #bmst #empreender"
+          hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+          image_brief: "Retrato do fundador com background de Luanda"
+        - platform: "linkedin"
+          caption: "Cinco anos de trabalho com PMEs angolanas ensinaram-me que a diferença entre crescer e estagnar raramente é falta de talento. É quase sempre falta de sistemas. Hoje partilho três padrões que vejo repetidamente nas empresas que conseguem escalar. O primeiro: elas automatizam antes de contratar. O segundo: medem o que importa, não o que é fácil de medir. O terceiro: constroem processos para crescer. O que pensa?"
+          hashtags: ["#angola", "#liderança", "#sistemas"]
+          image_brief: "Infográfico com os 3 padrões de escalar"
+        - platform: "facebook"
+          caption: "Muito da nossa produtividade não depende de trabalharmos mais. Depende de trabalharmos com sistemas melhores. Como está a sua empresa neste aspecto?"
+          hashtags: ["#angola", "#negócios"]
+          image_brief: "Imagem inspiracional sobre produtividade"
+        - platform: "tiktok"
+          caption: "Por que razão a sua empresa não está a crescer (mesmo com uma boa equipa). Dica: não é o esforço, são os sistemas. Saiba mais. #angola #empreender #bmst"
+          hashtags: ["#angola", "#empreender", "#bmst"]
+          image_brief: "Vídeo tipo talking-head com Fidel"
+    input:
+      session_id: "ds-writer-002"
+      run_date: "2026-05-23"
+      selected_topic:
+        topic: "Sistemas de crescimento em PMEs angolanas"
+        source_url: "https://growth.example.com/angola"
+        summary: "Análise de padrões de crescimento em PMEs angolanas mostra que sistemas e processos são o principal diferenciador."
+        relevance_score: 0.85
+        content_angles:
+          - "Padrões de escalar PMEs"
+          - "Sistemas vs esforço"
+          - "Automatizar antes de contratar"
+        platforms_fit:
+          - linkedin
+          - instagram
+      selected_pillar: "automation"
+      revision_note: null
+      revision_count: 0
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.85
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "linkedin_heavy", "thought_leadership"]
+
+  - id: "writer_hp_003"
+    description: "Fresh write — AI pillar topic, concrete tools focus."
+    agent_target: "writer"
+    scenario_type: "happy_path"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "Transcreveu uma reunião ontem? Escreveu um e-mail que soa sempre igual? Essas tarefas já têm resposta. Sistemas inteligentes que trabalham enquanto você foca no que importa. #angola #tech #fidelinacio #bmst #empreender"
+          hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+          image_brief: "Interface de ferramenta moderna com dados visuais"
+        - platform: "linkedin"
+          caption: "Nas últimas semanas experimentei 12 ferramentas diferentes de produtividade com suporte a inteligência. Algumas valem cada kwanza. Outras não. Aqui está o que ficou da experiência: três ferramentas que recomendo para qualquer PME angolana em 2025. E o critério que uso para escolher: funciona offline? Tem suporte em português? Integra com o que já uso? Só com estas três perguntas elimino 80% das opções."
+          hashtags: ["#angola", "#produtividade", "#ferramentas"]
+          image_brief: "Comparação visual de 3 ferramentas"
+        - platform: "facebook"
+          caption: "Pergunta directa: quais ferramentas digitais usa no seu negócio hoje? Estou a compilar as mais usadas em Angola para partilhar na próxima semana. Conta-me nos comentários!"
+          hashtags: ["#angola", "#digital"]
+          image_brief: "Imagem com pergunta em destaque"
+        - platform: "tiktok"
+          caption: "3 ferramentas que transformam como trabalho. Transcrição automática, e-mails gerados, relatórios prontos. Tempo recuperado: 2h/dia. #angola #tech #bmst"
+          hashtags: ["#angola", "#tech", "#bmst"]
+          image_brief: "Screen recording mostrando as ferramentas em uso"
+    input:
+      session_id: "ds-writer-003"
+      run_date: "2026-05-23"
+      selected_topic:
+        topic: "Ferramentas de produtividade com suporte inteligente para PMEs"
+        source_url: "https://tools.example.com/africa-ai-tools"
+        summary: "Revisão de ferramentas de produtividade com capacidades de inteligência aplicáveis ao mercado angolano em 2025."
+        relevance_score: 0.82
+        content_angles:
+          - "Ferramentas práticas para PMEs"
+          - "Critérios de escolha para Angola"
+          - "ROI medido em tempo recuperado"
+        platforms_fit:
+          - linkedin
+          - instagram
+          - tiktok
+      selected_pillar: "ai"
+      revision_note: null
+      revision_count: 0
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.85
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "ai_pillar", "concrete_tools"]
+
+  # ── Edge Cases ────────────────────────────────────────────────────────────
+
+  - id: "writer_ec_001"
+    description: "Very specific audience (data scientists in Angola) — niche content, still valid."
+    agent_target: "writer"
+    scenario_type: "edge_case"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "Trabalha com dados em Angola? O mercado angolano precisa de pessoas que transformam números em decisões. Saiba onde o seu perfil é mais valorizado. #angola #dados #tech #fidelinacio #bmst"
+          hashtags: ["#angola", "#dados", "#tech", "#fidelinacio", "#bmst"]
+          image_brief: "Dashboard analítico com contexto angolano"
+        - platform: "linkedin"
+          caption: "O perfil de analista de dados está entre os mais procurados em Angola em 2025. Não por moda — por necessidade real de transformar operações manuais em decisões baseadas em evidência. Se trabalha com dados, este é o seu momento."
+          hashtags: ["#angola", "#analytics", "#carreiras"]
+          image_brief: "Profissional trabalhando com dados"
+        - platform: "facebook"
+          caption: "Cada empresa angolana tem dados escondidos que valem ouro. Relatórios em papel, Excel sem análise, sistemas sem integração. Quem souber extrair valor daqui tem um futuro garantido."
+          hashtags: ["#angola", "#dados"]
+          image_brief: "Imagem representando dados transformados em insights"
+        - platform: "tiktok"
+          caption: "Por que dados são o petróleo do século XXI em Angola. E por que maioria das empresas ainda não o refinou. #angola #dados #tech"
+          hashtags: ["#angola", "#dados", "#tech"]
+          image_brief: "Animação de dados fluindo para insights"
+    input:
+      session_id: "ds-writer-ec-001"
+      run_date: "2026-05-23"
+      selected_topic:
+        topic: "Analistas de dados em Angola — perfil mais procurado de 2025"
+        source_url: "https://careers.example.com/angola-data-analysts"
+        summary: "Análise de oportunidades de carreira para analistas de dados no mercado angolano em crescimento."
+        relevance_score: 0.74
+        content_angles:
+          - "Perfis de dados em Angola"
+          - "Mercado de trabalho técnico angolano"
+          - "Como começar na área de dados"
+        platforms_fit:
+          - linkedin
+          - instagram
+      selected_pillar: "ai"
+      revision_note: null
+      revision_count: 0
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.75
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["edge_case", "niche_audience", "data_science"]
+
+  - id: "writer_ec_002"
+    description: "Topic with no clear CTA angle — theoretical subject, writer must create CTA."
+    agent_target: "writer"
+    scenario_type: "edge_case"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "A teoria dos sistemas complexos aplicada ao negócio parece abstracta. Na prática é simples: pequenas mudanças nos processos certos geram grandes resultados. Qual processo mudaria hoje? #angola #tech #fidelinacio #bmst #sistemas"
+          hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#sistemas"]
+          image_brief: "Diagrama de sistema complexo simplificado"
+        - platform: "linkedin"
+          caption: "Sistemas complexos têm uma propriedade interessante: pontos de alavancagem. Lugares onde uma pequena mudança tem efeito desproporcional. Nos negócios angolanos, encontro esses pontos quase sempre nos processos de aprovação, comunicação interna e recolha de dados. Onde está o ponto de alavancagem na sua empresa?"
+          hashtags: ["#angola", "#gestão", "#sistemas"]
+          image_brief: "Visualização de pontos de alavancagem em sistema"
+        - platform: "facebook"
+          caption: "Às vezes o problema não é o esforço. É não saber onde focar o esforço. Partilha este post se já sentiu isso no seu negócio."
+          hashtags: ["#angola", "#negócios"]
+          image_brief: "Imagem com frase motivacional sobre foco"
+        - platform: "tiktok"
+          caption: "O segredo de empresas que crescem sem caos. Não é trabalhar mais — é encontrar o ponto certo. #angola #empreender #bmst"
+          hashtags: ["#angola", "#empreender", "#bmst"]
+          image_brief: "Vídeo animado sobre pontos de alavancagem"
+    input:
+      session_id: "ds-writer-ec-002"
+      run_date: "2026-05-23"
+      selected_topic:
+        topic: "Teoria de sistemas complexos aplicada à gestão de negócios"
+        source_url: "https://theory.example.com/complex-systems-business"
+        summary: "Exploração de como princípios de sistemas complexos se aplicam à gestão de empresas modernas."
+        relevance_score: 0.71
+        content_angles:
+          - "Pontos de alavancagem em negócios"
+          - "Mudança de sistemas vs esforço"
+        platforms_fit:
+          - linkedin
+      selected_pillar: "automation"
+      revision_note: null
+      revision_count: 0
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.75
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["edge_case", "abstract_topic", "cta_required"]
+
+  # ── Revision Scenarios ────────────────────────────────────────────────────
+
+  - id: "writer_rv_001"
+    description: "Revision with 'humanise' note — content sounded too formal/AI-generated."
+    agent_target: "writer"
+    scenario_type: "revision"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "Ontem estive com uma cliente em Luanda que passou o dia inteiro a fazer transferências bancárias à mão. Três horas. Para o que um sistema faz em dois minutos. Este momento muda a conversa. #angola #tech #fidelinacio #bmst #empreender"
+          hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+          image_brief: "Momento íntimo em reunião de negócios em Luanda"
+        - platform: "linkedin"
+          caption: "Havia algo de familiar na conversa de ontem. Uma PME angolana de 20 anos de história, processos rodando à mão, equipa sobrecarregada. Não por falta de competência — por falta de sistema. Três semanas depois: facturas automáticas, relatórios prontos ao amanhecer, equipa focada em clientes. O que mudou? Apenas o sistema, não as pessoas."
+          hashtags: ["#angola", "#sistemas", "#pme"]
+          image_brief: "Before/after visual de operações da empresa"
+        - platform: "facebook"
+          caption: "Às vezes ajudo melhor com uma conversa curta do que com um plano longo. Se está a lutar com processos manuais, conte-me. Pode ser mais simples do que pensa."
+          hashtags: ["#angola", "#ajuda"]
+          image_brief: "Imagem de conversa entre profissionais"
+        - platform: "tiktok"
+          caption: "O dia em que percebi que a minha cliente perdeu 3 horas a fazer o que um sistema faz em 2 minutos. E como mudámos isso. #angola #tech #bmst"
+          hashtags: ["#angola", "#tech", "#bmst"]
+          image_brief: "Vídeo narrativo sobre o momento de mudança"
+    input:
+      session_id: "ds-writer-rv-001"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      selected_pillar: "automation"
+      revision_note: "O conteúdo anterior soava demasiado formal e gerado por IA. Humanizar com anedotas pessoais reais. Adicionar voz de Fidel como fundador e praticante."
+      revision_count: 0
+      existing_posts:
+        instagram:
+          platform: "instagram"
+          caption: "A automatização de processos permite às empresas optimizar a eficiência operacional através da eliminação de tarefas manuais repetitivas."
+          hashtags: ["#angola", "#tech", "#empreender", "#bmst", "#fidelinacio"]
+          image_brief: "Gráfico de eficiência"
+        linkedin:
+          platform: "linkedin"
+          caption: "A implementação de sistemas automatizados nas pequenas e médias empresas constitui uma estratégia fundamental para a melhoria da produtividade."
+          hashtags: ["#angola", "#automacao", "#pme"]
+          image_brief: "Gráfico empresarial"
+        facebook:
+          platform: "facebook"
+          caption: "Automatizar processos é essencial para melhorar a eficiência das empresas angolanas."
+          hashtags: ["#angola", "#negócios"]
+          image_brief: "Imagem genérica"
+        tiktok:
+          platform: "tiktok"
+          caption: "Automação de processos melhora eficiência empresarial."
+          hashtags: ["#angola", "#tech", "#bmst"]
+          image_brief: "Vídeo genérico"
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.80
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["revision", "humanise", "voice"]
+
+  - id: "writer_rv_002"
+    description: "Revision to fix Instagram character limit — caption was 2350 chars (over 2200)."
+    agent_target: "writer"
+    scenario_type: "revision"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "Processos manuais custam mais do que pensa. Tempo, energia, erros. A solução está mais perto do que imagina. Veja como. #angola #tech #fidelinacio #bmst #empreender"
+          hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+          image_brief: "Contador de tempo com perdas visíveis"
+        - platform: "linkedin"
+          caption: "O custo real dos processos manuais raramente aparece nas contas de exploração. Aparece nas horas extra não pagas, nos erros que ninguém reporta, na fadiga que drena a equipa. Quando somamos tudo, a automação paga-se sozinha em meses, não anos."
+          hashtags: ["#angola", "#custo", "#automacao"]
+          image_brief: "Análise de custo real visualmente clara"
+        - platform: "facebook"
+          caption: "Já contou quantas horas a sua equipa gasta em tarefas que um sistema podia fazer? Partilhe a resposta nos comentários — vai surpreender-se com os números."
+          hashtags: ["#angola", "#produtividade"]
+          image_brief: "Imagem questionando horas perdidas"
+        - platform: "tiktok"
+          caption: "O custo escondido dos processos manuais. Não é o que pensa. #angola #tech #bmst"
+          hashtags: ["#angola", "#tech", "#bmst"]
+          image_brief: "Animação mostrando custo acumulado"
+    input:
+      session_id: "ds-writer-rv-002"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      selected_pillar: "automation"
+      revision_note: "Instagram: reduzir caption para menos de 2200 caracteres. Versão anterior tinha 2350 caracteres."
+      revision_count: 0
+      existing_posts:
+        instagram:
+          platform: "instagram"
+          caption: "Os processos manuais têm um custo oculto que vai muito além do tempo perdido. Inclui o custo emocional de equipa desgastada, o custo financeiro de erros humanos inevitáveis, o custo estratégico de líderes focados em operações em vez de crescimento, e o custo de oportunidade de não estar a escalar. Quando somamos tudo isso, a automação não é um custo — é um investimento que se paga nos primeiros meses. E a boa notícia para empresas angolanas é que as ferramentas nunca foram tão acessíveis como agora. Se quiser saber por onde começar, contacte a BMST. Fazemos uma análise gratuita do potencial de automação do seu negócio. Sem compromisso, só clareza."
+          hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+          image_brief: "Análise de custo detalhada"
+        linkedin:
+          platform: "linkedin"
+          caption: "Versão anterior do LinkedIn post sobre custos."
+          hashtags: ["#angola", "#custo", "#automacao"]
+          image_brief: "Gráfico de custos"
+        facebook:
+          platform: "facebook"
+          caption: "Versão anterior do Facebook post."
+          hashtags: ["#angola", "#produtividade"]
+          image_brief: "Imagem genérica"
+        tiktok:
+          platform: "tiktok"
+          caption: "Versão anterior do TikTok."
+          hashtags: ["#angola", "#tech", "#bmst"]
+          image_brief: "Vídeo genérico"
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.80
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["revision", "character_limit", "instagram"]
+
+  # ── Fault Scenarios ───────────────────────────────────────────────────────
+
+  - id: "writer_fs_001"
+    description: "Prohibited term 'IA' in output — score degraded, still returned."
+    agent_target: "writer"
+    scenario_type: "fault_scenario"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "A IA está a mudar o mundo dos negócios em Angola. As empresas que adoptarem agora saem na frente. Saiba como. #angola #tech #fidelinacio #bmst #empreender"
+          hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+          image_brief: "Representação visual de IA em contexto angolano"
+        - platform: "linkedin"
+          caption: "A IA já não é futuro — é presente. As PMEs angolanas que souberem usá-la têm vantagem competitiva real."
+          hashtags: ["#angola", "#automacao", "#pme"]
+          image_brief: "Diagrama de adoção de IA"
+        - platform: "facebook"
+          caption: "A IA vai mudar como trabalhamos. A pergunta é: está preparado?"
+          hashtags: ["#angola", "#digital"]
+          image_brief: "Imagem futurista"
+        - platform: "tiktok"
+          caption: "IA em Angola: o que muda para as empresas. #angola #tech #bmst"
+          hashtags: ["#angola", "#tech", "#bmst"]
+          image_brief: "Vídeo explicativo"
+    input:
+      session_id: "ds-writer-fs-001"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      selected_pillar: "ai"
+      revision_note: null
+      revision_count: 0
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.90
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["fault_scenario", "prohibited_term", "ia", "score_degraded"]
+
+  - id: "writer_fs_002"
+    description: "Instagram caption exceeds 2200 char limit — char-count score deducted."
+    agent_target: "writer"
+    scenario_type: "fault_scenario"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "Processos manuais custam caro. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. A automação de processos em PMEs angolanas está a crescer rapidamente. Contacte a BMST."
+          hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+          image_brief: "Imagem de automação"
+        - platform: "linkedin"
+          caption: "Post do LinkedIn dentro do limite de caracteres — bem estruturado e conciso."
+          hashtags: ["#angola", "#automacao", "#pme"]
+          image_brief: "Imagem profissional"
+        - platform: "facebook"
+          caption: "Post do Facebook dentro do limite."
+          hashtags: ["#angola", "#negócios"]
+          image_brief: "Imagem para Facebook"
+        - platform: "tiktok"
+          caption: "Post do TikTok conciso e dentro do limite. #angola #tech #bmst"
+          hashtags: ["#angola", "#tech", "#bmst"]
+          image_brief: "Vídeo para TikTok"
+    input:
+      session_id: "ds-writer-fs-002"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      selected_pillar: "automation"
+      revision_note: null
+      revision_count: 0
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.70
+      confidence_max: 0.95
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["fault_scenario", "char_limit", "instagram", "score_degraded"]
+
+  - id: "writer_fs_003"
+    description: "Low confidence output — multiple posts have issues across platforms."
+    agent_target: "writer"
+    scenario_type: "fault_scenario"
+    mocks:
+      claude_payload:
+        - platform: "instagram"
+          caption: "A IA vai mudar tudo no escritório. O chatbot vai substituir parte do trabalho. Machine learning em Angola está a crescer rapidamente. Saiba mais sobre algoritmos e automação."
+          hashtags: ["#angola"]
+          image_brief: ""
+        - platform: "linkedin"
+          caption: "O algoritmo de inteligência artificial e o chatbot vão transformar as PMEs angolanas."
+          hashtags: ["#angola", "#ia", "#chatbot", "#algoritmo", "#ml", "#machinelearning", "#llm", "#genai", "#bot", "#deeplearning"]
+          image_brief: ""
+        - platform: "facebook"
+          caption: "IA e chatbot para negócios em Angola."
+          hashtags: ["#angola", "#ia"]
+          image_brief: ""
+        - platform: "tiktok"
+          caption: "Chatbot e IA: o futuro das empresas angolanas. #angola"
+          hashtags: ["#angola"]
+          image_brief: ""
+    input:
+      session_id: "ds-writer-fs-003"
+      run_date: "2026-05-23"
+      selected_topic: *brief
+      selected_pillar: "ai"
+      revision_note: null
+      revision_count: 0
+    expected_output:
+      action: "request_approval"
+      status: "task_complete"
+      confidence_min: 0.00
+      confidence_max: 0.70
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["fault_scenario", "low_confidence", "multiple_issues", "prohibited_terms"]

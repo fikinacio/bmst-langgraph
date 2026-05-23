@@ -5,13 +5,22 @@ no network and no credentials. tests/conftest.py sets the env vars.
 """
 
 import json
+from contextlib import ExitStack
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+import yaml
 
 from src.agents.writer import node as writer
 from src.protocols.io_schema import PlatformPost, ResearchBrief
 from src.protocols.vocabulary import ActionType, Platform, StatusType
+
+
+def _load_cases(filename: str) -> list[dict]:
+    path = Path(__file__).parent / "datasets" / filename
+    with path.open(encoding="utf-8") as fh:
+        return yaml.safe_load(fh)["cases"]
 
 
 # ---------------------------------------------------------------------------
@@ -220,7 +229,7 @@ def test_writer_prohibited_terms_check():
             f"False positive on '{innocent}'"
         )
 
-    # Score impact
+    # Score impact — intentional separation from the assertions above
     clean_post = PlatformPost(
         platform=Platform.INSTAGRAM,
         caption="Texto limpo sem termos proibidos. Body. CTA.",
@@ -270,3 +279,85 @@ def test_writer_confidence_calibration():
     )
     # char_count: 0 + hashtag: 0 + proh(6 terms): 0.25*0.4 = 0.10 + image: 0 = 0.10
     assert writer._score_post(broken) == pytest.approx(0.10)
+
+
+# ---------------------------------------------------------------------------
+# Dataset-driven tests
+# ---------------------------------------------------------------------------
+
+
+def _build_writer_state(inp: dict) -> dict:
+    """Build SocialAgentState for the WRITER node from YAML input overrides."""
+    selected_topic_raw = inp.get("selected_topic")
+    selected_topic = ResearchBrief(**selected_topic_raw) if selected_topic_raw else None
+
+    existing_posts_raw = inp.get("existing_posts", {})
+    existing_posts = {
+        plat: PlatformPost(**data)
+        for plat, data in existing_posts_raw.items()
+    } if existing_posts_raw else {}
+
+    return {
+        "session_id": inp.get("session_id", "ds-writer-test"),
+        "run_date": inp.get("run_date", "2026-05-23"),
+        "research_briefs": [selected_topic] if selected_topic else [],
+        "selected_topic": selected_topic,
+        "selected_pillar": inp.get("selected_pillar"),
+        "posts": existing_posts,
+        "carousel": None,
+        "review_results": [],
+        "pending_approval": False,
+        "approval_decision": None,
+        "revision_note": inp.get("revision_note"),
+        "revision_count": inp.get("revision_count", 0),
+        "publication_results": [],
+        "current_agent": "writer",
+        "action": ActionType.COMPLETE,
+        "status": StatusType.TASK_COMPLETE,
+        "confidence": 0.9,
+        "errors": [],
+    }
+
+
+@pytest.mark.parametrize("case", _load_cases("writer_cases.yaml"), ids=lambda c: c["id"])
+async def test_writer_dataset(case):
+    """Parametrized test driven by tests/datasets/writer_cases.yaml."""
+    mocks = case.get("mocks", {})
+    state = _build_writer_state(case.get("input", {}))
+
+    payload = mocks.get("claude_payload", [])
+    fake_resp = MagicMock()
+    fake_resp.content = [MagicMock(text=json.dumps(payload, ensure_ascii=False))]
+
+    mock_llm = MagicMock()
+    mock_llm.messages = MagicMock()
+    mock_llm.messages.create = AsyncMock(return_value=fake_resp)
+
+    with patch.object(writer, "AsyncAnthropic", return_value=mock_llm):
+        result = await writer.writer_node(state)
+
+    exp = case["expected_output"]
+    result_action = result["action"].value if hasattr(result["action"], "value") else result["action"]
+    result_status = result["status"].value if hasattr(result["status"], "value") else result["status"]
+
+    assert result_action == exp["action"], (
+        f"[{case['id']}] action: got {result_action!r}, want {exp['action']!r}"
+    )
+    assert result_status == exp["status"], (
+        f"[{case['id']}] status: got {result_status!r}, want {exp['status']!r}"
+    )
+    conf = result.get("confidence", 0)
+    assert exp["confidence_min"] <= conf <= exp["confidence_max"], (
+        f"[{case['id']}] confidence {conf} not in "
+        f"[{exp['confidence_min']}, {exp['confidence_max']}]"
+    )
+
+    behavior = case["expected_behavior"]
+    if behavior.get("should_escalate"):
+        assert result_action == "escalate_human", (
+            f"[{case['id']}] expected escalation, got action={result_action!r}"
+        )
+    if behavior.get("should_block"):
+        assert result_status in ("blocked", "failed"), (
+            f"[{case['id']}] expected block/fail, got status={result_status!r}"
+        )

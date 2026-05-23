@@ -1,0 +1,301 @@
+metadata:
+  version: "1.0.0"
+  agent: "scout"
+  description: "Evaluation dataset for the SCOUT agent — news research and topic selection."
+
+cases:
+
+  # ── Happy Path ────────────────────────────────────────────────────────────
+
+  - id: "scout_hp_001"
+    description: "Standard search: single strong result, pillar rotates from ai to automation."
+    agent_target: "scout"
+    scenario_type: "happy_path"
+    mocks:
+      tavily_results:
+        - title: "Workflow automation drives efficiency gains in Angolan SMEs"
+          url: "https://tech.example.com/angola-automation-2025"
+          content: >
+            Small and medium enterprises in Angola are adopting workflow automation
+            tools to cut manual workloads. RPA deployments in Luanda-based firms
+            show an average 30% reduction in processing time.
+          score: 0.88
+      published_topics: []
+      last_pillar: "ai"
+      build_brief_result:
+        topic: "Workflow automation in Angolan SMEs"
+        source_url: "https://tech.example.com/angola-automation-2025"
+        summary: >
+          Empresas angolanas estão a adoptar automação de processos para reduzir
+          cargas manuais. Implementações de RPA em Luanda mostram redução média
+          de 30% no tempo de processamento, com retorno sobre investimento em 6 meses.
+        relevance_score: 0.88
+        content_angles:
+          - "ROI de automação em PMEs angolanas"
+          - "Casos práticos de RPA em Luanda"
+          - "Primeiros passos para digitalizar processos"
+        platforms_fit:
+          - linkedin
+          - instagram
+    input:
+      session_id: "ds-scout-001"
+      run_date: "2026-05-23"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.80
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "automation_pillar", "rotation"]
+
+  - id: "scout_hp_002"
+    description: "Multiple results: dedup removes one overlap, best article selected."
+    agent_target: "scout"
+    scenario_type: "happy_path"
+    mocks:
+      tavily_results:
+        - title: "Generative AI breakthroughs reshape Africa tech sector"
+          url: "https://africatech.example.com/genai-2025"
+          content: "Generative AI tools like Claude and GPT are being adopted across Africa."
+          score: 0.92
+        - title: "AI automation transforming Angolan businesses already published"
+          url: "https://duplicate.example.com/angola"
+          content: "Duplicate topic from last week."
+          score: 0.75
+        - title: "Deep learning applications in African financial services"
+          url: "https://fintech.example.com/deeplearning"
+          content: "Machine learning and neural network solutions for African banks."
+          score: 0.70
+      published_topics:
+        - "AI automation transforming Angolan businesses"
+      last_pillar: "automation"
+      build_brief_result:
+        topic: "Generative AI reshapes Africa tech sector"
+        source_url: "https://africatech.example.com/genai-2025"
+        summary: >
+          Ferramentas de IA generativa estão a ser adoptadas em toda a África,
+          transformando sectores como finanças, saúde e retalho. Angola surge
+          como mercado emergente com crescente adopção tecnológica.
+        relevance_score: 0.92
+        content_angles:
+          - "IA generativa em sectores tradicionais africanos"
+          - "Oportunidades de negócio para empresas angolanas"
+          - "Como começar com ferramentas de IA hoje"
+        platforms_fit:
+          - linkedin
+          - instagram
+          - facebook
+    input:
+      session_id: "ds-scout-002"
+      run_date: "2026-05-23"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.85
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "dedup", "ai_pillar"]
+
+  - id: "scout_hp_003"
+    description: "Relevance filter: low-score article filtered out, second article selected."
+    agent_target: "scout"
+    scenario_type: "happy_path"
+    mocks:
+      tavily_results:
+        - title: "Generic tech news with low Angola relevance"
+          url: "https://generic.example.com/tech"
+          content: "Generic technology news without Angola context."
+          score: 0.45
+        - title: "Business process automation gains traction in Luanda offices"
+          url: "https://angola.example.com/bpa-luanda"
+          content: >
+            Luanda-based companies implement business process automation to
+            handle growing volumes. Integration tools streamline operations.
+          score: 0.78
+      published_topics: []
+      last_pillar: null
+      build_brief_result:
+        topic: "Automação de processos ganha terreno em Luanda"
+        source_url: "https://angola.example.com/bpa-luanda"
+        summary: >
+          Empresas sediadas em Luanda implementam automação de processos de
+          negócio para gerir volumes crescentes de operações. Ferramentas de
+          integração simplificam fluxos administrativos e financeiros.
+        relevance_score: 0.78
+        content_angles:
+          - "Automação administrativa em Luanda"
+          - "Ferramentas de integração acessíveis para PMEs"
+          - "Impacto no trabalho do dia-a-dia"
+        platforms_fit:
+          - linkedin
+          - facebook
+    input:
+      session_id: "ds-scout-003"
+      run_date: "2026-05-23"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.70
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "relevance_filter"]
+
+  # ── Edge Cases ────────────────────────────────────────────────────────────
+
+  - id: "scout_ec_001"
+    description: "No relevant news: Tavily returns empty results → CONFIDENCE_FAULT."
+    agent_target: "scout"
+    scenario_type: "edge_case"
+    mocks:
+      tavily_results: []
+      published_topics: []
+      last_pillar: null
+      build_brief_result: null
+    input:
+      session_id: "ds-scout-ec-001"
+      run_date: "2026-05-23"
+    expected_output:
+      action: "escalate_human"
+      status: "needs_approval"
+      confidence_min: 0.00
+      confidence_max: 0.30
+    expected_behavior:
+      should_escalate: true
+      should_block: false
+    tags: ["edge_case", "no_results", "confidence_fault"]
+
+  - id: "scout_ec_002"
+    description: "All topics already published: dedup removes every result → CONFIDENCE_FAULT."
+    agent_target: "scout"
+    scenario_type: "edge_case"
+    mocks:
+      tavily_results:
+        - title: "AI automation transforming Angolan businesses in 2025"
+          url: "https://example.com/angola-ai"
+          content: "Story about AI in Angola, already covered last week."
+          score: 0.87
+        - title: "Business process automation success stories Angola"
+          url: "https://example.com/bpa-angola"
+          content: "BPA success in Angola, also covered."
+          score: 0.82
+      published_topics:
+        - "AI automation transforming Angolan businesses in 2025"
+        - "Business process automation success stories Angola"
+        - "Workflow automation drives efficiency gains Luanda"
+      last_pillar: "automation"
+      build_brief_result: null
+    input:
+      session_id: "ds-scout-ec-002"
+      run_date: "2026-05-23"
+    expected_output:
+      action: "escalate_human"
+      status: "needs_approval"
+      confidence_min: 0.00
+      confidence_max: 0.30
+    expected_behavior:
+      should_escalate: true
+      should_block: false
+    tags: ["edge_case", "dedup_exhaustion", "confidence_fault"]
+
+  # ── Fault Scenarios ───────────────────────────────────────────────────────
+
+  - id: "scout_fs_001"
+    description: "Tavily API timeout: all queries raise → EXECUTION_FAULT."
+    agent_target: "scout"
+    scenario_type: "fault_scenario"
+    mocks:
+      tavily_results: []
+      tavily_error: "Connection timeout after 30s"
+      published_topics: []
+      last_pillar: null
+      build_brief_result: null
+    input:
+      session_id: "ds-scout-fs-001"
+      run_date: "2026-05-23"
+    expected_output:
+      action: "wait"
+      status: "blocked"
+      confidence_min: 0.00
+      confidence_max: 0.30
+    expected_behavior:
+      should_escalate: false
+      should_block: true
+    tags: ["fault_scenario", "tavily_error", "execution_fault"]
+
+  - id: "scout_fs_002"
+    description: "All results below relevance threshold (score < 0.60) → CONFIDENCE_FAULT."
+    agent_target: "scout"
+    scenario_type: "fault_scenario"
+    mocks:
+      tavily_results:
+        - title: "Generic AI article with weak Angola relevance"
+          url: "https://example.com/generic-ai"
+          content: "Some generic AI content without African business focus."
+          score: 0.35
+        - title: "Tech news not specific to Angola"
+          url: "https://example.com/tech-news"
+          content: "General technology news of moderate interest."
+          score: 0.48
+        - title: "Africa automation story with thin content"
+          url: "https://example.com/automation"
+          content: "Brief mention of automation in Africa."
+          score: 0.52
+      published_topics: []
+      last_pillar: null
+      build_brief_result: null
+    input:
+      session_id: "ds-scout-fs-002"
+      run_date: "2026-05-23"
+    expected_output:
+      action: "escalate_human"
+      status: "needs_approval"
+      confidence_min: 0.00
+      confidence_max: 0.30
+    expected_behavior:
+      should_escalate: true
+      should_block: false
+    tags: ["fault_scenario", "low_relevance", "confidence_fault"]
+
+  - id: "scout_fs_003"
+    description: "Brief built but relevance score below authority threshold (0.62 < 0.70)."
+    agent_target: "scout"
+    scenario_type: "fault_scenario"
+    mocks:
+      tavily_results:
+        - title: "AI tools marginally relevant to Angolan context"
+          url: "https://marginal.example.com/ai-angola"
+          content: "AI tools with some applicability to the Angolan market, tangential coverage."
+          score: 0.62
+      published_topics: []
+      last_pillar: null
+      build_brief_result:
+        topic: "AI tools marginally relevant to Angola"
+        source_url: "https://marginal.example.com/ai-angola"
+        summary: >
+          Ferramentas de IA com alguma aplicabilidade no mercado angolano.
+          A cobertura é tangencial ao contexto africano, com relevância limitada
+          para o público-alvo de empreendedores angolanos.
+        relevance_score: 0.62
+        content_angles:
+          - "Ferramentas genéricas adaptáveis ao contexto angolano"
+          - "Considerações para adopção de IA"
+        platforms_fit:
+          - linkedin
+    input:
+      session_id: "ds-scout-fs-003"
+      run_date: "2026-05-23"
+    expected_output:
+      action: "complete"
+      status: "task_complete"
+      confidence_min: 0.50
+      confidence_max: 0.69
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["fault_scenario", "low_confidence", "sub_threshold"]

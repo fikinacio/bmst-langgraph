@@ -1,0 +1,344 @@
+metadata:
+  version: "1.0.0"
+  agent: "revisor"
+  description: "Evaluation dataset for the REVISOR agent — quality gate, AI detection, and approval flow."
+
+# Shared post fixtures reused across cases
+_clean_posts: &clean_posts
+  instagram:
+    platform: "instagram"
+    caption: "Hook directo sobre processos. Body prático com exemplo. CTA claro para agir."
+    hashtags: ["#angola", "#tech", "#fidelinacio", "#bmst", "#empreender"]
+    image_brief: "Foto de escritório em Luanda"
+  linkedin:
+    platform: "linkedin"
+    caption: "Reflexão profissional sobre automação em PMEs angolanas com dados concretos."
+    hashtags: ["#angola", "#automacao", "#pme"]
+    image_brief: "Diagrama de processo"
+  facebook:
+    platform: "facebook"
+    caption: "Conversa sobre transformação digital em Luanda. Pergunta ao final para engagement."
+    hashtags: ["#angola", "#negócios"]
+    image_brief: "Equipa de trabalho"
+  tiktok:
+    platform: "tiktok"
+    caption: "3 factos sobre automação que vão mudar como trabalha. #angola #tech #bmst"
+    hashtags: ["#angola", "#tech", "#bmst"]
+    image_brief: "Vídeo dinâmico"
+
+_clean_carousel: &clean_carousel
+  carousel_title: "5 Passos para Automatizar a Sua PME"
+  platform: "instagram"
+  slides:
+    - slide_number: 1
+      headline: "Está preso em tarefas repetitivas?"
+      body: "A maioria das PMEs angolanas perde horas por semana em processos manuais."
+      visual_brief: "Relógio com horas perdidas"
+      canva_asset_url: "https://canva.example/slide_1.png"
+    - slide_number: 2
+      headline: "Passo 1: Mapeie os processos"
+      body: "Liste tudo o que faz manualmente. Priorize pelo tempo consumido."
+      visual_brief: "Lista de processos com prioridades"
+      canva_asset_url: "https://canva.example/slide_2.png"
+    - slide_number: 3
+      headline: "Passo 2: Escolha a ferramenta certa"
+      body: "Não existe ferramenta universal. Existe a certa para o seu contexto."
+      visual_brief: "Comparação de ferramentas"
+      canva_asset_url: "https://canva.example/slide_3.png"
+    - slide_number: 4
+      headline: "Passo 3: Meça o impacto"
+      body: "Sem métricas não há aprendizagem. Defina KPIs antes de começar."
+      visual_brief: "Dashboard de KPIs"
+      canva_asset_url: "https://canva.example/slide_4.png"
+    - slide_number: 5
+      headline: "A BMST ajuda-o a começar"
+      body: "Contacte a BMST para uma análise gratuita do potencial do seu negócio."
+      visual_brief: "CTA com contacto BMST"
+      canva_asset_url: "https://canva.example/slide_5.png"
+  caption: "5 passos para automatizar a sua PME. Qual é o seu passo 1?"
+  hashtags: ["#angola", "#automacao", "#bmst"]
+
+cases:
+
+  # ── Happy Path ────────────────────────────────────────────────────────────
+
+  - id: "revisor_hp_001"
+    description: "Clean high-quality content (0.90 quality, 0.20 AI score) — WhatsApp sent, pending."
+    agent_target: "revisor"
+    scenario_type: "happy_path"
+    mocks:
+      judge_score: 0.90
+      judge_issues: []
+      ai_detection_score: 0.20
+      whatsapp_raises: false
+      ai_detection_raises: false
+      revision_count: 0
+    input:
+      session_id: "ds-revisor-001"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "request_approval"
+      status: "needs_approval"
+      confidence_min: 0.80
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "clean_content", "whatsapp_sent"]
+
+  - id: "revisor_hp_002"
+    description: "Excellent content quality (0.95, AI 0.15) — high confidence approval request."
+    agent_target: "revisor"
+    scenario_type: "happy_path"
+    mocks:
+      judge_score: 0.95
+      judge_issues: []
+      ai_detection_score: 0.15
+      whatsapp_raises: false
+      ai_detection_raises: false
+      revision_count: 0
+    input:
+      session_id: "ds-revisor-002"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "request_approval"
+      status: "needs_approval"
+      confidence_min: 0.85
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["happy_path", "excellent_quality", "high_confidence"]
+
+  # ── Edge Cases ────────────────────────────────────────────────────────────
+
+  - id: "revisor_ec_001"
+    description: "Non-empty judge_issues (minor) + low confidence (0.585) — quality-flagged to WRITER."
+    agent_target: "revisor"
+    scenario_type: "edge_case"
+    mocks:
+      judge_score: 0.85
+      judge_issues: ["minor: some phrases sound slightly formal"]
+      ai_detection_score: 0.68
+      whatsapp_raises: false
+      ai_detection_raises: false
+      revision_count: 0
+    input:
+      session_id: "ds-revisor-ec-001"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "delegate_agent"
+      status: "blocked"
+      confidence_min: 0.50
+      confidence_max: 0.70
+    expected_behavior:
+      should_escalate: false
+      should_block: true
+    tags: ["edge_case", "quality_flag", "below_threshold"]
+
+  - id: "revisor_ec_002"
+    description: "Low quality score (0.75) + issues list → confidence below 0.80 threshold, quality-flagged."
+    agent_target: "revisor"
+    scenario_type: "edge_case"
+    mocks:
+      judge_score: 0.75
+      judge_issues:
+        - "Instagram: hook could be sharper"
+        - "LinkedIn: CTA missing direct call to action"
+        - "TikTok: too long for the format"
+      ai_detection_score: 0.30
+      whatsapp_raises: false
+      ai_detection_raises: false
+      revision_count: 0
+    input:
+      session_id: "ds-revisor-ec-002"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "delegate_agent"
+      status: "blocked"
+      confidence_min: 0.65
+      confidence_max: 0.85
+    expected_behavior:
+      should_escalate: false
+      should_block: true
+    tags: ["edge_case", "quality_flag", "issues_listed", "below_threshold"]
+
+  # ── Approval Flow ─────────────────────────────────────────────────────────
+
+  - id: "revisor_af_001"
+    description: "Approve path: clean content → pending_approval=True, WhatsApp sent once."
+    agent_target: "revisor"
+    scenario_type: "approval_flow"
+    mocks:
+      judge_score: 0.88
+      judge_issues: []
+      ai_detection_score: 0.22
+      whatsapp_raises: false
+      ai_detection_raises: false
+      revision_count: 0
+    input:
+      session_id: "ds-revisor-af-001"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "request_approval"
+      status: "needs_approval"
+      confidence_min: 0.80
+      confidence_max: 1.00
+    expected_behavior:
+      should_escalate: false
+      should_block: false
+    tags: ["approval_flow", "approve", "pending_true", "whatsapp_once"]
+
+  - id: "revisor_af_002"
+    description: "Reject path: quality score too low (0.60) — revision_requested, WRITER delegate."
+    agent_target: "revisor"
+    scenario_type: "approval_flow"
+    mocks:
+      judge_score: 0.60
+      judge_issues:
+        - "Instagram: caption lacks concrete hook"
+        - "LinkedIn: no personal story or CTA"
+        - "Facebook: too generic for Angolan audience"
+        - "TikTok: content too long and unfocused"
+      ai_detection_score: 0.35
+      whatsapp_raises: false
+      ai_detection_raises: false
+      revision_count: 0
+      platform_overrides:
+        facebook:
+          platform: "facebook"
+          caption: "A transformação digital é importante para os negócios modernos em geral."
+          hashtags: ["#angola", "#digital"]
+          image_brief: "Imagem genérica"
+    input:
+      session_id: "ds-revisor-af-002"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "delegate_agent"
+      status: "blocked"
+      confidence_min: 0.50
+      confidence_max: 0.80
+    expected_behavior:
+      should_escalate: false
+      should_block: true
+    tags: ["approval_flow", "reject", "revision_requested", "writer_delegate"]
+
+  - id: "revisor_af_003"
+    description: "Revise path: AI score 0.80 (over threshold) → revision_requested with humanise note."
+    agent_target: "revisor"
+    scenario_type: "approval_flow"
+    mocks:
+      judge_score: 0.85
+      judge_issues: []
+      ai_detection_score: 0.80
+      whatsapp_raises: false
+      ai_detection_raises: false
+      revision_count: 0
+    input:
+      session_id: "ds-revisor-af-003"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "delegate_agent"
+      status: "blocked"
+      confidence_min: 0.50
+      confidence_max: 0.85
+    expected_behavior:
+      should_escalate: false
+      should_block: true
+    tags: ["approval_flow", "revise", "ai_detection_flagged", "humanise"]
+
+  # ── Fault Scenarios ───────────────────────────────────────────────────────
+
+  - id: "revisor_fs_001"
+    description: "AI detection score above 0.70 threshold (0.80) — auto-revision requested, no human."
+    agent_target: "revisor"
+    scenario_type: "fault_scenario"
+    mocks:
+      judge_score: 0.88
+      judge_issues: []
+      ai_detection_score: 0.80
+      ai_detection_raises: false
+      whatsapp_raises: false
+      revision_count: 0
+    input:
+      session_id: "ds-revisor-fs-001"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "delegate_agent"
+      status: "blocked"
+      confidence_min: 0.40
+      confidence_max: 0.70
+    expected_behavior:
+      should_escalate: false
+      should_block: true
+    tags: ["fault_scenario", "ai_detection_flagged", "auto_revision"]
+
+  - id: "revisor_fs_002"
+    description: "WhatsApp unreachable — send_text raises, EXECUTION_FAULT triggers WAIT/BLOCKED."
+    agent_target: "revisor"
+    scenario_type: "fault_scenario"
+    mocks:
+      judge_score: 0.88
+      judge_issues: []
+      ai_detection_score: 0.20
+      whatsapp_raises: true
+      ai_detection_raises: false
+      revision_count: 0
+    input:
+      session_id: "ds-revisor-fs-002"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "wait"
+      status: "blocked"
+      confidence_min: 0.00
+      confidence_max: 0.10
+    expected_behavior:
+      should_escalate: false
+      should_block: true
+    tags: ["fault_scenario", "whatsapp_unreachable", "execution_fault", "wait"]
+
+  - id: "revisor_fs_003"
+    description: "Max revisions reached (revision_count=3) — rejected, escalation WhatsApp."
+    agent_target: "revisor"
+    scenario_type: "fault_scenario"
+    mocks:
+      judge_score: 0.55
+      judge_issues:
+        - "Instagram: repeated revision, still too generic"
+        - "LinkedIn: hook still not strong enough after 3 attempts"
+      ai_detection_score: 0.40
+      whatsapp_raises: false
+      ai_detection_raises: false
+      revision_count: 3
+    input:
+      session_id: "ds-revisor-fs-003"
+      run_date: "2026-05-23"
+      posts: *clean_posts
+      carousel: *clean_carousel
+    expected_output:
+      action: "escalate_human"
+      status: "failed"
+      confidence_min: 0.00
+      confidence_max: 0.65
+    expected_behavior:
+      should_escalate: true
+      should_block: true
+    tags: ["fault_scenario", "max_revisions", "escalation", "loop_fault"]

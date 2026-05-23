@@ -5,14 +5,23 @@ AsyncAnthropic) so they run without any network or credentials.
 pyproject.toml sets asyncio_mode='auto', so async tests need no decoration.
 """
 
+from contextlib import ExitStack
 from datetime import datetime, timezone
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
+import yaml
 
 from src.agents.scout import node as scout
 from src.protocols.io_schema import ResearchBrief
 from src.protocols.vocabulary import ActionType, Platform, StatusType
+
+
+def _load_cases(filename: str) -> list[dict]:
+    path = Path(__file__).parent / "datasets" / filename
+    with path.open(encoding="utf-8") as fh:
+        return yaml.safe_load(fh)["cases"]
 
 
 # ---------------------------------------------------------------------------
@@ -197,3 +206,96 @@ def test_classify_pillar_rotation():
     # Clear automation-leaning content
     auto_heavy = {"title": "RPA and workflow automation", "content": "n8n integration with Zapier..."}
     assert scout._classify_pillar(auto_heavy, last_pillar="automation") == "automation"
+
+
+# ---------------------------------------------------------------------------
+# Dataset-driven tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("case", _load_cases("scout_cases.yaml"), ids=lambda c: c["id"])
+async def test_scout_dataset(case):
+    """Parametrized test driven by tests/datasets/scout_cases.yaml."""
+    mocks = case.get("mocks", {})
+    inp = case.get("input", {})
+
+    state = {
+        "session_id": inp.get("session_id", "ds-test"),
+        "run_date": inp.get("run_date", "2026-05-23"),
+        "research_briefs": [],
+        "selected_topic": None,
+        "selected_pillar": None,
+        "posts": {},
+        "carousel": None,
+        "review_results": [],
+        "pending_approval": False,
+        "approval_decision": None,
+        "revision_note": None,
+        "revision_count": 0,
+        "publication_results": [],
+        "current_agent": "scout",
+        "action": ActionType.SEND_MESSAGE,
+        "status": StatusType.NEEDS_MORE_CONTEXT,
+        "confidence": 1.0,
+        "errors": [],
+    }
+
+    tavily_error = mocks.get("tavily_error")
+    tavily_results = mocks.get("tavily_results", [])
+    published_topics = mocks.get("published_topics", [])
+    last_pillar = mocks.get("last_pillar")
+    brief_data = mocks.get("build_brief_result")
+
+    redis_mock = AsyncMock()
+    supa_mock = AsyncMock()
+    supa_mock.get_published_topics.return_value = published_topics
+    supa_mock.get_last_pillar.return_value = last_pillar
+
+    if tavily_error:
+        search_mock = AsyncMock(side_effect=Exception(tavily_error))
+    else:
+        search_mock = AsyncMock(return_value=tavily_results)
+
+    patches = [
+        patch.object(scout.news_search, "search_ai_news", new=search_mock),
+        patch.object(scout, "RedisMemory", return_value=redis_mock),
+        patch.object(scout, "SupabaseMemory", return_value=supa_mock),
+        patch.object(scout, "AsyncAnthropic"),
+    ]
+
+    if brief_data:
+        brief_obj = ResearchBrief(**brief_data)
+        patches.append(
+            patch.object(scout, "_build_brief", new=AsyncMock(return_value=brief_obj))
+        )
+
+    with ExitStack() as stack:
+        for p in patches:
+            stack.enter_context(p)
+        result = await scout.scout_node(state)
+
+    exp = case["expected_output"]
+    result_action = result["action"].value if hasattr(result["action"], "value") else result["action"]
+    result_status = result["status"].value if hasattr(result["status"], "value") else result["status"]
+
+    assert result_action == exp["action"], (
+        f"[{case['id']}] action: got {result_action!r}, want {exp['action']!r}"
+    )
+    assert result_status == exp["status"], (
+        f"[{case['id']}] status: got {result_status!r}, want {exp['status']!r}"
+    )
+    conf = result.get("confidence", 0)
+    assert exp["confidence_min"] <= conf <= exp["confidence_max"], (
+        f"[{case['id']}] confidence {conf} not in "
+        f"[{exp['confidence_min']}, {exp['confidence_max']}]"
+    )
+
+    behavior = case["expected_behavior"]
+    if behavior.get("should_escalate"):
+        assert result_action == "escalate_human", (
+            f"[{case['id']}] expected escalation, got action={result_action!r}"
+        )
+    if behavior.get("should_block"):
+        assert result_status in ("blocked", "failed"), (
+            f"[{case['id']}] expected block/fail, got status={result_status!r}"
+        )

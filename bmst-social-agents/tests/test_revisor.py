@@ -5,13 +5,22 @@ whatsapp.send_text, SupabaseMemory) are stubbed.
 """
 
 import json
+from contextlib import ExitStack
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+import yaml
 
 from src.agents.revisor import node as revisor
 from src.protocols.io_schema import CarouselOutput, CarouselSlide, PlatformPost
 from src.protocols.vocabulary import ActionType, Platform, StatusType
+
+
+def _load_cases(filename: str) -> list[dict]:
+    path = Path(__file__).parent / "datasets" / filename
+    with path.open(encoding="utf-8") as fh:
+        return yaml.safe_load(fh)["cases"]
 
 
 # ---------------------------------------------------------------------------
@@ -347,3 +356,129 @@ async def test_revisor_prohibited_terms(base_state):
     assert "facebook" in note.lower()
     assert "prohibited" in note.lower()
     ws.assert_not_awaited()
+
+
+# ---------------------------------------------------------------------------
+# Dataset-driven tests
+# ---------------------------------------------------------------------------
+
+
+def _posts_from_yaml(posts_raw: dict) -> dict[str, PlatformPost]:
+    return {plat: PlatformPost(**data) for plat, data in posts_raw.items()}
+
+
+def _carousel_from_yaml(carousel_raw: dict | None) -> CarouselOutput | None:
+    if not carousel_raw:
+        return None
+    slides = [CarouselSlide(**s) for s in carousel_raw.get("slides", [])]
+    return CarouselOutput(
+        carousel_title=carousel_raw["carousel_title"],
+        platform=carousel_raw["platform"],
+        slides=slides,
+        caption=carousel_raw["caption"],
+        hashtags=carousel_raw["hashtags"],
+    )
+
+
+def _build_revisor_state(inp: dict) -> dict:
+    posts_raw = inp.get("posts", {})
+    posts = _posts_from_yaml(posts_raw) if posts_raw else {}
+    carousel = _carousel_from_yaml(inp.get("carousel"))
+
+    return {
+        "session_id": inp.get("session_id", "ds-revisor-test"),
+        "run_date": inp.get("run_date", "2026-05-23"),
+        "research_briefs": [],
+        "selected_topic": None,
+        "selected_pillar": None,
+        "posts": posts,
+        "carousel": carousel,
+        "review_results": [],
+        "pending_approval": False,
+        "approval_decision": None,
+        "revision_note": None,
+        "revision_count": inp.get("revision_count", 0),
+        "publication_results": [],
+        "current_agent": "carousel",
+        "action": ActionType.COMPLETE,
+        "status": StatusType.TASK_COMPLETE,
+        "confidence": 0.9,
+        "errors": [],
+    }
+
+
+@pytest.mark.parametrize("case", _load_cases("revisor_cases.yaml"), ids=lambda c: c["id"])
+async def test_revisor_dataset(case):
+    """Parametrized test driven by tests/datasets/revisor_cases.yaml."""
+    mocks = case.get("mocks", {})
+    inp = case.get("input", {})
+
+    # Apply revision_count from mocks if specified (used for loop-fault scenarios)
+    inp.setdefault("revision_count", mocks.get("revision_count", 0))
+
+    state = _build_revisor_state(inp)
+
+    judge_score = mocks.get("judge_score", 0.85)
+    judge_issues = mocks.get("judge_issues", [])
+    ai_score = mocks.get("ai_detection_score", 0.20)
+    ai_raises = mocks.get("ai_detection_raises", False)
+    wa_raises = mocks.get("whatsapp_raises", False)
+
+    judge_resp = MagicMock()
+    judge_resp.content = [MagicMock(text=json.dumps({"score": judge_score, "issues": judge_issues}))]
+
+    mock_llm = MagicMock()
+    mock_llm.messages = MagicMock()
+    mock_llm.messages.create = AsyncMock(return_value=judge_resp)
+
+    ai_mock = (
+        AsyncMock(side_effect=Exception("GPTZero unavailable"))
+        if ai_raises
+        else AsyncMock(return_value=ai_score)
+    )
+    wa_mock = (
+        AsyncMock(side_effect=Exception("WhatsApp unreachable"))
+        if wa_raises
+        else AsyncMock(return_value={"status": "sent"})
+    )
+
+    supa_mock = AsyncMock()
+    supa_mock.log_review = AsyncMock(return_value="row-id")
+
+    patches = [
+        patch.object(revisor, "AsyncAnthropic", return_value=mock_llm),
+        patch.object(revisor.ai_detection, "score_text", new=ai_mock),
+        patch.object(revisor.whatsapp, "send_text", new=wa_mock),
+        patch.object(revisor, "SupabaseMemory", return_value=supa_mock),
+    ]
+
+    with ExitStack() as stack:
+        for p in patches:
+            stack.enter_context(p)
+        result = await revisor.revisor_node(state)
+
+    exp = case["expected_output"]
+    result_action = result["action"].value if hasattr(result["action"], "value") else result["action"]
+    result_status = result["status"].value if hasattr(result["status"], "value") else result["status"]
+
+    assert result_action == exp["action"], (
+        f"[{case['id']}] action: got {result_action!r}, want {exp['action']!r}"
+    )
+    assert result_status == exp["status"], (
+        f"[{case['id']}] status: got {result_status!r}, want {exp['status']!r}"
+    )
+    conf = result.get("confidence", 0)
+    assert exp["confidence_min"] <= conf <= exp["confidence_max"], (
+        f"[{case['id']}] confidence {conf} not in "
+        f"[{exp['confidence_min']}, {exp['confidence_max']}]"
+    )
+
+    behavior = case["expected_behavior"]
+    if behavior.get("should_escalate"):
+        assert result_action == "escalate_human" or result.get("approval_decision") == "rejected", (
+            f"[{case['id']}] expected escalation/rejection, got action={result_action!r}"
+        )
+    if behavior.get("should_block"):
+        assert result_status in ("blocked", "failed"), (
+            f"[{case['id']}] expected block/fail, got status={result_status!r}"
+        )

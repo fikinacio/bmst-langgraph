@@ -3,9 +3,12 @@
 All external dependencies (LinkedIn, Meta, SupabaseMemory) are stubbed.
 """
 
+from contextlib import ExitStack
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
+import yaml
 
 from src.agents.publisher import node as publisher
 from src.protocols.io_schema import (
@@ -15,6 +18,12 @@ from src.protocols.io_schema import (
     ResearchBrief,
 )
 from src.protocols.vocabulary import ActionType, Platform, StatusType
+
+
+def _load_cases(filename: str) -> list[dict]:
+    path = Path(__file__).parent / "datasets" / filename
+    with path.open(encoding="utf-8") as fh:
+        return yaml.safe_load(fh)["cases"]
 
 
 # ---------------------------------------------------------------------------
@@ -288,3 +297,136 @@ async def test_publisher_no_approval_safety_fault(base_state):
     supa.save_topic.assert_not_awaited()
     # No WhatsApp sent (no TikTok delivery, no summary, no failure alert)
     whatsapp_mock.assert_not_awaited()
+
+
+# ---------------------------------------------------------------------------
+# Dataset-driven tests
+# ---------------------------------------------------------------------------
+
+
+def _posts_from_yaml(posts_raw: dict) -> dict[str, PlatformPost]:
+    return {plat: PlatformPost(**data) for plat, data in posts_raw.items()}
+
+
+def _carousel_from_yaml(carousel_raw: dict | None) -> CarouselOutput | None:
+    if not carousel_raw:
+        return None
+    slides = [CarouselSlide(**s) for s in carousel_raw.get("slides", [])]
+    return CarouselOutput(
+        carousel_title=carousel_raw["carousel_title"],
+        platform=carousel_raw["platform"],
+        slides=slides,
+        caption=carousel_raw["caption"],
+        hashtags=carousel_raw["hashtags"],
+    )
+
+
+def _build_publisher_state(inp: dict) -> dict:
+    posts_raw = inp.get("posts", {})
+    posts = _posts_from_yaml(posts_raw) if posts_raw else {}
+
+    carousel_raw = inp.get("carousel")
+    carousel = _carousel_from_yaml(carousel_raw) if isinstance(carousel_raw, dict) else None
+
+    topic_raw = inp.get("selected_topic")
+    selected_topic = ResearchBrief(**topic_raw) if topic_raw else None
+
+    return {
+        "session_id": inp.get("session_id", "ds-publisher-test"),
+        "run_date": inp.get("run_date", "2026-05-23"),
+        "research_briefs": [selected_topic] if selected_topic else [],
+        "selected_topic": selected_topic,
+        "selected_pillar": inp.get("selected_pillar"),
+        "posts": posts,
+        "carousel": carousel,
+        "review_results": [],
+        "pending_approval": False,
+        "approval_decision": inp.get("approval_decision", "approved"),
+        "revision_note": None,
+        "revision_count": 0,
+        "publication_results": [],
+        "current_agent": "revisor",
+        "action": ActionType.COMPLETE,
+        "status": StatusType.TASK_COMPLETE,
+        "confidence": 0.9,
+        "errors": [],
+    }
+
+
+def _patch_publisher_dataset(mocks: dict):
+    """Build publisher patches from a YAML mocks dict."""
+    def _side(err_msg):
+        async def fn(*args, **kwargs):
+            if err_msg:
+                raise Exception(err_msg)
+            return {"post_url": "https://example.com/post/1", "id": "1"}
+        return fn
+
+    supa_mock = AsyncMock()
+    supa_mock.log_publication = AsyncMock(return_value="row-id")
+    supa_mock.save_topic = AsyncMock(return_value=None)
+    supa_mock.is_session_approved = AsyncMock(return_value=mocks.get("is_approved", True))
+
+    wa_mock = AsyncMock(return_value={"status": "sent"})
+
+    return [
+        patch.object(
+            publisher.linkedin_api, "post_linkedin",
+            new=AsyncMock(side_effect=_side(mocks.get("linkedin_error"))),
+        ),
+        patch.object(
+            publisher.meta_api, "post_instagram",
+            new=AsyncMock(side_effect=_side(mocks.get("instagram_error"))),
+        ),
+        patch.object(
+            publisher.meta_api, "post_facebook",
+            new=AsyncMock(side_effect=_side(mocks.get("facebook_error"))),
+        ),
+        patch.object(publisher, "SupabaseMemory", return_value=supa_mock),
+        patch.object(publisher.whatsapp, "send_text", new=wa_mock),
+    ], supa_mock, wa_mock
+
+
+@pytest.mark.parametrize("case", _load_cases("publisher_cases.yaml"), ids=lambda c: c["id"])
+async def test_publisher_dataset(case):
+    """Parametrized test driven by tests/datasets/publisher_cases.yaml."""
+    mocks = case.get("mocks", {})
+    inp = case.get("input", {})
+
+    # Honour the has_carousel flag to override the carousel field
+    if not mocks.get("has_carousel", True):
+        inp = {**inp, "carousel": None}
+
+    state = _build_publisher_state(inp)
+    patches, supa_mock, wa_mock = _patch_publisher_dataset(mocks)
+
+    with ExitStack() as stack:
+        for p in patches:
+            stack.enter_context(p)
+        result = await publisher.publisher_node(state)
+
+    exp = case["expected_output"]
+    result_action = result["action"].value if hasattr(result["action"], "value") else result["action"]
+    result_status = result["status"].value if hasattr(result["status"], "value") else result["status"]
+
+    assert result_action == exp["action"], (
+        f"[{case['id']}] action: got {result_action!r}, want {exp['action']!r}"
+    )
+    assert result_status == exp["status"], (
+        f"[{case['id']}] status: got {result_status!r}, want {exp['status']!r}"
+    )
+    conf = result.get("confidence", 0)
+    assert exp["confidence_min"] <= conf <= exp["confidence_max"], (
+        f"[{case['id']}] confidence {conf} not in "
+        f"[{exp['confidence_min']}, {exp['confidence_max']}]"
+    )
+
+    behavior = case["expected_behavior"]
+    if behavior.get("should_escalate"):
+        assert result_action == "escalate_human", (
+            f"[{case['id']}] expected escalation, got action={result_action!r}"
+        )
+    if behavior.get("should_block"):
+        assert result_status in ("blocked", "failed"), (
+            f"[{case['id']}] expected block/fail, got status={result_status!r}"
+        )
