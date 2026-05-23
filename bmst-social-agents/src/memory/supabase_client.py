@@ -290,6 +290,17 @@ class SupabaseMemory:
         )
         return [row["topic"] for row in result.data]
 
+    async def list_publications(self, limit: int = 20) -> list[dict]:
+        """Return the most recent publication_log rows, newest first."""
+        result = await (
+            self._client.table("publication_log")
+            .select("*")
+            .order("published_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return result.data
+
     async def save_topic(
         self, topic: str, run_date: str, pillar: str
     ) -> None:
