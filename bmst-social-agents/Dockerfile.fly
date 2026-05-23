@@ -1,0 +1,25 @@
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+# Install dependencies before copying source for better layer caching.
+# pyproject.toml is the only file needed to resolve the dependency list.
+COPY pyproject.toml .
+
+# Copy source so hatchling can build the package during pip install.
+# tests/, docs/, infra/, .env* are intentionally excluded.
+COPY src/ src/
+
+# Install production deps only (no [dev] extras = no pytest/ruff/mypy).
+RUN pip install --no-cache-dir .
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Default process: api.
+# On Fly.io the [processes] table overrides this CMD per machine group.
+# Locally, set FLY_PROCESS_GROUP=scheduler to run the scheduler.
+CMD ["/app/entrypoint.sh"]

@@ -1,0 +1,58 @@
+app            = "bmst-social-agents"
+primary_region = "cdg"
+
+[build]
+  dockerfile = "Dockerfile.fly"
+
+# ── Process groups ────────────────────────────────────────────────────────────
+# Fly.io sets FLY_PROCESS_GROUP on each machine; the commands below override
+# the Dockerfile CMD for each group.
+[processes]
+  api       = "python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8080"
+  scheduler = "python -m src.scheduler.cron"
+
+# ── API service (HTTP, publicly exposed) ──────────────────────────────────────
+[[services]]
+  processes            = ["api"]
+  internal_port        = 8080
+  protocol             = "tcp"
+  auto_stop_machines   = false
+  min_machines_running = 1
+
+  [[services.ports]]
+    port     = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port     = 443
+    handlers = ["tls", "http"]
+
+  [[services.http_checks]]
+    interval     = "15s"
+    timeout      = "10s"
+    grace_period = "30s"
+    method       = "GET"
+    path         = "/health"
+
+# ── Scheduler service (background worker, no external ports) ──────────────────
+# internal_port is required by the Fly.io schema but no [[services.ports]]
+# means no external traffic reaches the scheduler machine.
+[[services]]
+  processes            = ["scheduler"]
+  internal_port        = 8080
+  protocol             = "tcp"
+  auto_stop_machines   = false
+  min_machines_running = 1
+
+# ── VM sizing (per process group) ─────────────────────────────────────────────
+[[vm]]
+  processes = ["api"]
+  cpu_kind  = "shared"
+  cpus      = 1
+  memory    = "512mb"
+
+[[vm]]
+  processes = ["scheduler"]
+  cpu_kind  = "shared"
+  cpus      = 1
+  memory    = "512mb"
