@@ -1,0 +1,967 @@
+{
+  "pipeline": {
+    "ultima_actualizacao": "2026-06-04",
+    "totais": {
+      "leads_total": 94,
+      "segmento_b": 83,
+      "segmento_c": 11,
+      "score_medio": 7.6,
+      "com_whatsapp_verificavel": 40,
+      "status_novo": 16,
+      "status_contactado": 76,
+      "status_em_curso": 0,
+      "status_arquivado": 2,
+      "status_qualificado": 0,
+      "status_perdido": 0,
+      "status_em_aprovacao": 0,
+      "nota_w23": "4 Jun 2026: CEO aprovou 38 mensagens. Enviadas 38/38 — 28 FIN/TEL/IMO/follow-ups + 10 JUR/VIA. VIA-002 Atlantida WTA contactada via WA +244929624550 (numero geral, confirmado no WA — o +244941367711 nao estava no WA)."
+    },
+    "por_sector": {
+      "Saude": 5,
+      "Educacao": 5,
+      "Logistica": 27,
+      "Comercio": 5,
+      "Servicos": 5,
+      "Financas_Seguros": 5,
+      "Telecomunicacoes": 5,
+      "Servicos_RH": 1,
+      "Auditoria": 1,
+      "Comércio_alimentar": 1,
+      "Imobiliario": 15,
+      "Advocacia": 5,
+      "Contabilidade": 5,
+      "Agencias_Viagens": 5,
+      "Hotelaria": 7
+    },
+    "por_zona": {
+      "Alvalade_Maianga": 2,
+      "Morro_Bento": 2,
+      "Talatona": 5,
+      "Futungo_de_Belas": 1,
+      "Maculusso_Benfica_Viana": 1,
+      "Belas_Luanda_Sul": 2,
+      "Via_Expressa_Benfica_Cacuaco": 1,
+      "Av_21_Janeiro_Gamek": 1,
+      "Estrada_de_Cacuaco": 1,
+      "Viana_Polo_Industrial": 2,
+      "Luanda_Centro": 2
+    },
+    "sessoes": [
+      {
+        "data": "2026-05-01",
+        "ficheiro": "leads/comercio-luanda-2026-05-01.json",
+        "sector_foco": "Comércio",
+        "leads_adicionados": 5,
+        "ids": [
+          "COM-001",
+          "COM-002",
+          "COM-003",
+          "COM-004",
+          "COM-005"
+        ],
+        "score_medio_sessao": 7.2,
+        "distribuicao_segmentos": {
+          "B": 5,
+          "C": 0
+        },
+        "com_whatsapp_verificavel": 1,
+        "notas_sessao": "Quarta sessão de prospecção. Foco em comércio retalhista e B2B Luanda. Lead de maior score: COM-001 Fresmart (score 8, 46 lojas, Grupo Newaco) e COM-003 Alimenta Angola (score 8, email televendas verificado, RAG catálogo 6.000 artigos). Único WhatsApp verificado: COM-004 Zopo Angola (+244 923 363 580). 100% Segmento B."
+      },
+      {
+        "data": "2026-05-01",
+        "ficheiro": "leads/servicos-luanda-2026-05-01.json",
+        "sector_foco": "Serviços",
+        "leads_adicionados": 5,
+        "ids": [
+          "SRV-001",
+          "SRV-002",
+          "SRV-003",
+          "SRV-004",
+          "SRV-005"
+        ],
+        "score_medio_sessao": 7.2,
+        "distribuicao_segmentos": {
+          "B": 5,
+          "C": 0
+        },
+        "com_whatsapp_verificavel": 0,
+        "notas_sessao": "Quinta sessão de prospecção. Foco em serviços profissionais Luanda (contabilidade, RH, imobiliária). Lead de maior score: SRV-001 ACE Audit Consulting (score 8, membro BKR, dor documental) e SRV-002 Multipessoal Angola (score 8, grupo multinacional, triagem de candidatos). Sector Serviços: 5 leads com email profissional, 4 com LinkedIn. Nenhum WhatsApp verificado — entrada preferencialmente por email ou LinkedIn. 100% Segmento B."
+      },
+      {
+        "data": "2026-05-15",
+        "ficheiro": "leads/logistica-luanda-2026-05-15.json",
+        "sector_foco": "Logística — aprofundamento W21",
+        "leads_adicionados": 17,
+        "ids": [
+          "LOG-006",
+          "LOG-007",
+          "LOG-008",
+          "LOG-009",
+          "LOG-010",
+          "LOG-011",
+          "LOG-012",
+          "LOG-013",
+          "LOG-014",
+          "LOG-015",
+          "LOG-016",
+          "LOG-017",
+          "LOG-018",
+          "LOG-019",
+          "LOG-020",
+          "LOG-021",
+          "LOG-022"
+        ],
+        "score_medio_sessao": 6.8,
+        "distribuicao_segmentos": {
+          "B": 9,
+          "C": 8
+        },
+        "com_whatsapp_verificavel": 11,
+        "leads_sem_website": 2,
+        "oferta_dupla": [
+          "LOG-019 Gira Transportes",
+          "LOG-020 Eragos Delivery"
+        ],
+        "top_leads": [
+          "LOG-019 Gira (score 8, proposta dupla)",
+          "LOG-008 SkyNet Angola (score 8)",
+          "LOG-007 Mamboo (score 8)"
+        ],
+        "notas_sessao": "Sexta sessão de prospecção. Aprofundamento logística Luanda com foco em empresas sem website (proposta dupla). 2 empresas sem website identificadas: LOG-019 Gira Transportes (21k Facebook, WhatsApp Televendas verificado, rotas interprovinciais) e LOG-020 Eragos Delivery (contacto directo +244 939 439 370). Destaque: LOG-008 SkyNet Angola (21 anos, 5 províncias, 2 decisores identificados) e LOG-007 Mamboo (startup tech, 1M+ entregas, COO identificado). 9 Segmento B, 8 Segmento C. 11 WhatsApp verificáveis."
+      },
+      {
+        "data": "2026-05-12",
+        "ficheiro": "leads/imobiliario-luanda-2026-05-12.json",
+        "sector_foco": "Imobiliário — sessão 1",
+        "leads_adicionados": 5,
+        "ids": [
+          "IMO-001",
+          "IMO-002",
+          "IMO-003",
+          "IMO-004",
+          "IMO-005"
+        ],
+        "score_medio_sessao": 7.4,
+        "distribuicao_segmentos": {
+          "B": 4,
+          "C": 1
+        },
+        "com_whatsapp_verificavel": 2,
+        "top_leads": [
+          "IMO-005 Century 21 Angola",
+          "IMO-002 Kora Angola"
+        ],
+        "notas_sessao": "Primeira sessão imobiliário Luanda. 5 agências: Imogesba, Kora Angola, Predilel, Luanda Real Estate, Century 21 Angola."
+      },
+      {
+        "data": "2026-05-27",
+        "ficheiro": "leads/imobiliario-luanda-2026-05-27.json",
+        "sector_foco": "Imobiliário — sessão 2",
+        "leads_adicionados": 10,
+        "ids": [
+          "IMO-006",
+          "IMO-007",
+          "IMO-008",
+          "IMO-009",
+          "IMO-010",
+          "IMO-011",
+          "IMO-012",
+          "IMO-013",
+          "IMO-014",
+          "IMO-015"
+        ],
+        "score_medio_sessao": 7.8,
+        "distribuicao_segmentos": {
+          "B": 8,
+          "C": 2
+        },
+        "com_whatsapp_verificavel": 5,
+        "top_leads": [
+          "IMO-010 RE/MAX Angola Multitrust (score 9)",
+          "IMO-006 Square Imobiliária (score 9)",
+          "IMO-012 Abacus Angola (score 8)",
+          "IMO-013 Equilátero (score 8)"
+        ],
+        "notas_sessao": "Segunda sessão imobiliário Luanda. 10 agências verificadas via web: Square (email+tel verificados), Prime Properties, Terra Imobiliária, ImoTrust, RE/MAX Angola Multitrust (franquia, score 9), My House Angola, Abacus Angola (consultoria B2B, RAG avaliações), Equilátero (bilíngue PT/EN), Capicua, Casa e Soluções Africa (property management). Sector imobiliário total: 15 leads (IMO-001 a IMO-015)."
+      },
+      {
+        "data": "2026-05-30",
+        "ficheiro": "leads/advocacia-luanda-2026-05-30.json",
+        "sector_foco": "Advocacia e Servicos Juridicos",
+        "leads_adicionados": 5,
+        "ids": [
+          "JUR-001",
+          "JUR-002",
+          "JUR-003",
+          "JUR-004",
+          "JUR-005"
+        ],
+        "score_medio_sessao": 7.8,
+        "distribuicao_segmentos": {
+          "B": 5,
+          "C": 0
+        },
+        "com_whatsapp_verificavel": 2,
+        "top_leads": [
+          "JUR-001 LCCA (score 9)",
+          "JUR-002 CLM Angola (score 8)",
+          "JUR-003 Couto Graca (score 8)"
+        ],
+        "notas_sessao": "Decima sessao de prospeccao. Sector Advocacia — estreia no pipeline. Dor principal: pesquisa juridica e documental manual. Top lead: JUR-001 LCCA (score 9). JUR-002 CLM Angola especializado Oil&Gas (ticket mais alto). 2 WhatsApp verificaveis."
+      },
+      {
+        "data": "2026-05-30",
+        "ficheiro": "leads/contabilidade-luanda-2026-05-30.json",
+        "sector_foco": "Contabilidade e Auditoria",
+        "leads_adicionados": 5,
+        "ids": [
+          "CON-001",
+          "CON-002",
+          "CON-003",
+          "CON-004",
+          "CON-005"
+        ],
+        "score_medio_sessao": 7.6,
+        "distribuicao_segmentos": {
+          "B": 5,
+          "C": 0
+        },
+        "com_whatsapp_verificavel": 2,
+        "top_leads": [
+          "CON-001 Angola Tax Advisory (score 9)",
+          "CON-002 Nexia Angola (score 8)",
+          "CON-003 Moore Angola (score 8)"
+        ],
+        "notas_sessao": "Decima-primeira sessao de prospeccao. Sector Contabilidade — estreia no pipeline (excluindo ACE Audit ja contactado). Dor: automacao declaracoes AGT e RAG sobre regulamentacao fiscal. 2 WhatsApp verificaveis."
+      },
+      {
+        "data": "2026-06-01",
+        "ficheiro": "leads/viagens-luanda-2026-06-01.json",
+        "sector_foco": "Agencias de Viagens e Turismo",
+        "leads_adicionados": 5,
+        "ids": ["VIA-001","VIA-002","VIA-003","VIA-004","VIA-005"],
+        "score_medio_sessao": 7.8,
+        "distribuicao_segmentos": {"B": 5, "C": 0},
+        "com_whatsapp_verificavel": 2,
+        "top_leads": [
+          "VIA-001 Charme Tours (score 9, IATA 30 anos, email+WA verificados)",
+          "VIA-002 Atlantida WTA (score 8, IATA 35 anos, corporate travel)",
+          "VIA-003 Val Tours (score 8, unico concierge Angola, email directo)"
+        ],
+        "notas_sessao": "Decima-segunda sessao de prospeccao. Sector Agencias de Viagens — estreia no pipeline. Foco em agencias com carteira corporativa B2B. Dor transversal: pedidos de cotacao repetitivos por WA/email sem automacao. 2 WhatsApp verificaveis (VIA-001 Charme Tours, VIA-003 Val Tours). VIA-001: IATA 30 anos, email+WA verificados, score 9. VIA-004 FlyLuanda: LinkedIn activo 1.646 seguidores. VIA-005 Cosmos: DMC parceria AirlinePros."
+      },
+      {
+        "data": "2026-06-03",
+        "ficheiro": "leads/hotelaria-luanda-2026-06-03.json",
+        "sector_foco": "Hotelaria e Alojamento",
+        "leads_adicionados": 7,
+        "ids": ["HOT-001","HOT-002","HOT-003","HOT-004","HOT-005","HOT-006","HOT-007"],
+        "score_medio_sessao": 8.0,
+        "distribuicao_segmentos": {"B": 7, "C": 0},
+        "com_whatsapp_verificavel": 3,
+        "top_leads": [
+          "HOT-001 Epic Sana Luanda (score 9, 5 estrelas 344 quartos, SANA Hotels)",
+          "HOT-002 Pullman Luanda (score 9, 5 estrelas 243 quartos, AccorHotels)",
+          "HOT-003 Talatona Convention Hotel (score 8, MICE referencia Luanda Sul)"
+        ],
+        "notas_sessao": "Decima-terceira sessao de prospeccao. Sector Hotelaria — sector aleatorio escolhido W23 (3 Jun 2026) — estreia no pipeline. 7 hoteis Seg B. Score medio mais alto do pipeline (8.0). Dor transversal: 50-150 mensagens WA/dia sem automacao, reservas directas perdidas para OTAs (15-18% comissao Booking.com), pedidos room service e manutencao sem workflow. HOT-001 e HOT-002 (score 9): targets prioritarios para CLOSER. HOT-003 Talatona (MICE): alto potencial de ticket. HOT-006 Maison (apart-hotel): dor de manutencao cronica para expatriados."
+      }
+    ],
+    "contactos": [
+      {
+        "lead_id": "LEAD-002",
+        "empresa": "MD Clinic Angola — Consultórios Especializados",
+        "status": "contactado",
+        "data_contacto": "2026-04-26",
+        "versao_mensagem": "A",
+        "canal_contacto": "WhatsApp",
+        "aprovado_por": "Fidel Kussunga",
+        "followup_b": {
+          "data_envio": "2026-05-05",
+          "versao_mensagem": "B",
+          "aprovado_por": "Fidel Kussunga",
+          "aprovacao_confirmada": "2026-05-05",
+          "mensagem_enviada": true,
+          "proximo_passo": "Aguardar resposta. Sem resposta ate 2026-05-08 (72h): arquivar, reactivar em 30 dias."
+        },
+        "followup_c": {
+          "estado": "ARQUIVADO",
+          "data_arquivo": "2026-05-12",
+          "reactivar_em": "2026-06-12",
+          "motivo": "16 dias sem resposta apos 2 contactos WhatsApp (A + B). Reactivar em 30 dias com novo angulo."
+        }
+      },
+      {
+        "lead_id": "LEAD-011",
+        "empresa": "Real Express Angola",
+        "status": "contactado",
+        "data_envio_whatsapp": "2026-04-27",
+        "mensagem_enviada": true,
+        "versao_mensagem": "A",
+        "canal_contacto": "WhatsApp",
+        "aprovado_por": "Fidel Kussunga",
+        "proximo_follow_up": "2026-04-29",
+        "proximo_passo": "Aguardar resposta. Se sem resposta em 48h (2026-04-29), enviar follow-up.",
+        "nota_envio": "NAO ENVIADO — numero +244923533318 nao tem WhatsApp (verificado Evolution API 2026-04-27). Canal alternativo a pesquisar."
+      },
+      {
+        "lead_id": "LEAD-003",
+        "empresa": "Visão Magna — Centro de Formação Profissional",
+        "status": "contactado",
+        "data_envio_whatsapp": "2026-04-27",
+        "mensagem_enviada": true,
+        "message_id": "3EB03B45C1414BEEA9B3DC",
+        "versao_mensagem": "A",
+        "canal_contacto": "WhatsApp",
+        "aprovado_por": "Fidel Kussunga",
+        "nota_envio": "ENVIADO — HTTP 201 confirmado pela Evolution API em 2026-04-27.",
+        "followup_b": {
+          "data_envio": "2026-05-04",
+          "versao_mensagem": "B",
+          "aprovado_por": "Fidel Kussunga",
+          "aprovacao_confirmada": "2026-05-04",
+          "webhook_status": "200 OK",
+          "proximo_passo": "Aguardar resposta. Sem resposta até 2026-05-07 (72h): contacto via LinkedIn ou email."
+        },
+        "followup_c": {
+          "estado": "AGUARDA-APROVACAO-CEO",
+          "canal": "LinkedIn",
+          "ficheiro": "proposals/drafts/closer-followup-C-LEAD-003-VisaoMagna-LinkedIn.md",
+          "webhook_enviado": "2026-05-12",
+          "webhook_status": "received",
+          "accao_pendente": "CEO aprova/rejeita no Telegram. Apos envio: sem resposta em 5 dias (2026-05-17) → arquivar, reactivar 2026-07-01."
+        }
+      },
+      {
+        "lead_id": "LEAD-004",
+        "empresa": "EDACO — Education Advisors and Counsellors",
+        "status": "contactado",
+        "data_envio_whatsapp": "2026-04-27",
+        "mensagem_enviada": true,
+        "segmento": "C",
+        "ticket_estimado_aoa": "480.000 – 960.000",
+        "versao_mensagem": "A",
+        "canal_contacto": "WhatsApp",
+        "aprovado_por": "Fidel Kussunga",
+        "proximo_follow_up": "2026-04-29",
+        "proximo_passo": "Aguardar resposta. Se sem resposta em 48h (2026-04-29), enviar follow-up.",
+        "nota_envio": "NAO ENVIADO — numero +244999636363 nao tem WhatsApp (verificado Evolution API 2026-04-27). Canal alternativo a pesquisar."
+      },
+      {
+        "lead_id": "LEAD-008",
+        "empresa": "LTI — Logística e Transportes Integrados",
+        "status": "contactado",
+        "data_envio_whatsapp": "2026-04-27",
+        "mensagem_enviada": true,
+        "message_id": "3EB010CCF07B1DBD475B4A",
+        "versao_mensagem": "A",
+        "canal_contacto": "WhatsApp",
+        "aprovado_por": "Fidel Kussunga",
+        "nota_envio": "ENVIADO — HTTP 201 confirmado pela Evolution API em 2026-04-27.",
+        "followup_b": {
+          "data_envio": "2026-05-04",
+          "versao_mensagem": "B",
+          "aprovado_por": "Fidel Kussunga",
+          "aprovacao_confirmada": "2026-05-04",
+          "webhook_status": "200 OK",
+          "proximo_passo": "Aguardar resposta. Sem resposta até 2026-05-07 (72h): contacto via LinkedIn ou email."
+        },
+        "followup_c": {
+          "estado": "PRONTO-APROVACAO",
+          "canal": "LinkedIn",
+          "ficheiro": "proposals/drafts/closer-followup-C-LEAD-008-LTILogistica-LinkedIn.md",
+          "data_preparacao": "2026-05-12",
+          "accao_pendente": "Aprovacao CEO via webhook. Sem resposta apos 5 dias (2026-05-17): arquivar, reactivar 2026-07-01."
+        }
+      },
+      {
+        "lead_id": "LEAD-009",
+        "empresa": "Labuta Transportes e Logística (Grupo LBT) — Áurea Silva",
+        "status": "contactado",
+        "data_envio_whatsapp": "2026-04-27",
+        "mensagem_enviada": true,
+        "versao_mensagem": "A",
+        "canal_contacto": "WhatsApp",
+        "aprovado_por": "Fidel Kussunga",
+        "proximo_follow_up": "2026-04-29",
+        "proximo_passo": "Aguardar resposta. Se sem resposta em 48h (2026-04-29), enviar follow-up.",
+        "nota_envio": "NAO ENVIADO — numero +244926722600 nao tem WhatsApp (verificado Evolution API 2026-04-27). Canal alternativo a pesquisar."
+      },
+      {
+        "lead_id": "COM-004",
+        "empresa": "Zopo Angola — Fast Fashion",
+        "status": "contactado",
+        "data_envio_whatsapp": "2026-05-05",
+        "versao_mensagem": "A",
+        "canal_contacto": "WhatsApp",
+        "aprovado_por": "Fidel Kussunga",
+        "webhook_status": "200 OK",
+        "aprovacao_confirmada": "2026-05-05",
+        "mensagem_enviada": true,
+        "proximo_passo": "Aguardar resposta. Sem resposta ate 2026-05-07 (48h): follow-up versao B.",
+        "followup_b": {
+          "estado": "ENVIADO",
+          "data_envio": "2026-05-12",
+          "message_id": "3EB01AF80A64ACEBA75548",
+          "canal": "WhatsApp",
+          "aprovado_por": "Fidel Kussunga",
+          "accao_pendente": "Aguardar resposta. Sem resposta ate 2026-05-15 (72h): arquivar, reactivar 2026-06-15."
+        }
+      },
+      {
+        "lead_id": "LOG-005",
+        "empresa": "FyCargo Angola",
+        "status": "arquivado",
+        "data_envio_whatsapp": "2026-05-04",
+        "versao_mensagem": "A",
+        "canal_contacto": "WhatsApp",
+        "aprovado_por": "Fidel Kussunga",
+        "aprovacao_confirmada": "2026-05-04",
+        "webhook_status": "200 OK",
+        "followup_b": {
+          "estado": "ENVIADO",
+          "data_envio": "2026-05-12",
+          "message_id": "3EB0506A7AE553A80033BA",
+          "canal": "WhatsApp"
+        },
+        "arquivo": {
+          "data": "2026-05-14",
+          "motivo": "Sistema próprio de gestão de cargas em operação. Recusa educada de Ailton Alvarenga em 2026-05-13.",
+          "resposta_cliente": "Empresa já dispõe de sistema próprio de rastreamento multi-país (Angola, Zâmbia, Tanzânia, Zimbabwe, África do Sul, Lesoto, Cabo Verde). Investimento contínuo nos próprios processos.",
+          "resposta_bmst": {
+            "data": "2026-05-14",
+            "message_id": "3EB004A56D63718B12542A",
+            "canal": "WhatsApp",
+            "nota": "Resposta de cortesia enviada. Deixada janela aberta para WhatsApp client-facing complementar ao sistema existente."
+          },
+          "reactivar_em": "2026-11-14",
+          "motivo_reactivacao": "Verificar se sistema próprio cobre WhatsApp client-facing. Janela: crescimento para novos mercados pode criar necessidade de camada de atendimento adicional."
+        }
+      },
+      {
+        "lead_id": "COM-003",
+        "empresa": "Alimenta Angola Retail",
+        "status": "contactado",
+        "data_envio": "2026-05-05",
+        "versao_mensagem": "A",
+        "canal_contacto": "Email",
+        "email_destino": "televendas.cmm@alimentaangola.co.ao",
+        "aprovado_por": "Fidel Kussunga",
+        "mensagem_enviada": true,
+        "proximo_passo": "Aguardar resposta. Sem resposta ate 2026-05-09 (4 dias, email): follow-up versao B.",
+        "followup_b": {
+          "estado": "AGUARDA-APROVACAO-CEO",
+          "canal": "Email",
+          "ficheiro": "proposals/drafts/closer-followup-B-COM-003-AlimentaAngola-Email.md",
+          "webhook_enviado": "2026-05-12",
+          "webhook_status": "received",
+          "accao_pendente": "CEO aprova/rejeita no Telegram. Apos envio: sem resposta em 5 dias (2026-05-17) → LinkedIn ou arquivar, reactivar em 30 dias."
+        }
+      },
+      {
+        "lead_id": "COM-001",
+        "empresa": "Fresmart (Grupo Newaco)",
+        "status": "contactado",
+        "data_envio": "2026-05-13",
+        "versao_mensagem": "A",
+        "canal_contacto": "Email",
+        "email_destino": "apoio.cliente@fresmart.net",
+        "aprovado_por": "Fidel Kussunga",
+        "mensagem_enviada": true,
+        "ficheiro": "proposals/drafts/closer-mensagem-COM-001-Fresmart.md",
+        "proximo_passo": "Aguardar resposta. Sem resposta até 2026-05-18 (5 dias, email): follow-up versão B."
+      },
+      {
+        "lead_id": "SRV-001",
+        "empresa": "ACE Audit Consulting Enterprise",
+        "status": "contactado",
+        "data_envio": "2026-05-13",
+        "versao_mensagem": "A",
+        "canal_contacto": "LinkedIn",
+        "decisor": "Carlos Pinho — Senior Partner",
+        "aprovado_por": "Fidel Kussunga",
+        "mensagem_enviada": false,
+        "ficheiro": "proposals/drafts/closer-mensagem-SRV-001-ACEAudit.md",
+        "nota_envio": "Pedido de conexão LinkedIn enviado em 2026-05-13. Mensagem aprovada aguarda aceitação da conexão para envio.",
+        "proximo_passo": "Quando Carlos Pinho aceitar a conexão: enviar DM aprovado. Sem aceitação em 7 dias (2026-05-20): arquivar."
+      },
+      {
+        "lead_id": "SRV-002",
+        "empresa": "Multipessoal Angola",
+        "status": "contactado",
+        "data_envio": "2026-05-13",
+        "versao_mensagem": "A",
+        "canal_contacto": "Email + LinkedIn",
+        "aprovado_por": "Fidel Kussunga",
+        "mensagem_enviada": true,
+        "ficheiro": "proposals/drafts/closer-mensagem-SRV-002-Multipessoal.md",
+        "nota_envio": "Email enviado em 2026-05-13. LinkedIn DM pendente — enviar após aceitação de conexão.",
+        "proximo_passo": "Aguardar resposta email. Sem resposta até 2026-05-18 (5 dias): follow-up versão B. LinkedIn DM: enviar quando conexão aceite.",
+        "w22_reactivacao": {
+          "data": "2026-05-25",
+          "canal": "Email",
+          "email_destino": "geral@multipessoal.co.ao",
+          "assunto": "Triagem automatizada de candidatos via WhatsApp — proposta para a Multipessoal Angola",
+          "resend_id": "375e0de7-b158-40bc-af51-348d5b8dab80",
+          "score_ia_editor": "38%",
+          "proximo_follow_up": "2026-05-29"
+        }
+      },
+      {
+        "lead_id": "COM-001",
+        "empresa": "Fresmart (Grupo Newaco)",
+        "status": "contactado",
+        "w22_reactivacao": {
+          "data": "2026-05-25",
+          "canal": "Email",
+          "email_destino": "apoio.cliente@fresmart.net",
+          "assunto": "Atendimento ao cliente em 46 lojas — proposta de automação para o Fresmart",
+          "resend_id": "aa635b33-ef73-4f67-8353-d4e0a24d9d36",
+          "score_ia_editor": "48%",
+          "proximo_follow_up": "2026-05-29"
+        }
+      },
+      {
+        "lead_id": "SRV-001",
+        "empresa": "ACE Audit Consulting Enterprise",
+        "status": "contactado",
+        "w22_reactivacao": {
+          "data": "2026-05-25",
+          "canal": "Email",
+          "email_destino": "ace@aceangola.com",
+          "assunto": "Pesquisa documental automatizada para auditoria — proposta para a ACE Audit",
+          "resend_id": "5a8b5bdf-371f-4b36-80fc-cd6dba698754",
+          "score_ia_editor": "41%",
+          "proximo_follow_up": "2026-05-29"
+        }
+      },
+      {
+        "lead_id": "LEAD-003",
+        "empresa": "Visão Magna",
+        "status": "arquivado",
+        "followup_c": {
+          "data": "2026-05-25",
+          "canal": "WhatsApp",
+          "message_id": "3EB0E42978DD2372D98DEB",
+          "nota": "Follow-up C final enviado. Sem resposta → arquivar 60 dias."
+        },
+        "arquivo": {
+          "data": "2026-05-25",
+          "reactivar_em": "2026-07-24",
+          "motivo": "3 contactos sem resposta (A + B + C)"
+        }
+      },
+      {
+        "lead_id": "LEAD-008",
+        "empresa": "LTI Logística",
+        "status": "arquivado",
+        "followup_c": {
+          "data": "2026-05-25",
+          "canal": "WhatsApp",
+          "message_id": "3EB00F097CF27C7450C5C6",
+          "nota": "Follow-up C final enviado. Sem resposta → arquivar 60 dias."
+        },
+        "arquivo": {
+          "data": "2026-05-25",
+          "reactivar_em": "2026-07-24",
+          "motivo": "3 contactos sem resposta (A + B + C)"
+        }
+      },
+      {
+        "lead_id": "COM-004",
+        "empresa": "Zopo Angola",
+        "status": "arquivado",
+        "followup_c": {
+          "data": "2026-05-25",
+          "canal": "WhatsApp",
+          "message_id": "3EB0F70E7C7D7D5FBEBA2D",
+          "nota": "Follow-up C final enviado. Sem resposta → arquivar 60 dias."
+        },
+        "arquivo": {
+          "data": "2026-05-25",
+          "reactivar_em": "2026-07-24",
+          "motivo": "3 contactos sem resposta (A + B + C)"
+        }
+      },
+      {
+        "lead_id": "FIN-001",
+        "empresa": "Fortaleza Seguros",
+        "score": 9,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "WhatsApp",
+        "session_id": "CLOSER-FortalezaSeguros-20260529-090000",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: WA enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-006",
+        "empresa": "Square Imobiliária Angola",
+        "score": 9,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-SquareImobiliaria-20260529-090100",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-010",
+        "empresa": "RE/MAX Angola Multitrust",
+        "score": 9,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-REMAXAngola-20260529-090200",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "FIN-003",
+        "empresa": "Zillian Angola",
+        "score": 8,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-ZillianAngola-20260529-090300",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "TEL-001",
+        "empresa": "Witelekom S.A.",
+        "score": 8,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "WhatsApp",
+        "session_id": "CLOSER-Witelekom-20260529-090400",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: WA enviado automaticamente."
+      },
+      {
+        "lead_id": "TEL-002",
+        "empresa": "SpeedNet Lda",
+        "score": 8,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "WhatsApp",
+        "session_id": "CLOSER-SpeedNet-20260529-090500",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: WA enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-002",
+        "empresa": "Kora Angola Real Estate",
+        "score": 8,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-KoraAngola-20260529-090600",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-005",
+        "empresa": "Century 21 Angola",
+        "score": 8,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-Century21Angola-20260529-090700",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-007",
+        "empresa": "Prime Properties Angola",
+        "score": 8,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-PrimeProperties-20260529-090800",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-012",
+        "empresa": "Abacus Angola Consultoria Imobiliária",
+        "score": 8,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-AbacusAngola-20260529-090900",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-013",
+        "empresa": "Equilátero Imobiliária",
+        "score": 8,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-Equilatero-20260529-091000",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-015",
+        "empresa": "Casa e Soluções Africa",
+        "score": 8,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-CasaSolucoesAfrica-20260529-091100",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "FIN-002",
+        "empresa": "Inter Risk Angola",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-InterRisk-20260529-091200",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "FIN-004",
+        "empresa": "Multicrédito Sociedade de Microcrédito",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-Multicredito-20260529-091300",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "FIN-005",
+        "empresa": "NespeCred Sociedade de Microcrédito",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "WhatsApp",
+        "session_id": "CLOSER-NespeCred-20260529-091400",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: WA enviado automaticamente."
+      },
+      {
+        "lead_id": "TEL-004",
+        "empresa": "Advanlink Lda",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-Advanlink-20260529-091500",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "TEL-005",
+        "empresa": "UWF Telecomunicações",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-UWF-20260529-091600",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-001",
+        "empresa": "Imogesba",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-Imogesba-20260529-091700",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-003",
+        "empresa": "Predilel Mediação Imobiliária",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-Predilel-20260529-091800",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-004",
+        "empresa": "Luanda Real Estate",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-LuandaRealEstate-20260529-091900",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-008",
+        "empresa": "Terra Imobiliária Angola",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "WhatsApp",
+        "session_id": "CLOSER-TerraImobiliaria-20260529-092000",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: WA enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-009",
+        "empresa": "ImoTrust Angola",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "Email",
+        "session_id": "CLOSER-ImoTrust-20260529-092100",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: email enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-011",
+        "empresa": "My House Angola",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "WhatsApp",
+        "session_id": "CLOSER-MyHouseAngola-20260529-092200",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: WA enviado automaticamente."
+      },
+      {
+        "lead_id": "IMO-014",
+        "empresa": "Capicua Mediação Imobiliária",
+        "score": 7,
+        "status": "em_aprovacao",
+        "data_submissao": "2026-05-29",
+        "canal": "WhatsApp",
+        "session_id": "CLOSER-Capicua-20260529-092300",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: WA enviado automaticamente."
+      }
+    ],
+    "prioridade_closer": [
+      {
+        "lead_id": "LOG-005",
+        "empresa": "FyCargo Angola",
+        "score": 8,
+        "motivo": "CONTACTADO 2026-05-01. WhatsApp verificado, 201-500 colaboradores, frete China-Angola = centenas de encomendas/mês, dor validada de rastreamento manual."
+      },
+      {
+        "lead_id": "LEAD-011",
+        "empresa": "Real Express Angola",
+        "score": 8,
+        "motivo": "WhatsApp verificado, clientes já compram por WhatsApp (dor validada), empresa em crescimento 2022–2025, multi-canal activo"
+      },
+      {
+        "lead_id": "LEAD-003",
+        "empresa": "Visão Magna",
+        "score": 7,
+        "motivo": "WhatsApp verificado, multi-polo (3 localizações), +8.000 formandos, email Gmail paralelo = processos informais = janela de automação"
+      },
+      {
+        "lead_id": "LEAD-004",
+        "empresa": "EDACO",
+        "score": 7,
+        "motivo": "WhatsApp duplo verificado, Talatona zona premium, email profissional, Instagram e Facebook activos"
+      },
+      {
+        "lead_id": "LEAD-009",
+        "empresa": "Labuta Transportes e Logística",
+        "score": 7,
+        "motivo": "Contacto nominado verificado (Áurea Silva), Grupo LBT = orçamento, empresa desde 1999 = historial sólido"
+      },
+      {
+        "lead_id": "LEAD-008",
+        "empresa": "LTI — Logística e Transportes Integrados",
+        "score": 7,
+        "motivo": "Telefone comercial verificado, website em PT e EN (clientes internacionais), Instagram activo, empresa fundada 2008"
+      },
+      {
+        "lead_id": "COM-001",
+        "empresa": "Fresmart (Grupo Newaco)",
+        "score": 8,
+        "motivo": "500+ colaboradores, 46 lojas em 8 províncias, email profissional verificado, LinkedIn activo, Grupo Newaco = orçamento disponível"
+      },
+      {
+        "lead_id": "COM-003",
+        "empresa": "Alimenta Angola Retail",
+        "score": 8,
+        "motivo": "Email de televendas verificado (entrada directa), catálogo 6.000 artigos = RAG perfeito, modelo B2B com encomendas recorrentes"
+      },
+      {
+        "lead_id": "SRV-001",
+        "empresa": "ACE Audit Consulting Enterprise",
+        "score": 8,
+        "motivo": "Membro BKR International, LinkedIn activo, decisor Carlos Pinho identificado, clientes angolanos de grande porte = volume documental alto"
+      },
+      {
+        "lead_id": "SRV-002",
+        "empresa": "Multipessoal Angola",
+        "score": 8,
+        "motivo": "Filial de grupo multinacional português, LinkedIn activo, dor de triagem de candidatos mensurável, proximidade geográfica (Maianga)"
+      },
+      {
+        "lead_id": "LOG-019",
+        "empresa": "Gira Transportes",
+        "score": 8,
+        "motivo": "SEM WEBSITE — proposta dupla (website + agente WhatsApp). WhatsApp Televendas verificado, 21k seguidores Facebook, empresa interprovincial em expansão. Oportunidade de maior impacto desta sessão.",
+        "oferta_especial": "website_mais_agente_whatsapp",
+        "status": "contactado",
+        "data_envio": "2026-05-15",
+        "canal": "WhatsApp",
+        "message_id": "3EB01B2436422F18DB61BC",
+        "proximo_passo": "Aguardar resposta. Sem resposta até 2026-05-17 (48h): follow-up versão B."
+      },
+      {
+        "lead_id": "LOG-008",
+        "empresa": "SkyNet Angola",
+        "score": 8,
+        "motivo": "21 anos de operação, rede nacional 5 províncias, decisores identificados (Elisio Pompeu + Julião Quibeto via ZoomInfo), email profissional @skynetangola.co.ao. Dor de tracking extremamente clara.",
+        "status": "contactado",
+        "data_envio": "2026-05-15",
+        "canal": "Email",
+        "email_destino": "apoio.cliente@skynetangola.co.ao",
+        "proximo_passo": "Aguardar resposta. Sem resposta até 2026-05-20 (5 dias): follow-up versão B."
+      },
+      {
+        "lead_id": "LOG-007",
+        "empresa": "Mamboo Tecnologia",
+        "score": 8,
+        "motivo": "Startup tech de alto crescimento, decisores identificados no LinkedIn (Kaê Carvalho/COO, Lucas Mousinho/CTO), 1M+ entregas, operações Angola + Tanzânia. Fit natural com IA.",
+        "status": "contactado",
+        "data_envio": "2026-05-15",
+        "canal": "Email",
+        "email_destino": "lucas@mamboo.co.ao",
+        "proximo_passo": "Aguardar resposta. Sem resposta até 2026-05-20 (5 dias): follow-up versão B."
+      },
+      {
+        "lead_id": "TEL-003",
+        "empresa": "CONNECTIS / Connectis-Data Angola",
+        "score": 9,
+        "motivo": "Score mais alto do pipeline Telecom. NSP corporativo com AS próprio. Email directo a Nuno Ventura (técnico) e Director Comercial Adilson Costa identificado LinkedIn. Dor NOC manual muito clara.",
+        "status": "contactado",
+        "data_envio": "2026-05-26",
+        "canal": "Email",
+        "email_destino": "nuno.ventura@connectis.co.ao",
+        "resend_id": "1e5676c9-9859-491d-ae43-b486d9c1e1ca",
+        "linkedin_pendente": "Adilson Costa — URL manual necessária (Unipile sem search endpoint)",
+        "proximo_passo": "Aguardar resposta email. Sem resposta até 2026-05-30 (4 dias): follow-up versão B."
+      },
+      {
+        "lead_id": "LEAD-009",
+        "empresa": "Labuta Transportes e Logística",
+        "score": 7,
+        "motivo": "25 anos de operação inter-provincial. WhatsApp principal sem número público — entrada via LinkedIn.",
+        "status": "contactado",
+        "data_envio": "2026-05-26",
+        "canal": "LinkedIn (Unipile invite)",
+        "linkedin_invitation_id": "7464956543193464832",
+        "nota_envio": "Convite enviado (183 chars). Aguarda aceitação para envio de DM.",
+        "proximo_passo": "Se aceito: enviar DM CLOSER via Unipile. Se sem resposta 7 dias (2026-06-02): arquivar, reactivar 2026-08-26."
+      },
+      {
+        "lead_id": "FIN-001",
+        "empresa": "Fortaleza Seguros",
+        "score": 9,
+        "motivo": "110.000 clientes activos, WhatsApp Business verificado, linha 24/7 existente = dor de atendimento manual clara. Score máximo sector Finanças.",
+        "status": "novo",
+        "canal_preferido": "WhatsApp (+244924744544)",
+        "proximo_passo": "CLOSER a preparar mensagem A. Janela W22-W23."
+      },
+      {
+        "lead_id": "FIN-003",
+        "empresa": "Zillian Angola (corretora AON)",
+        "score": 8,
+        "motivo": "Correspondente exclusivo AON em Angola. Clientes multinacionais = alto valor por interacção. Liderança jovem receptiva a inovação.",
+        "status": "novo",
+        "canal_preferido": "Email (info@zillian.co.ao) ou LinkedIn",
+        "proximo_passo": "CLOSER a preparar mensagem A. Janela W23."
+      }
+    ]
+  }
+}

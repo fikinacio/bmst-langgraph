@@ -45,14 +45,17 @@ Português europeu (pt-PT) em TODOS os documentos e comunicações. Acentos obri
 
 ---
 
-## Sistema de aprovação — Telegram via n8n
+## Sistema de aprovação — WhatsApp via FastAPI
 
-Todas as acções que requerem aprovação do CEO (⏳) são submetidas via webhook n8n, que envia notificação Telegram ao CEO. Os agentes nunca usam o canal nativo do Claude Code para aprovações — usam exclusivamente os webhooks abaixo.
+Todas as acções que requerem aprovação do CEO (⏳) são submetidas via webhook FastAPI, que envia notificação WhatsApp ao CEO (+41795748225). Os agentes nunca usam o canal nativo do Claude Code para aprovações — usam exclusivamente os webhooks abaixo.
+
+**API BMST:** `https://bmst-api.fly.dev` (deploy Fly.io — activo desde 2026-05-27)
+**Fallback n8n:** `https://n8n.biscaplus.com/webhook/bmst-aprovacao` (workflows offline — não usar até reactivação)
 
 ---
 
 ### Webhook de validação (aprovação CEO)
-**URL:** `https://www.n8n.biscaplus.com/webhook/bmst-aprovacao`
+**URL:** `https://bmst-api.fly.dev/webhook/bmst-aprovacao`
 **Método:** POST
 **Content-Type:** application/json
 
@@ -86,7 +89,7 @@ Todas as acções que requerem aprovação do CEO (⏳) são submetidas via webh
 ---
 
 ### Webhook de publicação LinkedIn
-**URL:** `https://www.n8n.biscaplus.com/webhook/bmst-linkedin-publish`
+**URL:** `https://n8n.biscaplus.com/webhook/bmst-linkedin-publish`
 **Método:** POST
 **Content-Type:** application/json
 
@@ -113,7 +116,7 @@ Usado pelo VOICE para publicar posts na página Bisca+ no LinkedIn via Buffer.
 ---
 
 ### Webhook de publicação Instagram
-**URL:** `https://www.n8n.biscaplus.com/webhook/bmst-instagram-publish`
+**URL:** `https://n8n.biscaplus.com/webhook/bmst-instagram-publish`
 **Método:** POST
 **Content-Type:** application/json
 
@@ -141,7 +144,7 @@ Usado pelo VOICE para publicar posts no Instagram @biscaplus via Buffer. Posts d
 ---
 
 ### Webhook de envio de email
-**URL:** `https://www.n8n.biscaplus.com/webhook/bmst-email-send`
+**URL:** `https://n8n.biscaplus.com/webhook/bmst-email-send`
 **Método:** POST
 **Content-Type:** application/json
 
