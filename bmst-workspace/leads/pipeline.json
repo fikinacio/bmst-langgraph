@@ -7,14 +7,16 @@
       "segmento_c": 11,
       "score_medio": 7.6,
       "com_whatsapp_verificavel": 40,
-      "status_novo": 16,
-      "status_contactado": 76,
+      "status_novo": 9,
+      "status_contactado": 83,
       "status_em_curso": 0,
       "status_arquivado": 2,
       "status_qualificado": 0,
       "status_perdido": 0,
       "status_em_aprovacao": 0,
-      "nota_w23": "4 Jun 2026: CEO aprovou 38 mensagens. Enviadas 38/38 — 28 FIN/TEL/IMO/follow-ups + 10 JUR/VIA. VIA-002 Atlantida WTA contactada via WA +244929624550 (numero geral, confirmado no WA — o +244941367711 nao estava no WA)."
+      "nota_w23": "4 Jun 2026: CEO aprovou 38 mensagens. Enviadas 38/38 — 28 FIN/TEL/IMO/follow-ups + 10 JUR/VIA. VIA-002 Atlantida WTA contactada via WA +244929624550 (numero geral, confirmado no WA — o +244941367711 nao estava no WA).",
+      "ultima_actualizacao": "2026-06-06",
+      "nota_hot": "6 Jun 2026: HOT-001 a HOT-007 contactados via email. CEO aprovou 7 em bloco."
     },
     "por_sector": {
       "Saude": 5,
@@ -239,9 +241,18 @@
         "ficheiro": "leads/viagens-luanda-2026-06-01.json",
         "sector_foco": "Agencias de Viagens e Turismo",
         "leads_adicionados": 5,
-        "ids": ["VIA-001","VIA-002","VIA-003","VIA-004","VIA-005"],
+        "ids": [
+          "VIA-001",
+          "VIA-002",
+          "VIA-003",
+          "VIA-004",
+          "VIA-005"
+        ],
         "score_medio_sessao": 7.8,
-        "distribuicao_segmentos": {"B": 5, "C": 0},
+        "distribuicao_segmentos": {
+          "B": 5,
+          "C": 0
+        },
         "com_whatsapp_verificavel": 2,
         "top_leads": [
           "VIA-001 Charme Tours (score 9, IATA 30 anos, email+WA verificados)",
@@ -255,9 +266,20 @@
         "ficheiro": "leads/hotelaria-luanda-2026-06-03.json",
         "sector_foco": "Hotelaria e Alojamento",
         "leads_adicionados": 7,
-        "ids": ["HOT-001","HOT-002","HOT-003","HOT-004","HOT-005","HOT-006","HOT-007"],
+        "ids": [
+          "HOT-001",
+          "HOT-002",
+          "HOT-003",
+          "HOT-004",
+          "HOT-005",
+          "HOT-006",
+          "HOT-007"
+        ],
         "score_medio_sessao": 8.0,
-        "distribuicao_segmentos": {"B": 7, "C": 0},
+        "distribuicao_segmentos": {
+          "B": 7,
+          "C": 0
+        },
         "com_whatsapp_verificavel": 3,
         "top_leads": [
           "HOT-001 Epic Sana Luanda (score 9, 5 estrelas 344 quartos, SANA Hotels)",
