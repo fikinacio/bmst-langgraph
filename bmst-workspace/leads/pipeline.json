@@ -1,13 +1,13 @@
 {
   "pipeline": {
-    "ultima_actualizacao": "2026-06-04",
+    "ultima_actualizacao": "2026-06-06",
     "totais": {
-      "leads_total": 94,
-      "segmento_b": 83,
+      "leads_total": 99,
+      "segmento_b": 88,
       "segmento_c": 11,
       "score_medio": 7.6,
-      "com_whatsapp_verificavel": 40,
-      "status_novo": 9,
+      "com_whatsapp_verificavel": 42,
+      "status_novo": 14,
       "status_contactado": 83,
       "status_em_curso": 0,
       "status_arquivado": 2,
@@ -16,7 +16,8 @@
       "status_em_aprovacao": 0,
       "nota_w23": "4 Jun 2026: CEO aprovou 38 mensagens. Enviadas 38/38 — 28 FIN/TEL/IMO/follow-ups + 10 JUR/VIA. VIA-002 Atlantida WTA contactada via WA +244929624550 (numero geral, confirmado no WA — o +244941367711 nao estava no WA).",
       "ultima_actualizacao": "2026-06-06",
-      "nota_hot": "6 Jun 2026: HOT-001 a HOT-007 contactados via email. CEO aprovou 7 em bloco."
+      "nota_hot": "6 Jun 2026: HOT-001 a HOT-007 contactados via email. CEO aprovou 7 em bloco.",
+      "nota_fab": "6 Jun 2026: HUNTER sessao 14 — Restauracao e F&B. 5 leads adicionados (FAB-001 a FAB-005). Score medio 7.8. 2 WA verificados. Top lead: FAB-001 Novagest (score 9, ISO 9001, Oil&Gas)."
     },
     "por_sector": {
       "Saude": 5,
@@ -33,7 +34,8 @@
       "Advocacia": 5,
       "Contabilidade": 5,
       "Agencias_Viagens": 5,
-      "Hotelaria": 7
+      "Hotelaria": 7,
+      "Restauracao_FB": 5
     },
     "por_zona": {
       "Alvalade_Maianga": 2,
@@ -287,6 +289,31 @@
           "HOT-003 Talatona Convention Hotel (score 8, MICE referencia Luanda Sul)"
         ],
         "notas_sessao": "Decima-terceira sessao de prospeccao. Sector Hotelaria — sector aleatorio escolhido W23 (3 Jun 2026) — estreia no pipeline. 7 hoteis Seg B. Score medio mais alto do pipeline (8.0). Dor transversal: 50-150 mensagens WA/dia sem automacao, reservas directas perdidas para OTAs (15-18% comissao Booking.com), pedidos room service e manutencao sem workflow. HOT-001 e HOT-002 (score 9): targets prioritarios para CLOSER. HOT-003 Talatona (MICE): alto potencial de ticket. HOT-006 Maison (apart-hotel): dor de manutencao cronica para expatriados."
+      },
+      {
+        "data": "2026-06-06",
+        "ficheiro": "leads/fab-luanda-2026-06-06.json",
+        "sector_foco": "Restauracao e F&B",
+        "leads_adicionados": 5,
+        "ids": [
+          "FAB-001",
+          "FAB-002",
+          "FAB-003",
+          "FAB-004",
+          "FAB-005"
+        ],
+        "score_medio_sessao": 7.8,
+        "distribuicao_segmentos": {
+          "B": 5,
+          "C": 0
+        },
+        "com_whatsapp_verificavel": 2,
+        "top_leads": [
+          "FAB-001 Novagest (score 9, ISO 9001, 20+ anos, Oil&Gas/saude/retail)",
+          "FAB-002 Pizzaria Capricciosa (score 8, 4 localizacoes, WA verificado)",
+          "FAB-003 Tupuca+ (score 8, plataforma delivery 120+ restaurantes, CEO identificado)"
+        ],
+        "notas_sessao": "Decima-quarta sessao de prospeccao. Sector Restauracao e F&B — estreia no pipeline. Escolhido por FORGE em W24 (6 Jun 2026). Foco em empresas com volume operacional elevado e dor de comunicacao clara: catering corporativo (pedidos manuais, coordenacao logistica), cadeias de restauracao (multiplos WhatsApp por localizacao), plataformas de delivery (onboarding e suporte a parceiros). Todos Segmento B. Top lead: FAB-001 Novagest (ISO 9001, 20+ anos, serve Oil&Gas — orcamento garantido). FAB-003 Tupuca+ unico caso de plataforma tech — angulo diferente: automacao de onboarding de restaurantes parceiros."
       }
     ],
     "contactos": [
