@@ -35,8 +35,12 @@
       "score": 9,
       "score_justificacao": "Website profissional +1; email profissional verificado +1; WhatsApp comercial verificado +1; LinkedIn empresa activo +1; ISO 9001 = processos formais = receptividade a automação +1; 20+ anos clientes Oil&Gas = orçamento disponível +1; dor de gestão de encomendas corporativas muito clara +2; localização Talatona (zona Oil&Gas) +1. Total = 9.",
       "segmento": "B",
-      "status": "novo",
-      "notas": "Lead de topo do sector. ISO 9001 certificada sugere cultura de processo e receptividade a ferramentas de gestão. Ângulo: 'cada cliente corporativo tem um contacto directo — quando esse contacto está ocupado, as encomendas perdem-se'. Entrada via email novagest@novagest.co.ao ou WhatsApp +244 924 181 096 dirigido a Raquel Fernandes ou Director Comercial. Ticket estimado: AOA 1.440.000–2.880.000."
+      "status": "contactado",
+      "data_contacto": "2026-06-06",
+      "canal_contacto": "email",
+      "email_usado": "novagest@novagest.co.ao",
+      "session_id": "CLOSER-Novagest-20260606-FAB001",
+      "notas": "Lead de topo do sector. ISO 9001 certificada sugere cultura de processo e receptividade a ferramentas de gestão. Ângulo: 'cada cliente corporativo tem um contacto directo — quando esse contacto está ocupado, as encomendas perdem-se'. Email enviado 2026-06-06. Follow-up B: 12 Jun 2026 se sem resposta. Ticket estimado: AOA 1.440.000–2.880.000."
     },
     {
       "id": "FAB-002",
@@ -54,8 +58,12 @@
       "score": 8,
       "score_justificacao": "Website activo +1; email profissional (admin) verificado +1; WhatsApp verificado activo para encomendas +1; 4 localizações = complexidade operacional clara +1; dor de gestão multi-número muito clara e imediata +2; 7d/semana 10-22h = volume constante +1; delivery activo = caso de uso óbvio +1. Sem LinkedIn verificado -1. Total = 8.",
       "segmento": "B",
-      "status": "novo",
-      "notas": "Caso de uso directo e imediato: a Capricciosa já usa WhatsApp para encomendas — a dor não é convencer a usar o canal, é resolver o caos de gerir 4 números distintos. Pitch: 'um número único que encaminha automaticamente para a loja mais próxima e confirma o tempo de entrega'. Entrada via email admcapricciosa@gmail.com ou WhatsApp +244 935 141 414. Ticket estimado: AOA 960.000–1.920.000."
+      "status": "contactado",
+      "data_contacto": "2026-06-06",
+      "canal_contacto": "email",
+      "email_usado": "admcapricciosa@gmail.com",
+      "session_id": "CLOSER-Capricciosa-20260606-FAB002",
+      "notas": "Caso de uso directo e imediato: a Capricciosa já usa WhatsApp para encomendas — a dor não é convencer a usar o canal, é resolver o caos de gerir 4 números distintos. Email enviado 2026-06-06. Follow-up B: 12 Jun 2026 se sem resposta. Ticket estimado: AOA 960.000–1.920.000."
     },
     {
       "id": "FAB-003",
@@ -74,7 +82,7 @@
       "score_justificacao": "Website profissional +1; LinkedIn empresa activo +1; WhatsApp suporte verificado +1; CEO identificado no LinkedIn +1; plataforma tech = receptividade a automação +1; 120+ parceiros = dor de onboarding/suporte escalável muito clara +2; crescimento 5%/mês = momento de expansão +1. Sem email directo verificado -1. Total = 8.",
       "segmento": "B",
       "status": "novo",
-      "notas": "Lead atípico no sector: não é um restaurante mas uma plataforma. Ângulo diferente — não é 'receber pedidos de clientes' mas 'gerir 120+ restaurantes parceiros'. Pitch para o CEO: 'onboarding e suporte a 120 parceiros por telefone e email não escala para 200 ou 300 — automatizamos o fluxo de onboarding e o suporte de nível 1 para a Tupuca poder crescer sem crescer a equipa de operações'. Entrada via LinkedIn DM a Erickson Mvezi ou WhatsApp +244 944 909 797. Ticket estimado: AOA 1.440.000–2.880.000."
+      "notas": "Lead atípico no sector: não é um restaurante mas uma plataforma. Ângulo diferente — não é 'receber pedidos de clientes' mas 'gerir 120+ restaurantes parceiros'. WA +244 944 909 797 retornou HTTP 502 em 2026-06-06 — número provavelmente não está no WhatsApp. Canal alternativo: LinkedIn DM a Erickson Mvezi (ao.linkedin.com/in/ericksonmvezi) — aguarda renovação Unipile. Ticket estimado: AOA 1.440.000–2.880.000."
     },
     {
       "id": "FAB-004",
