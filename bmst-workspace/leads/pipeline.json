@@ -1,26 +1,28 @@
 {
   "pipeline": {
-    "ultima_actualizacao": "2026-06-06",
+    "ultima_actualizacao": "2026-06-09",
     "totais": {
-      "leads_total": 99,
-      "segmento_b": 88,
+      "leads_total": 105,
+      "segmento_b": 94,
       "segmento_c": 11,
       "score_medio": 7.6,
-      "com_whatsapp_verificavel": 42,
-      "status_novo": 12,
+      "com_whatsapp_verificavel": 45,
+      "status_novo": 18,
       "status_contactado": 85,
       "status_em_curso": 0,
       "status_arquivado": 2,
       "status_qualificado": 0,
       "status_perdido": 0,
-      "status_em_aprovacao": 0,
+      "status_em_aprovacao": 6,
       "nota_w23": "4 Jun 2026: CEO aprovou 38 mensagens. Enviadas 38/38 — 28 FIN/TEL/IMO/follow-ups + 10 JUR/VIA. VIA-002 Atlantida WTA contactada via WA +244929624550 (numero geral, confirmado no WA — o +244941367711 nao estava no WA).",
       "ultima_actualizacao": "2026-06-06",
       "nota_hot": "6 Jun 2026: HOT-001 a HOT-007 contactados via email. CEO aprovou 7 em bloco.",
-      "nota_fab": "6 Jun 2026: HUNTER sessao 14 — Restauracao e F&B. 5 leads adicionados (FAB-001 a FAB-005). Score medio 7.8. 2 WA verificados. Top lead: FAB-001 Novagest (score 9, ISO 9001, Oil&Gas). CLOSER: FAB-001 e FAB-002 contactados via email. FAB-003 WA 502 (numero nao no WA) — aguarda LinkedIn/Unipile. FAB-004/005 bloqueados (LinkedIn expirado / sem canal digital)."
+      "nota_fab": "6 Jun 2026: HUNTER sessao 14 — Restauracao e F&B. 5 leads adicionados (FAB-001 a FAB-005). Score medio 7.8. 2 WA verificados. Top lead: FAB-001 Novagest (score 9, ISO 9001, Oil&Gas). CLOSER: FAB-001 e FAB-002 contactados via email. FAB-003 WA 502 (numero nao no WA) — aguarda LinkedIn/Unipile. FAB-004/005 bloqueados (LinkedIn expirado / sem canal digital).",
+      "nota_8jun": "8 Jun 2026 (22h): CLOSER sessao nocturna. 7 follow-ups B enviados com sucesso — FU-004 CONNECTIS + FU-005 EDACO (em atraso desde 3 Jun) + CON-001 ATA + CON-002 Nexia + CON-003 Moore + CON-004 LCA (WA: 3EB0C0B5E137A64B54EAF7) + CON-005 Crowe. FAB-003 Tupuca+ submetido para aprovacao CEO (LinkedIn DM Erickson Mvezi, session CLOSER-Tupuca-20260608-221309).",
+      "nota_sessao15": "9 Jun 2026: HUNTER Sessao 15 — Saude Privada (Clinicas e Laboratorios). 6 leads SAU-001..006 adicionados. Score medio 8.3 — mais alto do pipeline. Top leads: SAU-001 CSE (score 9, 18 provincias, WA), SAU-002 ALIVA (score 9, 900k consultas/ano, email Patricia Magalhaes), SAU-005 Multiperfil (score 9, 1000+ colaboradores, email Belmiro Rosa). CLOSER: 6 primeiros contactos submetidos para aprovacao CEO (em_aprovacao)."
     },
     "por_sector": {
-      "Saude": 5,
+      "Saude": 11,
       "Educacao": 5,
       "Logistica": 27,
       "Comercio": 5,
@@ -314,6 +316,32 @@
           "FAB-003 Tupuca+ (score 8, plataforma delivery 120+ restaurantes, CEO identificado)"
         ],
         "notas_sessao": "Decima-quarta sessao de prospeccao. Sector Restauracao e F&B — estreia no pipeline. Escolhido por FORGE em W24 (6 Jun 2026). Foco em empresas com volume operacional elevado e dor de comunicacao clara: catering corporativo (pedidos manuais, coordenacao logistica), cadeias de restauracao (multiplos WhatsApp por localizacao), plataformas de delivery (onboarding e suporte a parceiros). Todos Segmento B. Top lead: FAB-001 Novagest (ISO 9001, 20+ anos, serve Oil&Gas — orcamento garantido). FAB-003 Tupuca+ unico caso de plataforma tech — angulo diferente: automacao de onboarding de restaurantes parceiros."
+      },
+      {
+        "data": "2026-06-09",
+        "ficheiro": "leads/saude-luanda-2026-06-09.json",
+        "sector_foco": "Saude Privada — Clinicas e Laboratorios",
+        "leads_adicionados": 6,
+        "ids": [
+          "SAU-001",
+          "SAU-002",
+          "SAU-003",
+          "SAU-004",
+          "SAU-005",
+          "SAU-006"
+        ],
+        "score_medio_sessao": 8.3,
+        "distribuicao_segmentos": {
+          "B": 6,
+          "C": 0
+        },
+        "com_whatsapp_verificavel": 3,
+        "top_leads": [
+          "SAU-001 Clinica Sagrada Esperanca (score 9, rede 18 provincias, WA verificado)",
+          "SAU-002 ALIVA Saude (score 9, 900k consultas/ano, email corporativo Patricia Magalhaes)",
+          "SAU-005 Clinica Multiperfil (score 9, 1000+ colaboradores, Director Geral Belmiro Rosa)"
+        ],
+        "notas_sessao": "Decima-quinta sessao de prospeccao. Sector Saude Privada — estreia com sessao dedicada (sector original tinha 5 leads LEAD- de Abr 2026 de menor dimensao). Score medio 8.3 — mais alto do pipeline. Dor transversal: volume de mensagens WhatsApp de pacientes sem sistema centralizado — marcacoes, confirmacoes de resultados, seguimento pos-consulta. SAU-002 ALIVA destaque: contacto corporativo directo Patricia Magalhaes identificado. SAU-005 Multiperfil: email comercial + Director Geral Belmiro Rosa nomeado. SAU-001 CSE: rede 18 provincias = fragmentacao de canais WA por unidade. CLOSER: 6 primeiros contactos submetidos para aprovacao CEO (9 Jun 2026)."
       }
     ],
     "contactos": [
@@ -1010,6 +1038,78 @@
         "status": "novo",
         "canal_preferido": "Email (info@zillian.co.ao) ou LinkedIn",
         "proximo_passo": "CLOSER a preparar mensagem A. Janela W23."
+      },
+      {
+        "lead_id": "SAU-001",
+        "empresa": "Clínica Sagrada Esperança",
+        "score": 9,
+        "status": "em_aprovacao",
+        "canal_preferido": "WhatsApp (+244929070787)",
+        "decisor": "José Costa — Director de Gestão",
+        "data_submissao": "2026-06-09",
+        "canal": "WhatsApp",
+        "session_id": "CLOSER-CSE-20260609-000000",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: enviar WA +244929070787. Sem resposta em 48h: follow-up versão B (11 Jun 2026)."
+      },
+      {
+        "lead_id": "SAU-002",
+        "empresa": "ALIVA Saúde",
+        "score": 9,
+        "status": "em_aprovacao",
+        "canal_preferido": "Email patricia.magalhaes@alivasaude.com",
+        "decisor": "Patricia Magalhães (contacto corporativo) / Dr. Justin Gavanescu (CEO)",
+        "data_submissao": "2026-06-09",
+        "canal": "Email",
+        "session_id": "CLOSER-ALIVA-20260609-000000",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: enviar email patricia.magalhaes@alivasaude.com. Sem resposta em 5 dias: follow-up versão B (14 Jun 2026)."
+      },
+      {
+        "lead_id": "SAU-003",
+        "empresa": "MEDIAG — Laboratório de Análises Clínicas",
+        "score": 8,
+        "status": "em_aprovacao",
+        "canal_preferido": "Email geral@laboratoriomediag.com",
+        "decisor": "Director (a identificar)",
+        "data_submissao": "2026-06-09",
+        "canal": "Email",
+        "session_id": "CLOSER-MEDIAG-20260609-000000",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: enviar email geral@laboratoriomediag.com. Sem resposta em 5 dias: follow-up versão B (14 Jun 2026)."
+      },
+      {
+        "lead_id": "SAU-004",
+        "empresa": "Clínica Girassol",
+        "score": 8,
+        "status": "em_aprovacao",
+        "canal_preferido": "Email info@clinicagirassol.co.ao",
+        "decisor": "Director Clínico / Director de Gestão (a identificar)",
+        "data_submissao": "2026-06-09",
+        "canal": "Email",
+        "session_id": "CLOSER-Girassol-20260609-000000",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: enviar email info@clinicagirassol.co.ao. Sem resposta em 5 dias: follow-up versão B (14 Jun 2026)."
+      },
+      {
+        "lead_id": "SAU-005",
+        "empresa": "Clínica Multiperfil",
+        "score": 9,
+        "status": "em_aprovacao",
+        "canal_preferido": "Email comercial@multiperfil.co.ao",
+        "decisor": "Belmiro Rosa — Director Geral",
+        "data_submissao": "2026-06-09",
+        "canal": "Email",
+        "session_id": "CLOSER-Multiperfil-20260609-000000",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: enviar email comercial@multiperfil.co.ao. Sem resposta em 5 dias: follow-up versão B (14 Jun 2026)."
+      },
+      {
+        "lead_id": "SAU-006",
+        "empresa": "Clínica General Katondo",
+        "score": 7,
+        "status": "em_aprovacao",
+        "canal_preferido": "WhatsApp (+244923168644)",
+        "decisor": "Director / Sócio-gerente (a identificar)",
+        "data_submissao": "2026-06-09",
+        "canal": "WhatsApp",
+        "session_id": "CLOSER-Katondo-20260609-000000",
+        "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: enviar WA +244923168644. Sem resposta em 48h: follow-up versão B (11 Jun 2026)."
       }
     ]
   }
