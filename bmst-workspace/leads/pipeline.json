@@ -612,15 +612,19 @@
           {
             "data": "2026-06-10",
             "evento": "Proposta comercial enviada — AOA 1.440.000–2.880.000"
+          },
+          {
+            "data": "2026-06-10",
+            "evento": "Confirmado: 2ª reunião marcada após feedback da proposta. Aguarda resposta de Rodrigo Rica."
           }
         ],
         "proposta": {
           "valor_min_aoa": 1440000,
           "valor_max_aoa": 2880000,
           "data_envio": "2026-06-10",
-          "status": "enviada — aguarda segunda reunião"
+          "status": "enviada — aguarda feedback de Rodrigo Rica"
         },
-        "proximo_passo": "Segunda reunião em preparação — pode fechar o negócio. Contacto directo: rodrigo.rica@clan.pt | +244 941 480 868. Regra BMST: 50% pagamento antecipado obrigatório no fecho."
+        "proximo_passo": "Aguardar feedback de Rodrigo Rica sobre a proposta (rodrigo.rica@clan.pt | +244 941 480 868). Após feedback: marcar 2ª reunião. Guião pronto em proposals/guiao-segunda-reuniao-Multipessoal-CLAN-20260610.md."
       },
       {
         "lead_id": "COM-001",
