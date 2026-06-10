@@ -99,9 +99,11 @@
       "corpo": "Da Bisca+. Escrevi há dois dias sobre o número central de marcações para a Sagrada Esperança. Um ângulo adicional: a CSE é a única rede com oncologia em 18 províncias — um paciente em quimio que não consegue confirmar a próxima sessão via WhatsApp está a ligar para o número errado. Este problema tem solução directa. Vale 15 minutos?",
       "session_id": "CLOSER-CSE-FUB-20260612-080000",
       "requer_aprovacao": false,
-      "status": "pendente",
+      "status": "enviado",
+      "data_envio_real": "2026-06-10",
+      "message_id": "3EB0766E233052846F8863",
       "script": "scripts/enviar_followup_B_SAU_12jun.py",
-      "nota": "Executar 12 Jun 2026 se sem resposta desde 10 Jun. Angulo B: oncologia 18 provincias."
+      "nota": "Enviado antecipadamente 10 Jun 2026. msg_id: 3EB0766E233052846F8863."
     },
     {
       "id": "FU-007",
@@ -116,9 +118,11 @@
       "corpo": "Da Bisca+. Escrevi há dois dias sobre respostas automáticas fora do horário da Katondo. Uma observação do mercado: a Talatona tem uma concentração elevada de expatriados e profissionais que trabalham durante o dia — as marcações chegam à noite e ao fim de semana. A clínica que responde primeiro tem a marcação. Vale 15 minutos esta semana?",
       "session_id": "CLOSER-Katondo-FUB-20260612-080000",
       "requer_aprovacao": false,
-      "status": "pendente",
+      "status": "enviado",
+      "data_envio_real": "2026-06-10",
+      "message_id": "3EB06FE53CFDC825C20E5C",
       "script": "scripts/enviar_followup_B_SAU_12jun.py",
-      "nota": "Executar 12 Jun 2026 se sem resposta desde 10 Jun. Angulo B: mercado Talatona expatriados."
+      "nota": "Enviado antecipadamente 10 Jun 2026. msg_id: 3EB06FE53CFDC825C20E5C."
     },
     {
       "id": "FU-008",
