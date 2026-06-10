@@ -1,6 +1,6 @@
 {
   "pipeline": {
-    "ultima_actualizacao": "2026-06-09",
+    "ultima_actualizacao": "2026-06-10",
     "totais": {
       "leads_total": 105,
       "segmento_b": 94,
@@ -8,14 +8,14 @@
       "score_medio": 7.6,
       "com_whatsapp_verificavel": 45,
       "status_novo": 12,
-      "status_contactado": 91,
-      "status_em_curso": 0,
+      "status_contactado": 90,
+      "status_em_curso": 1,
       "status_arquivado": 2,
       "status_qualificado": 0,
       "status_perdido": 0,
       "status_em_aprovacao": 0,
       "nota_w23": "4 Jun 2026: CEO aprovou 38 mensagens. Enviadas 38/38 — 28 FIN/TEL/IMO/follow-ups + 10 JUR/VIA. VIA-002 Atlantida WTA contactada via WA +244929624550 (numero geral, confirmado no WA — o +244941367711 nao estava no WA).",
-      "ultima_actualizacao": "2026-06-06",
+      "ultima_actualizacao": "2026-06-10",
       "nota_hot": "6 Jun 2026: HOT-001 a HOT-007 contactados via email. CEO aprovou 7 em bloco.",
       "nota_fab": "6 Jun 2026: HUNTER sessao 14 — Restauracao e F&B. 5 leads adicionados (FAB-001 a FAB-005). Score medio 7.8. 2 WA verificados. Top lead: FAB-001 Novagest (score 9, ISO 9001, Oil&Gas). CLOSER: FAB-001 e FAB-002 contactados via email. FAB-003 WA 502 (numero nao no WA) — aguarda LinkedIn/Unipile. FAB-004/005 bloqueados (LinkedIn expirado / sem canal digital).",
       "nota_8jun": "8 Jun 2026 (22h): CLOSER sessao nocturna. 7 follow-ups B enviados com sucesso — FU-004 CONNECTIS + FU-005 EDACO (em atraso desde 3 Jun) + CON-001 ATA + CON-002 Nexia + CON-003 Moore + CON-004 LCA (WA: 3EB0C0B5E137A64B54EAF7) + CON-005 Crowe. FAB-003 Tupuca+ submetido para aprovacao CEO (LinkedIn DM Erickson Mvezi, session CLOSER-Tupuca-20260608-221309).",
@@ -565,25 +565,62 @@
       },
       {
         "lead_id": "SRV-002",
-        "empresa": "Multipessoal Angola",
-        "status": "contactado",
-        "data_envio": "2026-05-13",
-        "versao_mensagem": "A",
-        "canal_contacto": "Email + LinkedIn",
+        "empresa": "Multipessoal Angola (Grupo CLAN)",
+        "status": "em_curso",
+        "nota_empresa": "Multipessoal Angola pertence ao Grupo CLAN (clan.pt). Rodrigo Rica é o Country Manager International Business — decisor confirmado para Angola.",
+        "data_primeiro_contacto": "2026-05-13",
+        "canal_contacto": "Email",
         "aprovado_por": "Fidel Kussunga",
-        "mensagem_enviada": true,
-        "ficheiro": "proposals/drafts/closer-mensagem-SRV-002-Multipessoal.md",
-        "nota_envio": "Email enviado em 2026-05-13. LinkedIn DM pendente — enviar após aceitação de conexão.",
-        "proximo_passo": "Aguardar resposta email. Sem resposta até 2026-05-18 (5 dias): follow-up versão B. LinkedIn DM: enviar quando conexão aceite.",
         "w22_reactivacao": {
           "data": "2026-05-25",
           "canal": "Email",
           "email_destino": "geral@multipessoal.co.ao",
           "assunto": "Triagem automatizada de candidatos via WhatsApp — proposta para a Multipessoal Angola",
           "resend_id": "375e0de7-b158-40bc-af51-348d5b8dab80",
-          "score_ia_editor": "38%",
-          "proximo_follow_up": "2026-05-29"
-        }
+          "score_ia_editor": "38%"
+        },
+        "fu_b_enviado": "2026-06-08",
+        "decisor": {
+          "nome": "Rodrigo Rica",
+          "cargo": "Country Manager — International Business Department",
+          "empresa_grupo": "CLAN (grupo Multipessoal)",
+          "telefone_pt": "+351 939 850 026",
+          "telefone_ao": "+244 941 480 868",
+          "email": "rodrigo.rica@clan.pt"
+        },
+        "historico_negociacao": [
+          {
+            "data": "2026-05-13",
+            "evento": "Primeiro contacto — email geral@multipessoal.co.ao"
+          },
+          {
+            "data": "2026-05-25",
+            "evento": "Reactivação W22 — email com proposta triagem candidatos WA"
+          },
+          {
+            "data": "2026-06-08",
+            "evento": "Follow-up B enviado — geral@multipessoal.co.ao"
+          },
+          {
+            "data": "2026-06-09",
+            "evento": "Resposta recebida de Rodrigo Rica (Country Manager CLAN)"
+          },
+          {
+            "data": "2026-06-10",
+            "evento": "1ª reunião/demo realizada com Rodrigo Rica"
+          },
+          {
+            "data": "2026-06-10",
+            "evento": "Proposta comercial enviada — AOA 1.440.000–2.880.000"
+          }
+        ],
+        "proposta": {
+          "valor_min_aoa": 1440000,
+          "valor_max_aoa": 2880000,
+          "data_envio": "2026-06-10",
+          "status": "enviada — aguarda segunda reunião"
+        },
+        "proximo_passo": "Segunda reunião em preparação — pode fechar o negócio. Contacto directo: rodrigo.rica@clan.pt | +244 941 480 868. Regra BMST: 50% pagamento antecipado obrigatório no fecho."
       },
       {
         "lead_id": "COM-001",
