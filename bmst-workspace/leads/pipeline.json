@@ -1,14 +1,14 @@
 {
   "pipeline": {
-    "ultima_actualizacao": "2026-06-10",
+    "ultima_actualizacao": "2026-06-11",
     "totais": {
-      "leads_total": 105,
-      "segmento_b": 94,
+      "leads_total": 117,
+      "segmento_b": 106,
       "segmento_c": 11,
       "score_medio": 7.6,
       "com_whatsapp_verificavel": 45,
-      "status_novo": 12,
-      "status_contactado": 90,
+      "status_novo": 14,
+      "status_contactado": 100,
       "status_em_curso": 1,
       "status_arquivado": 2,
       "status_qualificado": 0,
@@ -38,7 +38,9 @@
       "Contabilidade": 5,
       "Agencias_Viagens": 5,
       "Hotelaria": 7,
-      "Restauracao_FB": 5
+      "Restauracao_FB": 5,
+      "Construcao_Obras": 6,
+      "Logistica_Distribuicao": 6
     },
     "por_zona": {
       "Alvalade_Maianga": 2,
@@ -343,6 +345,58 @@
           "SAU-005 Clinica Multiperfil (score 9, 1000+ colaboradores, Director Geral Belmiro Rosa)"
         ],
         "notas_sessao": "Decima-quinta sessao de prospeccao. Sector Saude Privada — estreia com sessao dedicada (sector original tinha 5 leads LEAD- de Abr 2026 de menor dimensao). Score medio 8.3 — mais alto do pipeline. Dor transversal: volume de mensagens WhatsApp de pacientes sem sistema centralizado — marcacoes, confirmacoes de resultados, seguimento pos-consulta. SAU-002 ALIVA destaque: contacto corporativo directo Patricia Magalhaes identificado. SAU-005 Multiperfil: email comercial + Director Geral Belmiro Rosa nomeado. SAU-001 CSE: rede 18 provincias = fragmentacao de canais WA por unidade. CLOSER: 6 primeiros contactos submetidos para aprovacao CEO (9 Jun 2026)."
+      },
+      {
+        "data": "2026-06-10",
+        "ficheiro": "leads/construcao-luanda-2026-06-10.json",
+        "sector_foco": "Construcao e Grandes Obras - Empreiteiros e Infra-estruturas",
+        "leads_adicionados": 6,
+        "ids": [
+          "CST-001",
+          "CST-002",
+          "CST-003",
+          "CST-004",
+          "CST-005",
+          "CST-006"
+        ],
+        "score_medio_sessao": 7.3,
+        "distribuicao_segmentos": {
+          "B": 6,
+          "C": 0
+        },
+        "com_whatsapp_verificavel": 0,
+        "top_leads": [
+          "CST-001 Mota-Engil Angola (score 8, 500+ colab, multi-provincial, email angola@mota-engil.com)",
+          "CST-002 Teixeira Duarte Angola (score 8, 30+ anos Angola, email geral@tdangola.co.ao)",
+          "CST-003 Conduril Angola (score 7, especialista vias, email conduril@conduril.pt)"
+        ],
+        "notas_sessao": "Decima-sexta sessao de prospeccao. Sector Construcao e Grandes Obras - estreia no pipeline. Foco em empreiteiros multinacionais portugueses com operacoes em Angola. Dor transversal: coordenacao multi-obra via grupos WhatsApp sem centralizacao. Ticket estimado alto: AOA 2.880.000-5.760.000."
+      },
+      {
+        "data": "2026-06-11",
+        "ficheiro": "leads/logistica-luanda-2026-06-11.json",
+        "sector_foco": "Distribuicao e Logistica — Operadores, Transportadoras e Distribuidores",
+        "leads_adicionados": 6,
+        "ids": [
+          "LOG-001",
+          "LOG-002",
+          "LOG-003",
+          "LOG-004",
+          "LOG-005",
+          "LOG-006"
+        ],
+        "score_medio_sessao": 7.7,
+        "distribuicao_segmentos": {
+          "B": 6,
+          "C": 0
+        },
+        "com_whatsapp_verificavel": 0,
+        "top_leads": [
+          "LOG-001 Unicargas Angola (score 8, dispatcher 40+ entregas/dia, email info@unicargas.co.ao)",
+          "LOG-002 Macon Angola (score 8, distribuidor FMCG, encomendas retalhistas WA sem registo)",
+          "LOG-006 Pumangol Logistica (score 8, maior distribuidor combustivel Angola, reconciliacao cisterna)"
+        ],
+        "notas_sessao": "Decima-setima sessao de prospeccao. Sector Distribuicao e Logistica — estreia no pipeline. Foco em operadores com frota propria, distribuidores FMCG e transportadoras. Dor transversal: coordenacao de entregas e confirmacoes via WA sem rastreio centralizado. 6 aprovacoes submetidas ao CEO. Score medio 7.7."
       }
     ],
     "contactos": [
@@ -941,6 +995,163 @@
         "canal": "WhatsApp",
         "session_id": "CLOSER-Capicua-20260529-092300",
         "proximo_passo": "CEO aprova via WhatsApp. Após aprovação: WA enviado automaticamente."
+      },
+      {
+        "id": "CST-001",
+        "nome": "Mota-Engil Angola",
+        "sector": "Construcao_Obras",
+        "segmento": "B",
+        "score": 8,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "angola@mota-engil.com",
+        "decisor": "Director de Operacoes Angola (a identificar)",
+        "data_adicao": "2026-06-10",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "CST-002",
+        "nome": "Teixeira Duarte Angola (TDA)",
+        "sector": "Construcao_Obras",
+        "segmento": "B",
+        "score": 8,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "geral@tdangola.co.ao",
+        "decisor": "Director Geral TDA Angola (a identificar)",
+        "data_adicao": "2026-06-10",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "CST-003",
+        "nome": "Conduril Angola",
+        "sector": "Construcao_Obras",
+        "segmento": "B",
+        "score": 7,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "conduril@conduril.pt",
+        "decisor": "Director de Projecto Angola (a identificar)",
+        "data_adicao": "2026-06-10",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "CST-004",
+        "nome": "Zagope Angola",
+        "sector": "Construcao_Obras",
+        "segmento": "B",
+        "score": 7,
+        "status": "novo",
+        "canal_preferido": "linkedin",
+        "contacto": null,
+        "decisor": "Director Geral Angola / Director de Projecto (a identificar LinkedIn)",
+        "data_adicao": "2026-06-10",
+        "nota": "LinkedIn DM pendente (requer Unipile)"
+      },
+      {
+        "id": "CST-005",
+        "nome": "Tecnovia Angola",
+        "sector": "Construcao_Obras",
+        "segmento": "B",
+        "score": 7,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "geral@tecnovia.pt",
+        "decisor": "Director de Operacoes Angola (a identificar)",
+        "data_adicao": "2026-06-10",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "CST-006",
+        "nome": "Soares da Costa Angola",
+        "sector": "Construcao_Obras",
+        "segmento": "B",
+        "score": 6,
+        "status": "novo",
+        "canal_preferido": "email",
+        "contacto": null,
+        "decisor": "Director Geral Angola (verificar estado operacao primeiro)",
+        "data_adicao": "2026-06-10",
+        "nota": "Lead condicional — verificar se operacao Angola activa antes de contactar"
+      },
+      {
+        "id": "LOG-001",
+        "nome": "Unicargas Angola",
+        "sector": "Logistica_Distribuicao",
+        "segmento": "B",
+        "score": 8,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "info@unicargas.co.ao",
+        "decisor": "Director de Operacoes Angola (a identificar)",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "LOG-002",
+        "nome": "Macon Angola",
+        "sector": "Logistica_Distribuicao",
+        "segmento": "B",
+        "score": 8,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "geral@macon.co.ao",
+        "decisor": "Director Comercial/Logistica (a identificar)",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "LOG-003",
+        "nome": "Transnama",
+        "sector": "Logistica_Distribuicao",
+        "segmento": "B",
+        "score": 7,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "transnama@transnama.co.ao",
+        "decisor": "Director Operacoes/Geral (a identificar)",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "LOG-004",
+        "nome": "DHL Express Angola",
+        "sector": "Logistica_Distribuicao",
+        "segmento": "B",
+        "score": 7,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "customerservice.angola@dhl.com",
+        "decisor": "Director Operacoes Angola (a identificar)",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "LOG-005",
+        "nome": "Grupo Carrinho Logistica",
+        "sector": "Logistica_Distribuicao",
+        "segmento": "B",
+        "score": 7,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "logistica@grupocarrinho.co.ao",
+        "decisor": "Director Logistica/Operacoes (a identificar)",
+        "data_adicao": "2026-06-11",
+        "nota": "Verificar email logistica@ antes de enviar",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "LOG-006",
+        "nome": "Pumangol Logistica",
+        "sector": "Logistica_Distribuicao",
+        "segmento": "B",
+        "score": 8,
+        "status": "contactado",
+        "canal_preferido": "email",
+        "contacto": "info@pumangol.com",
+        "decisor": "Director Logistica/Operacoes (a identificar)",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
       }
     ],
     "prioridade_closer": [

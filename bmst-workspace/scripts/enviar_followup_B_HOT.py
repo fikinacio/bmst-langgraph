@@ -34,7 +34,7 @@ mensagens = [
             "os pedidos especiais, os hóspedes que precisam de atenção real.\n\n"
             "Vale 20 minutos de conversa?\n\n"
             "Fidel Kussunga | Bisca+\n"
-            "contact@biscaplus.com | +244 956 873 126"
+            "f.kussunga@biscamaisst.com | +244 956 873 126"
         ),
     },
 
@@ -60,7 +60,7 @@ mensagens = [
             "estadia cresce — sem custo adicional de aquisição.\n\n"
             "20 minutos para mostrar os números concretos?\n\n"
             "Fidel Kussunga | Bisca+\n"
-            "contact@biscaplus.com | +244 956 873 126"
+            "f.kussunga@biscamaisst.com | +244 956 873 126"
         ),
     },
 
@@ -85,7 +85,7 @@ mensagens = [
             "o Talatona passa a ser sempre o primeiro a responder.\n\n"
             "Poderia reservar 20 minutos com o Director de Eventos esta semana?\n\n"
             "Fidel Kussunga | Bisca+\n"
-            "contact@biscaplus.com | +244 956 873 126"
+            "f.kussunga@biscamaisst.com | +244 956 873 126"
         ),
     },
 
@@ -111,7 +111,7 @@ mensagens = [
             "e fecha a reserva enquanto a equipa descansa.\n\n"
             "Vale a pena conversar 20 minutos?\n\n"
             "Fidel Kussunga | Bisca+\n"
-            "contact@biscaplus.com | +244 956 873 126"
+            "f.kussunga@biscamaisst.com | +244 956 873 126"
         ),
     },
 
@@ -136,7 +136,7 @@ mensagens = [
             "o processo falhou. É informação de gestão que hoje simplesmente não existe.\n\n"
             "20 minutos para mostrar como funciona na prática?\n\n"
             "Fidel Kussunga | Bisca+\n"
-            "contact@biscaplus.com | +244 956 873 126"
+            "f.kussunga@biscamaisst.com | +244 956 873 126"
         ),
     },
 
@@ -162,7 +162,7 @@ mensagens = [
             "O custo de implementar o sistema é uma fracção desse risco.\n\n"
             "20 minutos para mostrar como funciona concretamente?\n\n"
             "Fidel Kussunga | Bisca+\n"
-            "contact@biscaplus.com | +244 956 873 126"
+            "f.kussunga@biscamaisst.com | +244 956 873 126"
         ),
     },
 
@@ -189,7 +189,7 @@ mensagens = [
             "Implementação em menos de uma semana.\n\n"
             "20 minutos para mostrar como funciona?\n\n"
             "Fidel Kussunga | Bisca+\n"
-            "contact@biscaplus.com | +244 956 873 126"
+            "f.kussunga@biscamaisst.com | +244 956 873 126"
         ),
     },
 ]

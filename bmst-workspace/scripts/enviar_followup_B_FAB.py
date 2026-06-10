@@ -40,7 +40,7 @@ mensagens = [
             "insatisfação.\n\n"
             "Vale 20 minutos de conversa esta semana?\n\n"
             "Fidel Kussunga | Bisca+\n"
-            "contact@biscaplus.com | +244 956 873 126"
+            "f.kussunga@biscamaisst.com | +244 956 873 126"
         ),
     },
 
@@ -69,7 +69,7 @@ mensagens = [
             "ao mesmo ritmo das plataformas — sem ceder a margem à comissão do delivery.\n\n"
             "Poderia reservar 20 minutos esta semana?\n\n"
             "Fidel Kussunga | Bisca+\n"
-            "contact@biscaplus.com | +244 956 873 126"
+            "f.kussunga@biscamaisst.com | +244 956 873 126"
         ),
     },
 ]

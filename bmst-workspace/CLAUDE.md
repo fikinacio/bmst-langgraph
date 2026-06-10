@@ -6,8 +6,15 @@
 - **Sede:** Luanda, Angola (Alvalade, Maianga)
 - **Operação:** Lausanne, Suíça
 - **Website:** www.biscaplus.com
-- **Email:** contact@biscaplus.com
+- **Email geral:** info@biscamaisst.com
+- **Email comercial:** sales@biscamaisst.com
+- **Email CEO:** f.kussunga@biscamaisst.com
 - **Telefone:** +244 956 873 126 | +41 79 574 8225
+
+## Regras de uso de email
+- **info@biscamaisst.com** — contacto geral, dúvidas, informações institucionais, facturas
+- **sales@biscamaisst.com** — remetente Resend para outreach comercial (CLOSER, KEEPER), propostas, follow-ups
+- **f.kussunga@biscamaisst.com** — email pessoal do CEO; usar SEMPRE que se redigir mensagem em nome de Fidel Kussunga
 
 ## CEO
 - **Nome:** Fidel Inácio Kussunga
@@ -148,7 +155,7 @@ Usado pelo VOICE para publicar posts no Instagram @biscaplus via Buffer. Posts d
 **Método:** POST
 **Content-Type:** application/json
 
-Usado pelo CLOSER e KEEPER para enviar emails a clientes após aprovação do CEO. Aceita texto com acentos pt-PT completos (sem conversão ASCII). Credencial n8n: **BMST Resend** (smtp.resend.com, porta 465 SSL, remetente: nexus@biscaplus.com).
+Usado pelo CLOSER e KEEPER para enviar emails a clientes após aprovação do CEO. Aceita texto com acentos pt-PT completos (sem conversão ASCII). Credencial n8n: **BMST Resend** (smtp.resend.com, porta 465 SSL, remetente: sales@biscamaisst.com).
 
 ### Payload
 ```json
