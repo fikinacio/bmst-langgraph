@@ -388,6 +388,78 @@
       "requer_aprovacao": false,
       "status": "pendente",
       "nota": "Executar 16 Jun se sem resposta desde 11 Jun."
+    },
+    {
+      "id": "FU-025",
+      "tipo": "follow_up_b",
+      "lead_id": "SEG-001",
+      "empresa": "NOSSA Seguros",
+      "sector": "Seguros",
+      "canal": "email",
+      "email": "geral@nossaseguros.ao",
+      "data_prevista": "2026-06-16",
+      "status": "pendente",
+      "nota": "Follow-up B email SEG — 5 dias sem resposta ao primeiro contacto de 11 Jun. Remetente: info@biscamaisst.com."
+    },
+    {
+      "id": "FU-026",
+      "tipo": "follow_up_b",
+      "lead_id": "SEG-002",
+      "empresa": "AAA Seguros",
+      "sector": "Seguros",
+      "canal": "email",
+      "email": "info@aaaseguros.ao",
+      "data_prevista": "2026-06-16",
+      "status": "pendente",
+      "nota": "Follow-up B email SEG — 5 dias sem resposta ao primeiro contacto de 11 Jun. Remetente: info@biscamaisst.com."
+    },
+    {
+      "id": "FU-027",
+      "tipo": "follow_up_b",
+      "lead_id": "SEG-003",
+      "empresa": "Garantia Angola",
+      "sector": "Seguros",
+      "canal": "email",
+      "email": "geral@garantia.ao",
+      "data_prevista": "2026-06-16",
+      "status": "pendente",
+      "nota": "Follow-up B email SEG — 5 dias sem resposta ao primeiro contacto de 11 Jun. Remetente: info@biscamaisst.com."
+    },
+    {
+      "id": "FU-028",
+      "tipo": "follow_up_b",
+      "lead_id": "SEG-004",
+      "empresa": "Fidelidade Angola",
+      "sector": "Seguros",
+      "canal": "email",
+      "email": "fidelidade@fidelidade.ao",
+      "data_prevista": "2026-06-16",
+      "status": "pendente",
+      "nota": "Follow-up B email SEG — 5 dias sem resposta ao primeiro contacto de 11 Jun. Remetente: info@biscamaisst.com."
+    },
+    {
+      "id": "FU-029",
+      "tipo": "follow_up_b",
+      "lead_id": "SEG-005",
+      "empresa": "Global Seguros Angola",
+      "sector": "Seguros",
+      "canal": "email",
+      "email": "info@globalseguros.ao",
+      "data_prevista": "2026-06-16",
+      "status": "pendente",
+      "nota": "Follow-up B email SEG — 5 dias sem resposta ao primeiro contacto de 11 Jun. Remetente: info@biscamaisst.com."
+    },
+    {
+      "id": "FU-030",
+      "tipo": "follow_up_b",
+      "lead_id": "SEG-006",
+      "empresa": "ENSA",
+      "sector": "Seguros",
+      "canal": "email",
+      "email": "info@ensa.ao",
+      "data_prevista": "2026-06-16",
+      "status": "pendente",
+      "nota": "Follow-up B email SEG — 5 dias sem resposta ao primeiro contacto de 11 Jun. Remetente: info@biscamaisst.com."
     }
   ]
 }

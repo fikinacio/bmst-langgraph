@@ -2,25 +2,27 @@
   "pipeline": {
     "ultima_actualizacao": "2026-06-11",
     "totais": {
-      "leads_total": 123,
-      "segmento_b": 112,
+      "leads_total": 129,
+      "segmento_b": 118,
       "segmento_c": 11,
       "score_medio": 7.6,
       "com_whatsapp_verificavel": 45,
       "status_novo": 14,
-      "status_contactado": 106,
+      "status_contactado": 112,
       "status_em_curso": 1,
       "status_arquivado": 2,
       "status_qualificado": 0,
       "status_perdido": 0,
       "status_em_aprovacao": 0,
       "nota_w23": "4 Jun 2026: CEO aprovou 38 mensagens. Enviadas 38/38 — 28 FIN/TEL/IMO/follow-ups + 10 JUR/VIA. VIA-002 Atlantida WTA contactada via WA +244929624550 (numero geral, confirmado no WA — o +244941367711 nao estava no WA).",
-      "ultima_actualizacao": "2026-06-10",
+      "ultima_actualizacao": "2026-06-11",
       "nota_hot": "6 Jun 2026: HOT-001 a HOT-007 contactados via email. CEO aprovou 7 em bloco.",
       "nota_fab": "6 Jun 2026: HUNTER sessao 14 — Restauracao e F&B. 5 leads adicionados (FAB-001 a FAB-005). Score medio 7.8. 2 WA verificados. Top lead: FAB-001 Novagest (score 9, ISO 9001, Oil&Gas). CLOSER: FAB-001 e FAB-002 contactados via email. FAB-003 WA 502 (numero nao no WA) — aguarda LinkedIn/Unipile. FAB-004/005 bloqueados (LinkedIn expirado / sem canal digital).",
       "nota_8jun": "8 Jun 2026 (22h): CLOSER sessao nocturna. 7 follow-ups B enviados com sucesso — FU-004 CONNECTIS + FU-005 EDACO (em atraso desde 3 Jun) + CON-001 ATA + CON-002 Nexia + CON-003 Moore + CON-004 LCA (WA: 3EB0C0B5E137A64B54EAF7) + CON-005 Crowe. FAB-003 Tupuca+ submetido para aprovacao CEO (LinkedIn DM Erickson Mvezi, session CLOSER-Tupuca-20260608-221309).",
       "nota_sessao15": "9-10 Jun 2026: HUNTER Sessao 15 — Saude Privada (Clinicas e Laboratorios). 6 leads SAU-001..006 adicionados. Score medio 8.3 — mais alto do pipeline. Top leads: SAU-001 CSE (score 9, 18 provincias, WA), SAU-002 ALIVA (score 9, 900k consultas/ano, email Patricia Magalhaes), SAU-005 Multiperfil (score 9, 1000+ colaboradores, email Belmiro Rosa). CLOSER: 6 primeiros contactos aprovados por Fidel e enviados 10 Jun. SAU-001 WA msg_id 3EB0935375A660A2C85BE6. SAU-006 WA msg_id 3EB041C28840989CFDF0B0. Emails SAU-002..005 via bmst-api HTTP 200.",
-      "nota_10jun": "10 Jun 2026 (02h): CLOSER executou scripts de 12 Jun antecipadamente. Follow-up B SAU: SAU-001 WA 3EB0766E233052846F8863 + SAU-006 WA 3EB06FE53CFDC825C20E5C. Follow-up B HOT: 7 emails HOT-001..007 enviados. Follow-up B FAB: FAB-001 Novagest + FAB-002 Capricciosa enviados. Total sessao 10 Jun: 11/11 mensagens com sucesso."
+      "nota_10jun": "10 Jun 2026 (02h): CLOSER executou scripts de 12 Jun antecipadamente. Follow-up B SAU: SAU-001 WA 3EB0766E233052846F8863 + SAU-006 WA 3EB06FE53CFDC825C20E5C. Follow-up B HOT: 7 emails HOT-001..007 enviados. Follow-up B FAB: FAB-001 Novagest + FAB-002 Capricciosa enviados. Total sessao 10 Jun: 11/11 mensagens com sucesso.",
+      "nota_seg": "11 Jun 2026: HUNTER Sessao 19 - Seguros. 6 leads SEG-001..006 adicionados. Score medio 7.2. Sector estreia no pipeline. Dor transversal: sinistros e renovacoes via WA pessoal sem workflow. ENSA (SEG-006) estatal - ciclo longo, prioridade baixa.",
+      "nota_seg_envio": "11 Jun 2026: SEG-001..006 primeiro contacto enviado via email info@biscamaisst.com. 6/6 com sucesso."
     },
     "por_sector": {
       "Saude": 11,
@@ -41,7 +43,13 @@
       "Restauracao_FB": 5,
       "Construcao_Obras": 6,
       "Logistica_Distribuicao": 6,
-      "Banca_Microfinancas": 6
+      "Banca_Microfinancas": 6,
+      "Seguros": {
+        "leads": 6,
+        "segmento_b": 6,
+        "segmento_c": 0,
+        "sector": "Seguros e Resseguradoras"
+      }
     },
     "por_zona": {
       "Alvalade_Maianga": 2,
@@ -424,6 +432,16 @@
           "BAN-002 BFA (score 8, referencia credito PME, instrucao dossier via WA)"
         ],
         "notas_sessao": "Decima-oitava sessao. Sector Banca e Microfinancas. 6 aprovacoes submetidas ao CEO. Score medio 7.8."
+      },
+      {
+        "id": "SESSAO-19",
+        "data": "2026-06-11",
+        "agente": "HUNTER (NSANDI)",
+        "sector": "Seguros — Seguradoras e Resseguradoras Angola",
+        "leads_adicionados": 6,
+        "score_medio": 7.2,
+        "top_lead": "SEG-001 NOSSA Seguros (score 8)",
+        "status": "prospectado"
       }
     ],
     "contactos": [
@@ -1257,6 +1275,78 @@
         "decisor": "a identificar",
         "data_adicao": "2026-06-11",
         "data_contacto": "2026-06-11"
+      },
+      {
+        "lead_id": "SEG-001",
+        "empresa": "NOSSA Seguros",
+        "status": "contactado",
+        "data_envio_email": "2026-06-11",
+        "versao_mensagem": "v1_email_primeiro_contacto",
+        "canal_contacto": "email",
+        "aprovado_por": "CEO (2026-06-11)",
+        "proximo_follow_up": "2026-06-16",
+        "proximo_passo": "Follow-up B email se sem resposta ate 16 Jun",
+        "nota_envio": "Email enviado para geral@nossaseguros.ao via info@biscamaisst.com. Status: enviado."
+      },
+      {
+        "lead_id": "SEG-002",
+        "empresa": "AAA Seguros",
+        "status": "contactado",
+        "data_envio_email": "2026-06-11",
+        "versao_mensagem": "v1_email_primeiro_contacto",
+        "canal_contacto": "email",
+        "aprovado_por": "CEO (2026-06-11)",
+        "proximo_follow_up": "2026-06-16",
+        "proximo_passo": "Follow-up B email se sem resposta ate 16 Jun",
+        "nota_envio": "Email enviado para info@aaaseguros.ao via info@biscamaisst.com. Status: enviado."
+      },
+      {
+        "lead_id": "SEG-003",
+        "empresa": "Garantia Angola",
+        "status": "contactado",
+        "data_envio_email": "2026-06-11",
+        "versao_mensagem": "v1_email_primeiro_contacto",
+        "canal_contacto": "email",
+        "aprovado_por": "CEO (2026-06-11)",
+        "proximo_follow_up": "2026-06-16",
+        "proximo_passo": "Follow-up B email se sem resposta ate 16 Jun",
+        "nota_envio": "Email enviado para geral@garantia.ao via info@biscamaisst.com. Status: enviado."
+      },
+      {
+        "lead_id": "SEG-004",
+        "empresa": "Fidelidade Angola",
+        "status": "contactado",
+        "data_envio_email": "2026-06-11",
+        "versao_mensagem": "v1_email_primeiro_contacto",
+        "canal_contacto": "email",
+        "aprovado_por": "CEO (2026-06-11)",
+        "proximo_follow_up": "2026-06-16",
+        "proximo_passo": "Follow-up B email se sem resposta ate 16 Jun",
+        "nota_envio": "Email enviado para fidelidade@fidelidade.ao via info@biscamaisst.com. Status: enviado."
+      },
+      {
+        "lead_id": "SEG-005",
+        "empresa": "Global Seguros Angola",
+        "status": "contactado",
+        "data_envio_email": "2026-06-11",
+        "versao_mensagem": "v1_email_primeiro_contacto",
+        "canal_contacto": "email",
+        "aprovado_por": "CEO (2026-06-11)",
+        "proximo_follow_up": "2026-06-16",
+        "proximo_passo": "Follow-up B email se sem resposta ate 16 Jun",
+        "nota_envio": "Email enviado para info@globalseguros.ao via info@biscamaisst.com. Status: enviado."
+      },
+      {
+        "lead_id": "SEG-006",
+        "empresa": "ENSA",
+        "status": "contactado",
+        "data_envio_email": "2026-06-11",
+        "versao_mensagem": "v1_email_primeiro_contacto",
+        "canal_contacto": "email",
+        "aprovado_por": "CEO (2026-06-11)",
+        "proximo_follow_up": "2026-06-16",
+        "proximo_passo": "Follow-up B email se sem resposta ate 16 Jun",
+        "nota_envio": "Email enviado para info@ensa.ao via info@biscamaisst.com. Status: enviado."
       }
     ],
     "prioridade_closer": [
