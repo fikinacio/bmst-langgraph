@@ -2,13 +2,13 @@
   "pipeline": {
     "ultima_actualizacao": "2026-06-11",
     "totais": {
-      "leads_total": 117,
-      "segmento_b": 106,
+      "leads_total": 123,
+      "segmento_b": 112,
       "segmento_c": 11,
       "score_medio": 7.6,
       "com_whatsapp_verificavel": 45,
       "status_novo": 14,
-      "status_contactado": 100,
+      "status_contactado": 106,
       "status_em_curso": 1,
       "status_arquivado": 2,
       "status_qualificado": 0,
@@ -40,7 +40,8 @@
       "Hotelaria": 7,
       "Restauracao_FB": 5,
       "Construcao_Obras": 6,
-      "Logistica_Distribuicao": 6
+      "Logistica_Distribuicao": 6,
+      "Banca_Microfinancas": 6
     },
     "por_zona": {
       "Alvalade_Maianga": 2,
@@ -397,6 +398,32 @@
           "LOG-006 Pumangol Logistica (score 8, maior distribuidor combustivel Angola, reconciliacao cisterna)"
         ],
         "notas_sessao": "Decima-setima sessao de prospeccao. Sector Distribuicao e Logistica — estreia no pipeline. Foco em operadores com frota propria, distribuidores FMCG e transportadoras. Dor transversal: coordenacao de entregas e confirmacoes via WA sem rastreio centralizado. 6 aprovacoes submetidas ao CEO. Score medio 7.7."
+      },
+      {
+        "data": "2026-06-11",
+        "ficheiro": "leads/banca-luanda-2026-06-11.json",
+        "sector_foco": "Banca e Microfinancas — Bancos Comerciais e Instituicoes de Microcredito",
+        "leads_adicionados": 6,
+        "ids": [
+          "BAN-001",
+          "BAN-002",
+          "BAN-003",
+          "BAN-004",
+          "BAN-005",
+          "BAN-006"
+        ],
+        "score_medio_sessao": 7.8,
+        "distribuicao_segmentos": {
+          "B": 6,
+          "C": 0
+        },
+        "com_whatsapp_verificavel": 0,
+        "top_leads": [
+          "BAN-003 Yetu (score 9, banco digital, onboarding abandonado, decisao rapida)",
+          "BAN-001 BAI (score 8, maior banco privado Angola, 2M+ clientes)",
+          "BAN-002 BFA (score 8, referencia credito PME, instrucao dossier via WA)"
+        ],
+        "notas_sessao": "Decima-oitava sessao. Sector Banca e Microfinancas. 6 aprovacoes submetidas ao CEO. Score medio 7.8."
       }
     ],
     "contactos": [
@@ -1150,6 +1177,84 @@
         "canal_preferido": "email",
         "contacto": "info@pumangol.com",
         "decisor": "Director Logistica/Operacoes (a identificar)",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "BAN-001",
+        "nome": "BAI — Banco Angolano de Investimentos",
+        "score": 8,
+        "contacto": "geral@bancobai.ao",
+        "sector": "Banca_Microfinancas",
+        "segmento": "B",
+        "status": "contactado",
+        "canal_preferido": "email",
+        "decisor": "a identificar",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "BAN-002",
+        "nome": "BFA — Banco de Fomento Angola",
+        "score": 8,
+        "contacto": "info@bfa.ao",
+        "sector": "Banca_Microfinancas",
+        "segmento": "B",
+        "status": "contactado",
+        "canal_preferido": "email",
+        "decisor": "a identificar",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "BAN-003",
+        "nome": "Yetu",
+        "score": 9,
+        "contacto": "info@yetu.ao",
+        "sector": "Banca_Microfinancas",
+        "segmento": "B",
+        "status": "contactado",
+        "canal_preferido": "email",
+        "decisor": "a identificar",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "BAN-004",
+        "nome": "Kixicredito",
+        "score": 8,
+        "contacto": "info@kixicredito.ao",
+        "sector": "Banca_Microfinancas",
+        "segmento": "B",
+        "status": "contactado",
+        "canal_preferido": "email",
+        "decisor": "a identificar",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "BAN-005",
+        "nome": "BIC — Banco BIC",
+        "score": 7,
+        "contacto": "bic@bancobic.ao",
+        "sector": "Banca_Microfinancas",
+        "segmento": "B",
+        "status": "contactado",
+        "canal_preferido": "email",
+        "decisor": "a identificar",
+        "data_adicao": "2026-06-11",
+        "data_contacto": "2026-06-11"
+      },
+      {
+        "id": "BAN-006",
+        "nome": "BNI — Banco de Negocios Internacional",
+        "score": 7,
+        "contacto": "info@bni.ao",
+        "sector": "Banca_Microfinancas",
+        "segmento": "B",
+        "status": "contactado",
+        "canal_preferido": "email",
+        "decisor": "a identificar",
         "data_adicao": "2026-06-11",
         "data_contacto": "2026-06-11"
       }
