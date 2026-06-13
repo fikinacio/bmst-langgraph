@@ -20,7 +20,7 @@ def _api_key() -> str:
     return os.environ.get("EVOLUTION_API_KEY", "")
 
 def _instance() -> str:
-    return os.environ.get("EVOLUTION_INSTANCE", "bmst")
+    return os.environ.get("EVOLUTION_INSTANCE", "biscaplus")
 
 _TIMEOUT      = httpx.Timeout(30.0, connect=10.0)
 _MAX_RETRIES  = 2   # total attempts = 1 + MAX_RETRIES

@@ -119,21 +119,23 @@ async def send_approval_request(
         The Telegram message_id as a string — stored in LangGraph state
         so the Wait Node can match the callback to the right thread.
     """
-    empresa  = contexto.get("empresa",  "—")
-    segmento = contexto.get("segmento", "—")
-    canal    = contexto.get("canal",    "—")
-    agente   = contexto.get("agente",   "—")
+    empresa  = contexto.get("empresa")  or "—"
+    segmento = contexto.get("segmento") or "—"
+    canal    = contexto.get("canal")    or "—"
+    agente   = contexto.get("agente")   or "—"
+
+    seg_label = f" · Seg {segmento}" if segmento and segmento != "—" else ""
 
     body = (
-        f"📝 <b>REVISOR — Approval Required</b>\n\n"
-        f"<b>Company:</b> {empresa} — Seg {segmento}\n"
-        f"<b>Channel:</b> {canal}\n"
-        f"<b>Agent:</b> {agente}\n\n"
-        f"<b>Message to send:</b>\n"
+        f"📝 <b>REVISOR — Aprovação Necessária</b>\n\n"
+        f"🏢 <b>Empresa:</b> {empresa}{seg_label}\n"
+        f"📲 <b>Canal:</b> {canal}\n"
+        f"🤖 <b>Agente:</b> {agente}\n\n"
+        f"<b>Mensagem a enviar:</b>\n"
         f"<code>{'─' * 30}</code>\n"
         f"{mensagem_cliente}\n"
         f"<code>{'─' * 30}</code>\n\n"
-        f"<b>Revisions made:</b> {revisao_notas or 'none'}"
+        f"<b>Revisões:</b> {revisao_notas or 'nenhuma — texto aprovado sem alterações'}"
     )
 
     # Inline keyboard: three buttons in one row.
@@ -286,20 +288,20 @@ async def send_daily_report(report: dict) -> dict:
     g = report.get
 
     text = (
-        f"📊 <b>HUNTER — {g('data', '—')}</b>\n\n"
-        f"📤 Processed today: <b>{g('processados', 0)}</b> leads\n"
-        f"✅ Messages sent: <b>{g('enviadas', 0)}</b>\n"
-        f"⏳ Awaiting approval: <b>{g('aguardam', 0)}</b>\n"
-        f"🔴 Auto-archived (Seg A): <b>{g('arquivados', 0)}</b>\n"
-        f"⚠️ Seg C pending founder approval: <b>{g('seg_c_pendentes', 0)}</b>\n\n"
-        f"💬 Replies received today: <b>{g('respostas', 0)}</b>\n"
-        f"🟢 Interested: <b>{g('interessados', 0)}</b>"
+        f"📊 <b>HUNTER — Relatório {g('data', '—')}</b>\n\n"
+        f"📤 Processados hoje: <b>{g('processados', 0)}</b> leads\n"
+        f"✅ Mensagens enviadas: <b>{g('enviadas', 0)}</b>\n"
+        f"⏳ Aguardam aprovação: <b>{g('aguardam', 0)}</b>\n"
+        f"🔴 Arquivados (Seg A): <b>{g('arquivados', 0)}</b>\n"
+        f"⚠️ Seg C pendentes (aprovação fundador): <b>{g('seg_c_pendentes', 0)}</b>\n\n"
+        f"💬 Respostas recebidas hoje: <b>{g('respostas', 0)}</b>\n"
+        f"🟢 Interessados: <b>{g('interessados', 0)}</b>"
         + (f" → {g('nomes_interessados', '')}" if g('nomes_interessados') else "") + "\n"
-        f"🟡 Neutral: <b>{g('neutros', 0)}</b>\n"
-        f"🔴 Not interested: <b>{g('nao_interessados', 0)}</b>\n\n"
-        f"📅 <b>Tomorrow:</b>\n"
-        f"• Follow-ups scheduled: <b>{g('followups', 0)}</b>\n"
-        f"• New leads from PROSPECTOR: (at 08h00)"
+        f"🟡 Neutros: <b>{g('neutros', 0)}</b>\n"
+        f"🔴 Não interessados: <b>{g('nao_interessados', 0)}</b>\n\n"
+        f"📅 <b>Amanhã:</b>\n"
+        f"• Follow-ups agendados: <b>{g('followups', 0)}</b>\n"
+        f"• Novos leads do PROSPECTOR: (às 07h00)"
     )
 
     try:

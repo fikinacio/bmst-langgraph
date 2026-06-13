@@ -9,7 +9,7 @@ class HunterState(TypedDict):
     Full state for one HUNTER execution (batch or single-lead mode).
 
     Fields are grouped by lifecycle phase:
-      1. Input fields       — loaded from Google Sheets or WhatsApp webhook
+      1. Input fields       — loaded from HubSpot CRM or WhatsApp webhook
       2. Processing fields  — populated during HUNTER logic
       3. REVISOR integration— subset of RevisorState, written by bridge nodes
       4. Result fields      — final outcome for the current lead
@@ -18,7 +18,7 @@ class HunterState(TypedDict):
 
     # ── 1. Input: current lead (populated by preparar_lead_atual) ─────────────
     lead_id:          str | None
-    sheet_row_index:  int | None       # 1-based row in the Google Sheet
+    sheet_row_index:  str | None       # HubSpot Company record id
     empresa:          str | None
     sector:           str | None
     segmento:         Literal["A", "B", "C"] | None
@@ -64,6 +64,6 @@ class HunterState(TypedDict):
     erro:                     str | None    # error detail if something failed
 
     # ── 5. Batch tracking (shared across all leads in a daily run) ────────────
-    leads_pendentes:          list[dict]    # full list loaded from the sheet
+    leads_pendentes:          list[dict]    # full list loaded from HubSpot
     leads_processados:        int           # index of the next lead to process
     mensagens_enviadas:       int           # counter for the daily report

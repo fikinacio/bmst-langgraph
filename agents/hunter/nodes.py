@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import os
 
 from agents.hunter.state import HunterState
 from agents.hunter.prompts import (
@@ -17,11 +16,10 @@ from agents.hunter.prompts import (
 from core.llm import create_json_message, create_message
 from core.memory import update_lead_state, save_message, get_lead
 from core.redis_client import is_duplicate, mark_sent, hash_message
-from core import sheets_client, evolution_client, telegram_client
+from core import hubspot_client, evolution_client, telegram_client
 
 logger = logging.getLogger(__name__)
 
-_SHEET_ID = os.environ.get("GOOGLE_SHEETS_ID", "")
 _AGENT    = "hunter"
 
 
@@ -35,7 +33,7 @@ def _lead_atual(state: HunterState) -> dict:
 
 
 def _extrair_campos_lead(lead: dict) -> dict:
-    """Map Google Sheet column names to HunterState field names."""
+    """Map HubSpot Company lead dict fields to HunterState field names."""
     def _int(val) -> int | None:
         try:
             return int(str(val).replace(",", "").replace(".", "").strip())
@@ -110,10 +108,10 @@ def _validar_mensagem(mensagem: str) -> str | None:
 # ── Node: carregar_leads_sheet ────────────────────────────────────────────────
 
 async def carregar_leads_sheet(state: HunterState) -> dict:
-    """Load pending leads from Google Sheets. Entry point for the daily batch run."""
+    """Load pending leads from HubSpot. Entry point for the daily batch run."""
     logger.info("hunter.carregar_leads_sheet: fetching pending leads")
 
-    leads = await sheets_client.get_pending_leads(_SHEET_ID)
+    leads = await hubspot_client.get_pending_leads()
 
     if not leads:
         logger.info("hunter.carregar_leads_sheet: no pending leads today")
@@ -376,12 +374,12 @@ async def processar_resultado_revisor(state: HunterState) -> dict:
 # ── Node: arquivar_lead ───────────────────────────────────────────────────────
 
 async def arquivar_lead(state: HunterState) -> dict:
-    """Archive the current lead in the Google Sheet and Supabase."""
+    """Archive the current lead in HubSpot and Supabase."""
     phone = state.get("whatsapp", "")
     row   = state.get("sheet_row_index")
 
     if row:
-        await sheets_client.update_lead_status(_SHEET_ID, row, "arquivado")
+        await hubspot_client.update_lead_status(row, "arquivado")
     if phone:
         await update_lead_state(phone, "arquivado", _AGENT)
 
@@ -446,10 +444,10 @@ async def enviar_whatsapp(state: HunterState) -> dict:
     # Mark as sent in Redis (24h dedup window)
     mark_sent(phone, msg_hash)
 
-    # Update Google Sheet status
+    # Update HubSpot status
     row = state.get("sheet_row_index")
     if row:
-        await sheets_client.update_lead_status(_SHEET_ID, row, "enviado")
+        await hubspot_client.update_lead_status(row, "enviado")
 
     # Persist to Supabase
     await save_message(phone, "assistant", texto, _AGENT)
@@ -527,10 +525,10 @@ async def processar_resposta(state: HunterState) -> dict:
 
     logger.info("hunter.processar_resposta: phone=%s classificacao=%s", phone, classificacao)
 
-    # Update sheet and Supabase
+    # Update HubSpot and Supabase
     row = state.get("sheet_row_index")
     if row and resposta:
-        await sheets_client.mark_lead_response(_SHEET_ID, row, resposta)
+        await hubspot_client.mark_lead_response(row, resposta)
     if phone:
         await update_lead_state(phone, f"respondeu_{classificacao.lower()}", _AGENT)
         await save_message(phone, "user", resposta, "prospect")

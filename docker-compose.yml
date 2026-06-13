@@ -11,8 +11,18 @@ services:
     volumes:
       - ./secrets:/app/secrets:ro
     depends_on:
-      - redis
-      - gotenberg
+      redis:
+        condition: service_healthy
+      gotenberg:
+        condition: service_started
+    networks:
+      - bmst-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   redis:
     image: redis:7-alpine
@@ -36,3 +46,10 @@ services:
 
 volumes:
   redis-data:
+
+networks:
+  bmst-net:
+    # external: true quando partilhado com n8n/Evolution no EasyPanel.
+    # Para ambiente standalone (sem EasyPanel), comenta a linha abaixo
+    # e o Docker cria a rede automaticamente.
+    external: true

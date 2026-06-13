@@ -35,10 +35,13 @@ class Settings(BaseSettings):
     GOOGLE_SHEETS_ID: str = ""
     GOOGLE_SERVICE_ACCOUNT_JSON: str = ""
 
+    # ── HubSpot CRM ───────────────────────────────────────────────────────────
+    HUBSPOT_ACCESS_TOKEN: str = ""
+
     # ── Evolution API (WhatsApp) ──────────────────────────────────────────────
     EVOLUTION_API_URL: str = "http://localhost:8080"
     EVOLUTION_API_KEY: str = ""
-    EVOLUTION_INSTANCE: str = "bmst"
+    EVOLUTION_INSTANCE: str = "biscaplus"
 
     # ── Telegram ──────────────────────────────────────────────────────────────
     TELEGRAM_BOT_TOKEN: str = ""

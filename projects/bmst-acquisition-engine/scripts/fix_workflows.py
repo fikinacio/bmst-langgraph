@@ -21,7 +21,7 @@ AIRTABLE_BASE_ID  = "appFWSWvTMzFYJCAv"
 AIRTABLE_TABLE_COMPANIES    = "tblpED6NVZ8gViriH"
 AIRTABLE_TABLE_INTERACTIONS = "tbljk7jdoBCgVeapM"
 EVOLUTION_URL     = "https://evolution.biscaplus.com"
-EVOLUTION_INST    = "bmst"
+EVOLUTION_INST    = "biscaplus"
 
 WF_IDS = {
     "WF03": "NDsuDNsYSypcumPN",

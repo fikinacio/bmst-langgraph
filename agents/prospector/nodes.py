@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import os
 
 from agents.prospector.state import ProspectorState
 from agents.prospector.prompts import (
@@ -12,11 +11,10 @@ from agents.prospector.prompts import (
     QualificacaoSchema,
 )
 from core.llm import create_json_message, create_message
-from core import sheets_client
+from core import hubspot_client
 
 logger = logging.getLogger(__name__)
 
-_SHEET_ID = os.environ.get("GOOGLE_SHEETS_ID", "")
 _AGENT    = "prospector"
 
 
@@ -104,10 +102,10 @@ async def preparar_lead_raw(state: ProspectorState) -> dict:
 
 async def verificar_duplicado(state: ProspectorState) -> dict:
     """
-    Check whether this empresa/phone already exists in the Google Sheet.
+    Check whether this empresa/phone already exists in HubSpot.
 
     Duplicates are skipped — we set proxima_acao="duplicado" so the graph
-    routes straight to avancar_lead without calling the LLM or writing the sheet.
+    routes straight to avancar_lead without calling the LLM or writing to HubSpot.
     """
     empresa = state.get("empresa", "")
     phone   = state.get("whatsapp", "")
@@ -115,7 +113,7 @@ async def verificar_duplicado(state: ProspectorState) -> dict:
     if not empresa and not phone:
         return {"proxima_acao": "qualificar"}
 
-    is_dup = await sheets_client.check_duplicate(_SHEET_ID, empresa, phone)
+    is_dup = await hubspot_client.check_duplicate(empresa, phone)
     if is_dup:
         logger.info(
             "prospector.verificar_duplicado: DUPLICATE empresa=%s phone=%s — skipping",
@@ -123,7 +121,7 @@ async def verificar_duplicado(state: ProspectorState) -> dict:
         )
         return {
             "qualificado":    False,
-            "motivo_rejeicao": "duplicate — already in the sheet",
+            "motivo_rejeicao": "duplicate — already in HubSpot",
             "proxima_acao":   "duplicado",
         }
 
@@ -221,7 +219,7 @@ async def gerar_hook(state: ProspectorState) -> dict:
 
 async def registar_lead(state: ProspectorState) -> dict:
     """
-    Write the enriched lead data to Google Sheets.
+    Write the enriched lead data to HubSpot (Company + associated Contact).
 
     Segment A leads are written with estado_hunter="arquivado" (for record keeping).
     Segment B/C leads are written with estado_hunter="pendente" so the HUNTER picks them up.
@@ -258,7 +256,7 @@ async def registar_lead(state: ProspectorState) -> dict:
         state.get("empresa"), estado,
     )
 
-    row_index = await sheets_client.append_lead_row(_SHEET_ID, lead_row)
+    row_index = await hubspot_client.append_lead_row(lead_row)
 
     if row_index:
         return {"lead_gravado": True, "proxima_acao": "proximo_lead"}
@@ -268,7 +266,7 @@ async def registar_lead(state: ProspectorState) -> dict:
     )
     return {
         "lead_gravado": False,
-        "erro":         "sheet_append_failed",
+        "erro":         "hubspot_append_failed",
         "proxima_acao": "proximo_lead",
     }
 
