@@ -2,14 +2,14 @@
   "pipeline": {
     "ultima_actualizacao": "2026-06-19",
     "totais": {
-      "leads_total": 158,
+      "leads_total": 168,
       "segmento_a": 1,
       "segmento_b": 132,
       "segmento_c": 13,
       "score_medio": 8.2,
       "com_whatsapp_verificavel": 62,
-      "status_novo": 20,
-      "status_contactado": 123,
+      "status_novo": 14,
+      "status_contactado": 129,
       "status_em_curso": 1,
       "status_arquivado": 2,
       "status_qualificado": 0,
@@ -27,7 +27,8 @@
       "nota_pmes_diversificados": "18 Jun 2026: HUNTER Sessao 20 — PMEs Diversificados (Farmacias, Dentarias, Automovel). 5 leads adicionados FAR-001..002, DEN-001..002, AUTO-001. 4 alta prioridade com WA Business confirmado. Score medio sessao 11.6 (mais alto do pipeline). Aprovacoes submetidas CEO para FAR-001/002, DEN-001, AUTO-001. DEN-002 aguarda mais pesquisa.",
       "nota_estetica": "19 Jun 2026: NSANDI Sessao 21 — Clinicas de Estetica (SPAs, Medicina Estetica, Centros de Beleza). 12 leads EST-001..012 adicionados. Score medio sessao 11.5. 8 alta prioridade. 8 WA verificaveis. Top leads: EST-006 Corpore (score 15, 57k Instagram, 3 locais, co-fundadores Fabricio+Georgea identificados), EST-004 Innovare (score 14, 3 marcas, +244940905875), EST-007 Maison BH (score 14, 43 profissionais, fundadora Eliane Hense identificada). Ready for outreach — CLOSER a activar.",
       "nota_educacao": "19 Jun 2026: NSANDI Sessao 22 — Educacao Privada (Universidades, Colegios Internacionais, Politecnicos, Centros Formacao). 12 leads EDU-001..012 adicionados. Score medio sessao 10.5. 2 alta prioridade: EDU-006 LIS (score 14, USD 36k propina, Dylan Hughes Director), EDU-004 ISPTEC (score 13, 1000-1500 alunos, Talatona). Dor transversal: matriculas/inscricoes por WA pessoal sem registo. Pico Jun-Ago = secretariado sobrecarregado.",
-      "nota_educacao_envio": "19 Jun 2026: Sessao 22 EDU outreach completo. 7/8 mensagens enviadas (4 emails Resend + 3 WA Evolution). 1 falha: EDU-009 CAT +244933053980 nao registado no WA. Emails: LIS resend:e8818799, ISPTEC resend:b33ec374, UCAN resend:380c62c4, Jean Piaget resend:901e6171. WA: CSFA msg:3EB0D9467C33AC615CED6F, ULA msg:3EB0B880B0DD2F9BDB6C7E, Aurora msg:3EB066D52AD28FE4AF2E2B."
+      "nota_educacao_envio": "19 Jun 2026: Sessao 22 EDU outreach completo. 7/8 mensagens enviadas (4 emails Resend + 3 WA Evolution). 1 falha: EDU-009 CAT +244933053980 nao registado no WA. Emails: LIS resend:e8818799, ISPTEC resend:b33ec374, UCAN resend:380c62c4, Jean Piaget resend:901e6171. WA: CSFA msg:3EB0D9467C33AC615CED6F, ULA msg:3EB0B880B0DD2F9BDB6C7E, Aurora msg:3EB066D52AD28FE4AF2E2B.",
+      "nota_ginasios": "19 Jun 2026: Sessao 23 GYM — Ginasios e Academias Desportivas. 10 leads adicionados. 6/7 outreach enviados (5 WA + 1 email CrossFit Angola resend:c90962c5). 1 falha: GYM-004 BigOne Active +244922604180 nao registado no WA. Top leads: GYM-001 Seven Gym (21K IG, CEO Miguel Pedroto LinkedIn), GYM-003 26Gym (piso 26 marginal), GYM-004 BigOne Active (2 localizacoes). 3 sem canal: GYM-002 Pro Ultimate, GYM-005 Body Fit, GYM-006 FitCenter (Instagram apenas)."
     },
     "por_sector": {
       "Saude": 11,
@@ -59,7 +60,8 @@
       "Clinicas_Dentarias": 2,
       "Automovel_Concessionarios": 1,
       "Clinicas_Estetica": 12,
-      "Educacao_Privada": 12
+      "Educacao_Privada": 12,
+      "Ginasios_Academias": 10
     },
     "por_zona": {
       "Alvalade_Maianga": 2,
@@ -514,6 +516,32 @@
           "enviados": 7,
           "falhas": 1,
           "falha_motivo": "EDU-009 CAT +244933053980 nao registado no WA"
+        }
+      },
+      {
+        "id": "SESSAO-23",
+        "data": "2026-06-19",
+        "ficheiro": "leads/ginasios-luanda-2026-06-19.json",
+        "agente": "NSANDI",
+        "sector": "Ginasios e Academias Desportivas — Luanda",
+        "leads_adicionados": 10,
+        "ids": ["GYM-001", "GYM-002", "GYM-003", "GYM-004", "GYM-005", "GYM-006", "GYM-007", "GYM-008", "GYM-009", "GYM-010"],
+        "score_medio_sessao": 9.0,
+        "distribuicao_segmentos": {"B": 7, "C": 3},
+        "com_whatsapp_verificavel": 6,
+        "top_leads": [
+          "GYM-001 Seven Gym Luanda (score 13, CEO Miguel Pedroto LinkedIn, 21K Instagram, info@sevengym.com)",
+          "GYM-002 Pro Ultimate Gym (score 11, 2 localizacoes Maianga+Vila Alice, 6.8K Instagram)",
+          "GYM-003 26Gym Life Club (score 11, piso 26 Kilamba marginal, 4.5K Instagram)"
+        ],
+        "status": "outreach_enviado",
+        "outreach": {
+          "data_envio": "2026-06-19",
+          "ficheiro_drafts": "leads/outreach-drafts-GYM-20260619.json",
+          "total_drafts": 7,
+          "enviados": 6,
+          "falhas": 1,
+          "falha_motivo": "GYM-004 BigOne Active +244922604180 nao registado no WA"
         }
       }
     ],
