@@ -1,14 +1,15 @@
 {
   "pipeline": {
-    "ultima_actualizacao": "2026-06-11",
+    "ultima_actualizacao": "2026-06-19",
     "totais": {
-      "leads_total": 129,
-      "segmento_b": 118,
-      "segmento_c": 11,
-      "score_medio": 7.6,
-      "com_whatsapp_verificavel": 45,
-      "status_novo": 14,
-      "status_contactado": 112,
+      "leads_total": 158,
+      "segmento_a": 1,
+      "segmento_b": 132,
+      "segmento_c": 13,
+      "score_medio": 8.2,
+      "com_whatsapp_verificavel": 62,
+      "status_novo": 20,
+      "status_contactado": 123,
       "status_em_curso": 1,
       "status_arquivado": 2,
       "status_qualificado": 0,
@@ -22,7 +23,11 @@
       "nota_sessao15": "9-10 Jun 2026: HUNTER Sessao 15 — Saude Privada (Clinicas e Laboratorios). 6 leads SAU-001..006 adicionados. Score medio 8.3 — mais alto do pipeline. Top leads: SAU-001 CSE (score 9, 18 provincias, WA), SAU-002 ALIVA (score 9, 900k consultas/ano, email Patricia Magalhaes), SAU-005 Multiperfil (score 9, 1000+ colaboradores, email Belmiro Rosa). CLOSER: 6 primeiros contactos aprovados por Fidel e enviados 10 Jun. SAU-001 WA msg_id 3EB0935375A660A2C85BE6. SAU-006 WA msg_id 3EB041C28840989CFDF0B0. Emails SAU-002..005 via bmst-api HTTP 200.",
       "nota_10jun": "10 Jun 2026 (02h): CLOSER executou scripts de 12 Jun antecipadamente. Follow-up B SAU: SAU-001 WA 3EB0766E233052846F8863 + SAU-006 WA 3EB06FE53CFDC825C20E5C. Follow-up B HOT: 7 emails HOT-001..007 enviados. Follow-up B FAB: FAB-001 Novagest + FAB-002 Capricciosa enviados. Total sessao 10 Jun: 11/11 mensagens com sucesso.",
       "nota_seg": "11 Jun 2026: HUNTER Sessao 19 - Seguros. 6 leads SEG-001..006 adicionados. Score medio 7.2. Sector estreia no pipeline. Dor transversal: sinistros e renovacoes via WA pessoal sem workflow. ENSA (SEG-006) estatal - ciclo longo, prioridade baixa.",
-      "nota_seg_envio": "11 Jun 2026: SEG-001..006 primeiro contacto enviado via email info@biscamaisst.com. 6/6 com sucesso."
+      "nota_seg_envio": "11 Jun 2026: SEG-001..006 primeiro contacto enviado via email info@biscamaisst.com. 6/6 com sucesso.",
+      "nota_pmes_diversificados": "18 Jun 2026: HUNTER Sessao 20 — PMEs Diversificados (Farmacias, Dentarias, Automovel). 5 leads adicionados FAR-001..002, DEN-001..002, AUTO-001. 4 alta prioridade com WA Business confirmado. Score medio sessao 11.6 (mais alto do pipeline). Aprovacoes submetidas CEO para FAR-001/002, DEN-001, AUTO-001. DEN-002 aguarda mais pesquisa.",
+      "nota_estetica": "19 Jun 2026: NSANDI Sessao 21 — Clinicas de Estetica (SPAs, Medicina Estetica, Centros de Beleza). 12 leads EST-001..012 adicionados. Score medio sessao 11.5. 8 alta prioridade. 8 WA verificaveis. Top leads: EST-006 Corpore (score 15, 57k Instagram, 3 locais, co-fundadores Fabricio+Georgea identificados), EST-004 Innovare (score 14, 3 marcas, +244940905875), EST-007 Maison BH (score 14, 43 profissionais, fundadora Eliane Hense identificada). Ready for outreach — CLOSER a activar.",
+      "nota_educacao": "19 Jun 2026: NSANDI Sessao 22 — Educacao Privada (Universidades, Colegios Internacionais, Politecnicos, Centros Formacao). 12 leads EDU-001..012 adicionados. Score medio sessao 10.5. 2 alta prioridade: EDU-006 LIS (score 14, USD 36k propina, Dylan Hughes Director), EDU-004 ISPTEC (score 13, 1000-1500 alunos, Talatona). Dor transversal: matriculas/inscricoes por WA pessoal sem registo. Pico Jun-Ago = secretariado sobrecarregado.",
+      "nota_educacao_envio": "19 Jun 2026: Sessao 22 EDU outreach completo. 7/8 mensagens enviadas (4 emails Resend + 3 WA Evolution). 1 falha: EDU-009 CAT +244933053980 nao registado no WA. Emails: LIS resend:e8818799, ISPTEC resend:b33ec374, UCAN resend:380c62c4, Jean Piaget resend:901e6171. WA: CSFA msg:3EB0D9467C33AC615CED6F, ULA msg:3EB0B880B0DD2F9BDB6C7E, Aurora msg:3EB066D52AD28FE4AF2E2B."
     },
     "por_sector": {
       "Saude": 11,
@@ -49,7 +54,12 @@
         "segmento_b": 6,
         "segmento_c": 0,
         "sector": "Seguros e Resseguradoras"
-      }
+      },
+      "Farmacias_Rede": 2,
+      "Clinicas_Dentarias": 2,
+      "Automovel_Concessionarios": 1,
+      "Clinicas_Estetica": 12,
+      "Educacao_Privada": 12
     },
     "por_zona": {
       "Alvalade_Maianga": 2,
@@ -442,6 +452,69 @@
         "score_medio": 7.2,
         "top_lead": "SEG-001 NOSSA Seguros (score 8)",
         "status": "prospectado"
+      },
+      {
+        "id": "SESSAO-20",
+        "data": "2026-06-18",
+        "ficheiro": "leads/pmes-diversificados-luanda-2026-06-18.json",
+        "agente": "NSANDI",
+        "sector": "PMEs Diversificados — Farmacias em Rede, Clinicas Dentarias, Concessionarios Automovel",
+        "leads_adicionados": 5,
+        "ids": ["FAR-001", "FAR-002", "DEN-001", "DEN-002", "AUTO-001"],
+        "score_medio_sessao": 11.6,
+        "distribuicao_segmentos": {"A": 1, "B": 3, "C": 1},
+        "com_whatsapp_verificavel": 5,
+        "top_leads": [
+          "FAR-002 MonizSilva (score 14, 4 provincias, Director Geral Jose Moniz Silva, WA +244942205662)",
+          "AUTO-001 Daimic Motors (score 14, 700+ colab, MD Zamir Ibraimo, WA +244997417004)",
+          "FAR-001 Mecofarma (score 12, 12 farmacias, CEO Dr. Joao Carlos Lopes, WA +244946286049)",
+          "DEN-001 BioDente Angola (score 12, 50 colab 10 consultorios, WA +244935543633)"
+        ],
+        "status": "prospectado — aprovacoes submetidas"
+      },
+      {
+        "id": "SESSAO-21",
+        "data": "2026-06-19",
+        "ficheiro": "leads/estetica-luanda-2026-06-19.json",
+        "agente": "NSANDI",
+        "sector": "Clinicas de Estetica — SPAs, Medicina Estetica, Centros de Beleza",
+        "leads_adicionados": 12,
+        "ids": ["EST-001", "EST-002", "EST-003", "EST-004", "EST-005", "EST-006", "EST-007", "EST-008", "EST-009", "EST-010", "EST-011", "EST-012"],
+        "score_medio_sessao": 11.5,
+        "distribuicao_segmentos": {"B": 12},
+        "com_whatsapp_verificavel": 8,
+        "top_leads": [
+          "EST-006 Corpore (score 15, 3 locais, 57k Instagram, co-fundadores Fabricio Lorenzi + Georgea K, WA +244947999865)",
+          "EST-004 Instituto Innovare (score 14, 3 marcas, email profissional, WA +244940905875)",
+          "EST-007 Maison BH (score 14, 43 profissionais, fundadora Eliane Hense, WA +244924418599)"
+        ],
+        "status": "prospectado — ready_for_outreach"
+      },
+      {
+        "id": "SESSAO-22",
+        "data": "2026-06-19",
+        "ficheiro": "leads/educacao-luanda-2026-06-19.json",
+        "agente": "NSANDI",
+        "sector": "Educacao Privada — Universidades, Colegios Internacionais, Politecnicos, Centros de Formacao",
+        "leads_adicionados": 12,
+        "ids": ["EDU-001", "EDU-002", "EDU-003", "EDU-004", "EDU-005", "EDU-006", "EDU-007", "EDU-008", "EDU-009", "EDU-010", "EDU-011", "EDU-012"],
+        "score_medio_sessao": 10.5,
+        "distribuicao_segmentos": {"B": 11, "C": 1},
+        "com_whatsapp_verificavel": 4,
+        "top_leads": [
+          "EDU-006 Luanda International School (score 14, USD 36k propina, Dylan Hughes Director, email dhughes@lisluanda.com)",
+          "EDU-004 ISPTEC (score 13, 1000-1500 alunos, Talatona, geral@isptec.co.ao)",
+          "EDU-002 UCAN (score 12, Reitora Maria Assuncao identificada, maria.assuncao@ucan.edu)"
+        ],
+        "status": "outreach_enviado",
+        "outreach": {
+          "data_envio": "2026-06-19",
+          "ficheiro_drafts": "leads/outreach-drafts-EDU-20260619.json",
+          "total_drafts": 8,
+          "enviados": 7,
+          "falhas": 1,
+          "falha_motivo": "EDU-009 CAT +244933053980 nao registado no WA"
+        }
       }
     ],
     "contactos": [
