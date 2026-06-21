@@ -2,14 +2,14 @@
   "pipeline": {
     "ultima_actualizacao": "2026-06-21",
     "totais": {
-      "leads_total": 188,
+      "leads_total": 198,
       "segmento_a": 1,
       "segmento_b": 132,
       "segmento_c": 13,
       "score_medio": 8.2,
       "com_whatsapp_verificavel": 62,
-      "status_novo": 22,
-      "status_contactado": 141,
+      "status_novo": 27,
+      "status_contactado": 146,
       "status_em_curso": 1,
       "status_arquivado": 2,
       "status_qualificado": 0,
@@ -30,7 +30,9 @@
       "nota_educacao_envio": "19 Jun 2026: Sessao 22 EDU outreach completo. 7/8 mensagens enviadas (4 emails Resend + 3 WA Evolution). 1 falha: EDU-009 CAT +244933053980 nao registado no WA. Emails: LIS resend:e8818799, ISPTEC resend:b33ec374, UCAN resend:380c62c4, Jean Piaget resend:901e6171. WA: CSFA msg:3EB0D9467C33AC615CED6F, ULA msg:3EB0B880B0DD2F9BDB6C7E, Aurora msg:3EB066D52AD28FE4AF2E2B.",
       "nota_ginasios": "19 Jun 2026: Sessao 23 GYM — Ginasios e Academias Desportivas. 10 leads adicionados. 6/7 outreach enviados (5 WA + 1 email CrossFit Angola resend:c90962c5). 1 falha: GYM-004 BigOne Active +244922604180 nao registado no WA. Top leads: GYM-001 Seven Gym (21K IG, CEO Miguel Pedroto LinkedIn), GYM-003 26Gym (piso 26 marginal), GYM-004 BigOne Active (2 localizacoes). 3 sem canal: GYM-002 Pro Ultimate, GYM-005 Body Fit, GYM-006 FitCenter (Instagram apenas).",
       "nota_formacao": "20 Jun 2026: Sessao 24 FOR — Centros de Formacao Profissional e Escolas de Conducao. 10 leads adicionados. 6/6 outreach enviados (3 WA + 3 email Resend). 4 sem canal: FOR-001 SISTEC (sem email/WA directo), FOR-004 CFP Kilamba (sem email/WA directo), FOR-009 EC Visao Moderna (WA nao confirmado), FOR-010 Sol de Luanda (Instagram apenas). Top leads: FOR-003 EC JQ (score 14, 132K Instagram, dominio proprio), FOR-001 SISTEC (score 14, ISO 9001, 50K formandos/30 anos), FOR-002 ITGest (score 13, 1o parceiro SAP em portugues em Africa).",
-      "nota_eventos": "21 Jun 2026: Sessao 25 EVT — Organizacao e Producao de Eventos. 10 leads adicionados. 6/6 outreach enviados (4 WA + 2 email Resend). 4 sem canal: EVT-003 ABM Imperial (sem directo), EVT-006 Mukonda (sem directo), EVT-009 Be-Brave (LinkedIn/Unipile), EVT-010 Nadiva (sem directo). Top leads: EVT-001 Eventos Arena (score 13, 87 colab, 3 marcas, 20 anos, email manuel.novais@grupoarena.co.ao), EVT-009 Be-Brave (score 13, 20+ anos, 10+ provincias, Braulio Cambango LinkedIn), EVT-004 Mining Eventos (score 12, clientes Oil&Gas, email geral@miningeventos.ao)."
+      "nota_eventos": "21 Jun 2026: Sessao 25 EVT — Organizacao e Producao de Eventos. 10 leads adicionados. 6/6 outreach enviados (4 WA + 2 email Resend). 4 sem canal: EVT-003 ABM Imperial (sem directo), EVT-006 Mukonda (sem directo), EVT-009 Be-Brave (LinkedIn/Unipile), EVT-010 Nadiva (sem directo). Top leads: EVT-001 Eventos Arena (score 13, 87 colab, 3 marcas, 20 anos, email manuel.novais@grupoarena.co.ao), EVT-009 Be-Brave (score 13, 20+ anos, 10+ provincias, Braulio Cambango LinkedIn), EVT-004 Mining Eventos (score 12, clientes Oil&Gas, email geral@miningeventos.ao).",
+      "nota_seguranca_privada": "21 Jun 2026: Sessao 26 SEG — Seguranca Privada e Vigilancia. 10 leads adicionados. 5/5 outreach enviados (5 email Resend). 5 sem canal: SEG-001 Ango-Segu (sem directo), SEG-003 G4S (WA exists:false sem email comercial), SEG-008 Hiperproteccao (sem directo), SEG-009 Teleservice (LinkedIn/Unipile), SEG-010 Seguservice (sem directo). Score medio 11.1 — mais alto do pipeline. Top leads: SEG-007 Omega Risk (score 13, Maersk+ConocoPhillips+Subsea7, Erick Rademeyer Country Manager), SEG-002 Securitas (score 12, Grupo sueco, centenas guardas), SEG-004 Chivemba (score 12, DG Almerindo Chivemba LinkedIn ISPTEC, dg@chivemba-security.com).",
+      "ultima_actualizacao": "2026-06-21"
     },
     "por_sector": {
       "Saude": 11,
@@ -65,7 +67,8 @@
       "Educacao_Privada": 12,
       "Ginasios_Academias": 10,
       "Formacao_Profissional": 10,
-      "Eventos_Producao": 10
+      "Eventos_Producao": 10,
+      "Seguranca_Privada": 10
     },
     "por_zona": {
       "Alvalade_Maianga": 2,
@@ -602,6 +605,34 @@
           "canais": {"whatsapp": 4, "email": 2},
           "sem_canal": 4,
           "sem_canal_motivo": "EVT-003 ABM Imperial (sem directo), EVT-006 Mukonda (sem directo), EVT-009 Be-Brave (LinkedIn Unipile — sessao separada), EVT-010 Nadiva (sem directo)"
+        }
+      },
+      {
+        "id": "SESSAO-26",
+        "data": "2026-06-21",
+        "data_envio": "2026-06-21",
+        "ficheiro": "leads/seguranca-luanda-2026-06-21.json",
+        "agente": "NSANDI",
+        "sector": "Seguranca Privada e Vigilancia — Luanda",
+        "leads_adicionados": 10,
+        "ids": ["SEG-001", "SEG-002", "SEG-003", "SEG-004", "SEG-005", "SEG-006", "SEG-007", "SEG-008", "SEG-009", "SEG-010"],
+        "score_medio_sessao": 11.1,
+        "distribuicao_segmentos": {"B": 9, "C": 1},
+        "com_whatsapp_verificavel": 1,
+        "top_leads": [
+          "SEG-007 Omega Risk Solutions Angola (score 13, clientes Maersk+ConocoPhillips+Subsea7, Country Manager Erick Rademeyer, erickrademeyer@omegasol.com)",
+          "SEG-002 Securitas Angola (score 12, Grupo Securitas sueco, info@securitas.co.ao, +244940161609)",
+          "SEG-004 Chivemba Security (score 12, DG Almerindo Chivemba LinkedIn ISPTEC, dg@chivemba-security.com)"
+        ],
+        "status": "outreach_enviado",
+        "outreach": {
+          "data_envio": "2026-06-21",
+          "ficheiro_drafts": "leads/outreach-drafts-SEG-20260621.json",
+          "total_drafts": 5,
+          "enviados": 5,
+          "canais": {"whatsapp": 0, "email": 5},
+          "sem_canal": 5,
+          "sem_canal_motivo": "SEG-001 Ango-Segu (sem email/WA directo), SEG-003 G4S (WA exists:false sem email comercial), SEG-008 Hiperproteccao (sem directo), SEG-009 Teleservice (LinkedIn/Unipile), SEG-010 Seguservice (sem directo)"
         }
       }
     ],
