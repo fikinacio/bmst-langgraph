@@ -1,22 +1,22 @@
 {
   "pipeline": {
-    "ultima_actualizacao": "2026-06-20",
+    "ultima_actualizacao": "2026-06-21",
     "totais": {
-      "leads_total": 178,
+      "leads_total": 188,
       "segmento_a": 1,
       "segmento_b": 132,
       "segmento_c": 13,
       "score_medio": 8.2,
       "com_whatsapp_verificavel": 62,
-      "status_novo": 18,
-      "status_contactado": 135,
+      "status_novo": 22,
+      "status_contactado": 141,
       "status_em_curso": 1,
       "status_arquivado": 2,
       "status_qualificado": 0,
       "status_perdido": 0,
       "status_em_aprovacao": 0,
       "nota_w23": "4 Jun 2026: CEO aprovou 38 mensagens. Enviadas 38/38 — 28 FIN/TEL/IMO/follow-ups + 10 JUR/VIA. VIA-002 Atlantida WTA contactada via WA +244929624550 (numero geral, confirmado no WA — o +244941367711 nao estava no WA).",
-      "ultima_actualizacao": "2026-06-20",
+      "ultima_actualizacao": "2026-06-21",
       "nota_hot": "6 Jun 2026: HOT-001 a HOT-007 contactados via email. CEO aprovou 7 em bloco.",
       "nota_fab": "6 Jun 2026: HUNTER sessao 14 — Restauracao e F&B. 5 leads adicionados (FAB-001 a FAB-005). Score medio 7.8. 2 WA verificados. Top lead: FAB-001 Novagest (score 9, ISO 9001, Oil&Gas). CLOSER: FAB-001 e FAB-002 contactados via email. FAB-003 WA 502 (numero nao no WA) — aguarda LinkedIn/Unipile. FAB-004/005 bloqueados (LinkedIn expirado / sem canal digital).",
       "nota_8jun": "8 Jun 2026 (22h): CLOSER sessao nocturna. 7 follow-ups B enviados com sucesso — FU-004 CONNECTIS + FU-005 EDACO (em atraso desde 3 Jun) + CON-001 ATA + CON-002 Nexia + CON-003 Moore + CON-004 LCA (WA: 3EB0C0B5E137A64B54EAF7) + CON-005 Crowe. FAB-003 Tupuca+ submetido para aprovacao CEO (LinkedIn DM Erickson Mvezi, session CLOSER-Tupuca-20260608-221309).",
@@ -29,7 +29,8 @@
       "nota_educacao": "19 Jun 2026: NSANDI Sessao 22 — Educacao Privada (Universidades, Colegios Internacionais, Politecnicos, Centros Formacao). 12 leads EDU-001..012 adicionados. Score medio sessao 10.5. 2 alta prioridade: EDU-006 LIS (score 14, USD 36k propina, Dylan Hughes Director), EDU-004 ISPTEC (score 13, 1000-1500 alunos, Talatona). Dor transversal: matriculas/inscricoes por WA pessoal sem registo. Pico Jun-Ago = secretariado sobrecarregado.",
       "nota_educacao_envio": "19 Jun 2026: Sessao 22 EDU outreach completo. 7/8 mensagens enviadas (4 emails Resend + 3 WA Evolution). 1 falha: EDU-009 CAT +244933053980 nao registado no WA. Emails: LIS resend:e8818799, ISPTEC resend:b33ec374, UCAN resend:380c62c4, Jean Piaget resend:901e6171. WA: CSFA msg:3EB0D9467C33AC615CED6F, ULA msg:3EB0B880B0DD2F9BDB6C7E, Aurora msg:3EB066D52AD28FE4AF2E2B.",
       "nota_ginasios": "19 Jun 2026: Sessao 23 GYM — Ginasios e Academias Desportivas. 10 leads adicionados. 6/7 outreach enviados (5 WA + 1 email CrossFit Angola resend:c90962c5). 1 falha: GYM-004 BigOne Active +244922604180 nao registado no WA. Top leads: GYM-001 Seven Gym (21K IG, CEO Miguel Pedroto LinkedIn), GYM-003 26Gym (piso 26 marginal), GYM-004 BigOne Active (2 localizacoes). 3 sem canal: GYM-002 Pro Ultimate, GYM-005 Body Fit, GYM-006 FitCenter (Instagram apenas).",
-      "nota_formacao": "20 Jun 2026: Sessao 24 FOR — Centros de Formacao Profissional e Escolas de Conducao. 10 leads adicionados. 6/6 outreach enviados (3 WA + 3 email Resend). 4 sem canal: FOR-001 SISTEC (sem email/WA directo), FOR-004 CFP Kilamba (sem email/WA directo), FOR-009 EC Visao Moderna (WA nao confirmado), FOR-010 Sol de Luanda (Instagram apenas). Top leads: FOR-003 EC JQ (score 14, 132K Instagram, dominio proprio), FOR-001 SISTEC (score 14, ISO 9001, 50K formandos/30 anos), FOR-002 ITGest (score 13, 1o parceiro SAP em portugues em Africa)."
+      "nota_formacao": "20 Jun 2026: Sessao 24 FOR — Centros de Formacao Profissional e Escolas de Conducao. 10 leads adicionados. 6/6 outreach enviados (3 WA + 3 email Resend). 4 sem canal: FOR-001 SISTEC (sem email/WA directo), FOR-004 CFP Kilamba (sem email/WA directo), FOR-009 EC Visao Moderna (WA nao confirmado), FOR-010 Sol de Luanda (Instagram apenas). Top leads: FOR-003 EC JQ (score 14, 132K Instagram, dominio proprio), FOR-001 SISTEC (score 14, ISO 9001, 50K formandos/30 anos), FOR-002 ITGest (score 13, 1o parceiro SAP em portugues em Africa).",
+      "nota_eventos": "21 Jun 2026: Sessao 25 EVT — Organizacao e Producao de Eventos. 10 leads adicionados. 6/6 outreach enviados (4 WA + 2 email Resend). 4 sem canal: EVT-003 ABM Imperial (sem directo), EVT-006 Mukonda (sem directo), EVT-009 Be-Brave (LinkedIn/Unipile), EVT-010 Nadiva (sem directo). Top leads: EVT-001 Eventos Arena (score 13, 87 colab, 3 marcas, 20 anos, email manuel.novais@grupoarena.co.ao), EVT-009 Be-Brave (score 13, 20+ anos, 10+ provincias, Braulio Cambango LinkedIn), EVT-004 Mining Eventos (score 12, clientes Oil&Gas, email geral@miningeventos.ao)."
     },
     "por_sector": {
       "Saude": 11,
@@ -63,7 +64,8 @@
       "Clinicas_Estetica": 12,
       "Educacao_Privada": 12,
       "Ginasios_Academias": 10,
-      "Formacao_Profissional": 10
+      "Formacao_Profissional": 10,
+      "Eventos_Producao": 10
     },
     "por_zona": {
       "Alvalade_Maianga": 2,
@@ -572,6 +574,34 @@
           "canais": {"whatsapp": 3, "email": 3},
           "sem_canal": 4,
           "sem_canal_motivo": "FOR-001 SISTEC (sem email/WA directo), FOR-004 CFP Kilamba (sem email/WA directo), FOR-009 EC Visao Moderna (WA nao confirmado), FOR-010 Sol de Luanda (Instagram apenas)"
+        }
+      },
+      {
+        "id": "SESSAO-25",
+        "data": "2026-06-21",
+        "data_envio": "2026-06-21",
+        "ficheiro": "leads/eventos-luanda-2026-06-20.json",
+        "agente": "NSANDI",
+        "sector": "Organizacao e Producao de Eventos — Luanda",
+        "leads_adicionados": 10,
+        "ids": ["EVT-001", "EVT-002", "EVT-003", "EVT-004", "EVT-005", "EVT-006", "EVT-007", "EVT-008", "EVT-009", "EVT-010"],
+        "score_medio_sessao": 10.2,
+        "distribuicao_segmentos": {"B": 7, "C": 3},
+        "com_whatsapp_verificavel": 4,
+        "top_leads": [
+          "EVT-001 Eventos Arena — Grupo Arena (score 13, 87 colab, 3 marcas, 20 anos, $30.5M revenue, email geral@eventosarena.co.ao)",
+          "EVT-009 Be-Brave Agency (score 13, 20+ anos, 10+ provincias, decisor Braulio Cambango LinkedIn)",
+          "EVT-004 Mining Eventos (score 12, clientes Oil&Gas, email geral@miningeventos.ao, Ingombotas)"
+        ],
+        "status": "outreach_enviado",
+        "outreach": {
+          "data_envio": "2026-06-21",
+          "ficheiro_drafts": "leads/outreach-drafts-EVT-20260621.json",
+          "total_drafts": 6,
+          "enviados": 6,
+          "canais": {"whatsapp": 4, "email": 2},
+          "sem_canal": 4,
+          "sem_canal_motivo": "EVT-003 ABM Imperial (sem directo), EVT-006 Mukonda (sem directo), EVT-009 Be-Brave (LinkedIn Unipile — sessao separada), EVT-010 Nadiva (sem directo)"
         }
       }
     ],
