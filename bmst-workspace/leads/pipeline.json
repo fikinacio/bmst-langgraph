@@ -2,14 +2,14 @@
   "pipeline": {
     "ultima_actualizacao": "2026-06-21",
     "totais": {
-      "leads_total": 198,
+      "leads_total": 208,
       "segmento_a": 1,
       "segmento_b": 132,
       "segmento_c": 13,
       "score_medio": 8.2,
       "com_whatsapp_verificavel": 62,
-      "status_novo": 27,
-      "status_contactado": 146,
+      "status_novo": 32,
+      "status_contactado": 151,
       "status_em_curso": 1,
       "status_arquivado": 2,
       "status_qualificado": 0,
@@ -32,6 +32,7 @@
       "nota_formacao": "20 Jun 2026: Sessao 24 FOR — Centros de Formacao Profissional e Escolas de Conducao. 10 leads adicionados. 6/6 outreach enviados (3 WA + 3 email Resend). 4 sem canal: FOR-001 SISTEC (sem email/WA directo), FOR-004 CFP Kilamba (sem email/WA directo), FOR-009 EC Visao Moderna (WA nao confirmado), FOR-010 Sol de Luanda (Instagram apenas). Top leads: FOR-003 EC JQ (score 14, 132K Instagram, dominio proprio), FOR-001 SISTEC (score 14, ISO 9001, 50K formandos/30 anos), FOR-002 ITGest (score 13, 1o parceiro SAP em portugues em Africa).",
       "nota_eventos": "21 Jun 2026: Sessao 25 EVT — Organizacao e Producao de Eventos. 10 leads adicionados. 6/6 outreach enviados (4 WA + 2 email Resend). 4 sem canal: EVT-003 ABM Imperial (sem directo), EVT-006 Mukonda (sem directo), EVT-009 Be-Brave (LinkedIn/Unipile), EVT-010 Nadiva (sem directo). Top leads: EVT-001 Eventos Arena (score 13, 87 colab, 3 marcas, 20 anos, email manuel.novais@grupoarena.co.ao), EVT-009 Be-Brave (score 13, 20+ anos, 10+ provincias, Braulio Cambango LinkedIn), EVT-004 Mining Eventos (score 12, clientes Oil&Gas, email geral@miningeventos.ao).",
       "nota_seguranca_privada": "21 Jun 2026: Sessao 26 SEG — Seguranca Privada e Vigilancia. 10 leads adicionados. 5/5 outreach enviados (5 email Resend). 5 sem canal: SEG-001 Ango-Segu (sem directo), SEG-003 G4S (WA exists:false sem email comercial), SEG-008 Hiperproteccao (sem directo), SEG-009 Teleservice (LinkedIn/Unipile), SEG-010 Seguservice (sem directo). Score medio 11.1 — mais alto do pipeline. Top leads: SEG-007 Omega Risk (score 13, Maersk+ConocoPhillips+Subsea7, Erick Rademeyer Country Manager), SEG-002 Securitas (score 12, Grupo sueco, centenas guardas), SEG-004 Chivemba (score 12, DG Almerindo Chivemba LinkedIn ISPTEC, dg@chivemba-security.com).",
+      "nota_mpc": "21 Jun 2026: Sessao 27 MPC — Media, Publicidade e Comunicacao. 10 leads adicionados. 5/5 outreach enviados (3 email Resend + 2 WA Evolution). 5 sem canal: MPC-005 YO!Angola (sem directo), MPC-006 Blend (WA exists:false sem email), MPC-008 Tecangrafical, MPC-009 Trend Angola, MPC-010 RC Media. Score medio 10.1. Top leads: MPC-001 ORION (score 12, maior produtora audiovisual Angola, S.A.), MPC-002 CRIACOM (score 12, audiovisual desde 2001), MPC-003 Seven 360 (score 11, Angola+Brasil+Portugal).",
       "ultima_actualizacao": "2026-06-21"
     },
     "por_sector": {
@@ -68,7 +69,8 @@
       "Ginasios_Academias": 10,
       "Formacao_Profissional": 10,
       "Eventos_Producao": 10,
-      "Seguranca_Privada": 10
+      "Seguranca_Privada": 10,
+      "Media_Publicidade_Comunicacao": 10
     },
     "por_zona": {
       "Alvalade_Maianga": 2,
@@ -633,6 +635,34 @@
           "canais": {"whatsapp": 0, "email": 5},
           "sem_canal": 5,
           "sem_canal_motivo": "SEG-001 Ango-Segu (sem email/WA directo), SEG-003 G4S (WA exists:false sem email comercial), SEG-008 Hiperproteccao (sem directo), SEG-009 Teleservice (LinkedIn/Unipile), SEG-010 Seguservice (sem directo)"
+        }
+      },
+      {
+        "id": "SESSAO-27",
+        "data": "2026-06-21",
+        "data_envio": "2026-06-21",
+        "ficheiro": "leads/mpc-luanda-2026-06-21.json",
+        "agente": "NSANDI",
+        "sector": "Media, Publicidade e Comunicacao — Agencias e Produtoras — Luanda",
+        "leads_adicionados": 10,
+        "ids": ["MPC-001", "MPC-002", "MPC-003", "MPC-004", "MPC-005", "MPC-006", "MPC-007", "MPC-008", "MPC-009", "MPC-010"],
+        "score_medio_sessao": 10.1,
+        "distribuicao_segmentos": {"B": 7, "C": 3},
+        "com_whatsapp_verificavel": 2,
+        "top_leads": [
+          "MPC-001 ORION S.A. (score 12, maior produtora publicidade/audiovisual Angola, agencia.produtora@orion.ao, Maculusso)",
+          "MPC-002 CRIACOM//BCC (score 12, produtora audiovisual desde 2001, WA +244924434054, Ingombota)",
+          "MPC-003 Seven 360 (score 11, escritorios Angola+Brasil+Portugal, parceria Torke+CC, WA +244927409847)"
+        ],
+        "status": "outreach_enviado",
+        "outreach": {
+          "data_envio": "2026-06-21",
+          "ficheiro_drafts": "leads/outreach-drafts-MPC-20260621.json",
+          "total_drafts": 5,
+          "enviados": 5,
+          "canais": {"whatsapp": 2, "email": 3},
+          "sem_canal": 5,
+          "sem_canal_motivo": "MPC-005 YO!Angola (sem directo), MPC-006 Blend (WA exists:false sem email), MPC-008 Tecangrafical (sem directo), MPC-009 Trend Angola (sem directo), MPC-010 RC Media (sem directo)"
         }
       }
     ],
