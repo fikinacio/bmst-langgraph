@@ -30,6 +30,8 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
+    networks:
+      - bmst-net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -39,6 +41,8 @@ services:
   gotenberg:
     image: gotenberg/gotenberg:8
     restart: unless-stopped
+    networks:
+      - bmst-net
     command:
       - gotenberg
       - --chromium-disable-javascript=true
