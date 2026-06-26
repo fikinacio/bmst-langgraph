@@ -5,6 +5,8 @@ from __future__ import annotations
 import asyncio
 import logging
 
+import httpx
+
 from agents.hunter.state import HunterState
 from agents.hunter.prompts import (
     TRIAGEM_PROMPT,
@@ -17,6 +19,8 @@ from core.llm import create_json_message, create_message
 from core.memory import update_lead_state, save_message, get_lead
 from core.redis_client import is_duplicate, mark_sent, hash_message
 from core import hubspot_client, evolution_client, telegram_client
+
+LUSAMBU_WEBHOOK = "https://lusambu.fly.dev/webhook/lusambu"
 
 logger = logging.getLogger(__name__)
 
@@ -456,6 +460,24 @@ async def enviar_whatsapp(state: HunterState) -> dict:
     await update_lead_state(phone, "enviado", _AGENT)
 
     logger.info("hunter.enviar_whatsapp: sent to %s (message_id=%s)", phone, message_id)
+
+    # Handoff to LUSAMBU: pass lead context so it knows who this contact is
+    lusambu_payload = {
+        "phone":       phone,
+        "empresa":     state.get("empresa", ""),
+        "sector":      state.get("sector", ""),
+        "segmento":    state.get("segmento", ""),
+        "responsavel": state.get("responsavel", ""),
+        "negocio":     state.get("oportunidade") or state.get("notas_abordagem", ""),
+        "mensagem_inicial": texto,
+        "contexto":    "Primeira abordagem enviada pelo HUNTER BMST. Lead ainda não respondeu.",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            await client.post(LUSAMBU_WEBHOOK, json=lusambu_payload)
+        logger.info("hunter.enviar_whatsapp: lusambu notified for phone=%s", phone)
+    except Exception as exc:
+        logger.warning("hunter.enviar_whatsapp: lusambu notification failed: %s", exc)
 
     # Anti-spam delay: 90 seconds between messages
     await asyncio.sleep(90)
