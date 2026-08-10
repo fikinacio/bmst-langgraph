@@ -137,7 +137,7 @@ async def get_pending_leads(sheet_id: str) -> list[dict]:
             return []
 
         # Normalise header names (strip whitespace)
-        headers = [h.strip() for h in headers]
+        headers = [h.strip().lower() for h in headers]
 
         pending: list[dict] = []
         for i, row in enumerate(data_rows):
@@ -230,7 +230,7 @@ async def get_lead_by_whatsapp(sheet_id: str, phone: str) -> dict | None:
         headers, data_rows = await asyncio.to_thread(_sync_get_all_rows, sheet_id)
         if not headers:
             return None
-        headers = [h.strip() for h in headers]
+        headers = [h.strip().lower() for h in headers]
 
         # Normalise the search phone (remove spaces)
         needle = phone.replace(" ", "").strip()
@@ -288,7 +288,7 @@ async def append_lead_row(sheet_id: str, lead: dict) -> int | None:
             logger.error("append_lead_row: sheet has no headers (sheet=%s)", sheet_id)
             return None
 
-        headers = [h.strip() for h in headers]
+        headers = [h.strip().lower() for h in headers]
         row_values = [str(lead.get(h, "")) for h in headers]
 
         row_index = await asyncio.to_thread(_sync_append_row, sheet_id, row_values)
@@ -316,7 +316,7 @@ async def check_duplicate(sheet_id: str, empresa: str, phone: str) -> bool:
         headers, data_rows = await asyncio.to_thread(_sync_get_all_rows, sheet_id)
         if not headers:
             return False
-        headers = [h.strip() for h in headers]
+        headers = [h.strip().lower() for h in headers]
 
         needle_phone   = phone.replace(" ", "").strip().lower()
         needle_empresa = empresa.strip().lower()

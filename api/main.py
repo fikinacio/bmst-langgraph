@@ -78,7 +78,15 @@ async def lifespan(app: FastAPI):
     global _checkpointer
     if settings.APP_ENV == "production":
         _checkpointer = get_checkpointer()   # RedisSaver — state survives restarts
-        logger.info("Checkpointer: RedisSaver (production)")
+        # setup() creates Redis Search indices needed for interrupt() persistence.
+        # Must run once before the first graph invocation; safe to call on restart.
+        try:
+            await asyncio.to_thread(_checkpointer.setup)
+            logger.info("Checkpointer: RedisSaver (production) — setup() completed")
+        except Exception as exc:
+            logger.warning(
+                "RedisSaver.setup() failed — interrupt() may not persist state: %s", exc
+            )
     else:
         _checkpointer = MemorySaver()        # In-memory — suitable for local dev only
         logger.info("Checkpointer: MemorySaver (development)")
@@ -508,16 +516,15 @@ async def telegram_callback(request: TelegramCallbackRequest):
     #   "hunter-*"  → HUNTER graph
     #   "closer-*"  → CLOSER graph
     try:
-        checkpointer = get_checkpointer()
         tid = request.thread_id
         if tid.startswith("closer-"):
-            graph = get_closer_graph(checkpointer=checkpointer)
+            graph = get_closer_graph(checkpointer=_checkpointer)
         elif tid.startswith("delivery-"):
-            graph = get_delivery_graph(checkpointer=checkpointer)
+            graph = get_delivery_graph(checkpointer=_checkpointer)
         elif tid.startswith("ledger-"):
-            graph = get_ledger_graph(checkpointer=checkpointer)
+            graph = get_ledger_graph(checkpointer=_checkpointer)
         else:
-            graph = get_hunter_graph(checkpointer=checkpointer)
+            graph = get_hunter_graph(checkpointer=_checkpointer)
 
         config = {"configurable": {"thread_id": tid}}
         await graph.ainvoke(Command(resume=resume_payload), config)
@@ -632,10 +639,9 @@ async def closer_status(phone: str):
     """
     thread_id = f"closer-{phone}"
     try:
-        checkpointer = get_checkpointer()
-        config       = {"configurable": {"thread_id": thread_id}}
-        snapshot     = await asyncio.to_thread(
-            checkpointer.get, config
+        config   = {"configurable": {"thread_id": thread_id}}
+        snapshot = await asyncio.to_thread(
+            _checkpointer.get, config
         )
         if snapshot is None:
             return {"phone": phone, "active": False}
@@ -673,7 +679,7 @@ async def closer_webhook(request: HunterWebhookRequest):
 
     # Resume the interrupted CLOSER graph with the prospect's reply
     try:
-        graph  = get_closer_graph(checkpointer=get_checkpointer())
+        graph  = get_closer_graph(checkpointer=_checkpointer)
         config = {"configurable": {"thread_id": thread_id}}
         await graph.ainvoke(
             Command(resume={"texto_prospect": request.message}),
@@ -828,7 +834,7 @@ async def delivery_webhook(request: DeliveryWebhookRequest):
     The thread_id identifies the correct paused DELIVERY run.
     """
     try:
-        graph  = get_delivery_graph(checkpointer=get_checkpointer())
+        graph  = get_delivery_graph(checkpointer=_checkpointer)
         config = {"configurable": {"thread_id": request.thread_id}}
         await graph.ainvoke(
             Command(resume={"aprovado": request.aprovado}),
